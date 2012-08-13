@@ -17,8 +17,9 @@
 package helma.main;
 
 import helma.framework.core.Application;
+
 import java.io.File;
-import java.util.*;
+import java.util.Vector;
 
 /**
  *  Helma command line runner class. This class creates and starts a single application,
@@ -39,9 +40,9 @@ public class CommandlineRunner {
      */
     public static void main(String[] args) throws Exception {
 
-        ServerConfig config = new ServerConfig();
+        ServerConfig config = ServerConfig.getInstance();
         String commandStr = null;
-        Vector funcArgs = new Vector();
+        Vector<String> funcArgs = new Vector<String>();
     
         // get possible environment setting for helma home
         if (System.getProperty("helma.home")!=null) {
@@ -61,14 +62,6 @@ public class CommandlineRunner {
                 // first argument without a switch
                 commandStr = args[i];
             }
-        }
-
-        // get server.properties from home dir or vv
-        try {
-            Server.guessConfig (config);
-        } catch (Exception ex) {
-            printUsageError(ex.toString());
-            System.exit(1);
         }
 
         String appName = null;

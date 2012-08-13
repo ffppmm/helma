@@ -39,7 +39,11 @@ import java.util.*;
  *     </ul>
  */
 public final class StandaloneServletClient extends AbstractServletClient {
-    private Application app = null;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 6515895361950250466L;
+	private Application app = null;
     private String appName;
     private String appDir;
     private String dbDir;
@@ -77,8 +81,7 @@ public final class StandaloneServletClient extends AbstractServletClient {
             throw new ServletException("dbdir parameter not specified");
         }
 
-        Class[] parameters = { String.class };
-        ArrayList repositoryList = new ArrayList();
+        ArrayList<Repository> repositoryList = new ArrayList<Repository>();
 
         for (int i = 0; true; i++) {
             String repositoryArgs = init.getInitParameter("repository." + i);
@@ -99,7 +102,7 @@ public final class StandaloneServletClient extends AbstractServletClient {
         
                 try {
                     Repository newRepository = (Repository) Class.forName(repositoryImpl)
-                        .getConstructor(parameters)
+                        .getConstructor(String.class)
                         .newInstance(new Object[] {repositoryArgs});
                     repositoryList.add(newRepository);
                     log("adding repository: " + repositoryArgs);
@@ -123,7 +126,7 @@ public final class StandaloneServletClient extends AbstractServletClient {
         }
 
         repositories = new Repository[repositoryList.size()];
-        repositories = (Repository[]) repositoryList.toArray(repositories);
+        repositories = repositoryList.toArray(repositories);
 
     }
 
@@ -156,7 +159,7 @@ public final class StandaloneServletClient extends AbstractServletClient {
             File appHome = new File(appDir);
             File hopHome = new File(hopDir);
 
-            ServerConfig config = new ServerConfig();
+            ServerConfig config = ServerConfig.getInstance();
             config.setHomeDir(hopHome);
             Server server = new Server(config);
             server.init();

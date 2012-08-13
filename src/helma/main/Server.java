@@ -131,184 +131,19 @@ public class Server implements Runnable {
      * @return the server instance
      */
     public static Server loadServer(String[] args) {
-        checkJavaVersion();
-
-        ServerConfig config = null;
-        try {
-            config = getConfig(args);
-        } catch (Exception cex) {
-            printUsageError("error reading configuration: " + cex.getMessage());
-            System.exit(1);
-        }
-
-        checkRunning(config);
-
-        // create new server instance
-        server = new Server(config);
+        ServerConfig config;
+		try {
+			config = ServerConfig.getInstance();
+	        checkRunning(config);
+	        // create new server instance
+	        server = new Server(config);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			System.exit(1);
+		}
         return server;
     }
-
-
-    /**
-      * check if we are running on a Java 2 VM - otherwise exit with an error message
-      */
-    public static void checkJavaVersion() {
-        String javaVersion = System.getProperty("java.version");
-
-        if ((javaVersion == null) || javaVersion.startsWith("1.4")
-				                  || javaVersion.startsWith("1.3")
-                                  || javaVersion.startsWith("1.2")
-                                  || javaVersion.startsWith("1.1")
-                                  || javaVersion.startsWith("1.0")) {
-            System.err.println("This version of Helma requires Java 1.5 or greater.");
-
-            if (javaVersion == null) { // don't think this will ever happen, but you never know
-                System.err.println("Your Java Runtime did not provide a version number. Please update to a more recent version.");
-            } else {
-                System.err.println("Your Java Runtime is version " + javaVersion +
-                                   ". Please update to a more recent version.");
-            }
-
-            System.exit(1);
-        }
-    }
-
-
-    /**
-      * parse the command line arguments, read a given server.properties file
-      * and check the values given for server ports
-      * @return ServerConfig if successfull
-      * @throws Exception on any configuration error
-      */
-    public static ServerConfig getConfig(String[] args) throws Exception {
-
-        ServerConfig config = new ServerConfig();
-
-        // get possible environment setting for helma home
-        if (System.getProperty("helma.home")!=null) {
-            config.setHomeDir(new File(System.getProperty("helma.home")));
-        }
-
-        parseArgs(config, args);
-
-        guessConfig(config);
-
-        // create system properties
-        ResourceProperties sysProps = new ResourceProperties();
-        sysProps.addResource(new FileResource(config.getPropFile()));
-
-        // check if there's a property setting for those ports not specified via command line
-        try {
-	        if (!config.hasWebsrvPort() && sysProps.getProperty("webPort") != null) {
-	            config.setWebsrvPort(getInetSocketAddress(sysProps.getProperty("webPort")));
-	        } else if (System.getProperty("helma.httpport") != null) {
-	        	config.setWebsrvPort(getInetSocketAddress(System.getProperty("helma.httpport")));
-	        }
-        } catch (Exception portx) {
-            throw new Exception("Error parsing web server port property from server.properties: " + portx);
-        }
-
-        if (!config.hasAjp13Port() && sysProps.getProperty("ajp13Port") != null) {
-            try {
-                config.setAjp13Port(getInetSocketAddress(sysProps.getProperty("ajp13Port")));
-            } catch (Exception portx) {
-                throw new Exception("Error parsing AJP1.3 server port property from server.properties: " + portx);
-            }
-        }
-
-        if (!config.hasXmlrpcPort() && sysProps.getProperty("xmlrpcPort") != null) {
-            try {
-                config.setXmlrpcPort(getInetSocketAddress(sysProps.getProperty("xmlrpcPort")));
-            } catch (Exception portx) {
-                throw new Exception("Error parsing XML-RPC server port property from server.properties: " + portx);
-            }
-        }
-        return config;
-    }
-
-
-    /**
-      * parse argument list from command line and store values
-      * in given ServerConfig object
-      * @throws Exception when argument can't be parsed into an InetAddrPort
-      * or invalid token is given.
-      */
-    public static void parseArgs(ServerConfig config, String[] args) throws Exception {
-        for (int i = 0; i < args.length; i++) {
-        	System.out.println(args[i]);
-            if (args[i].equals("-h") && ((i + 1) < args.length)) {
-                config.setHomeDir(new File(args[++i]));
-            } else if (args[i].equals("-f") && ((i + 1) < args.length)) {
-                config.setPropFile(new File(args[++i]));
-            } else if (args[i].equals("-a") && ((i + 1) < args.length)) {
-                config.setApps(StringUtils.split(args[++i]));
-            } else if (args[i].equals("-x") && ((i + 1) < args.length)) {
-                try {
-                    config.setXmlrpcPort(getInetSocketAddress(args[++i]));
-                } catch (Exception portx) {
-                    throw new Exception("Error parsing XML-RPC server port property: " + portx);
-                }
-            } else if (args[i].equals("-w") && ((i + 1) < args.length)) {
-                try {
-                    config.setWebsrvPort(getInetSocketAddress(args[++i]));
-                } catch (Exception portx) {
-                    throw new Exception("Error parsing web server port property: " + portx);
-                }
-            } else if (args[i].equals("-jk") && ((i + 1) < args.length)) {
-                try {
-                    config.setAjp13Port(getInetSocketAddress(args[++i]));
-                } catch (Exception portx) {
-                    throw new Exception("Error parsing AJP1.3 server port property: " + portx);
-                }
-            } else if (args[i].equals("-c") && ((i + 1) < args.length)) {
-                config.setConfigFile(new File(args[++i]));
-            } else if (args[i].equals("-i") && ((i + 1) < args.length)) {
-                // eat away the -i parameter which is meant for helma.main.launcher.Main
-                i++;
-            } else {
-                throw new Exception("Unknown command line token: " + args[i]);
-            }
-        }
-    }
-
-
-    /**
-      * get main property file from home dir or vice versa,
-      * depending on what we have
-      */
-    public static void guessConfig(ServerConfig config) throws Exception {
-        // get property file from hopHome:
-        if (!config.hasPropFile()) {
-            if (config.hasHomeDir()) {
-                config.setPropFile(new File(config.getHomeDir(), "server.properties"));
-            } else {
-                config.setPropFile(new File("server.properties"));
-            }
-        }
-
-        // create system properties
-        ResourceProperties sysProps = new ResourceProperties();
-        sysProps.addResource(new FileResource(config.getPropFile()));
-
-        // try to get hopHome from property file
-        if (!config.hasHomeDir() && sysProps.getProperty("hophome") != null) {
-            config.setHomeDir(new File(sysProps.getProperty("hophome")));
-        }
-
-        // use the directory where server.properties is located:
-        if (!config.hasHomeDir() && config.hasPropFile()) {
-            config.setHomeDir(config.getPropFile().getAbsoluteFile().getParentFile());
-        }
-
-        if (!config.hasPropFile()) {
-            throw new Exception ("no server.properties found");
-        }
-
-        if (!config.hasHomeDir()) {
-            throw new Exception ("couldn't determine helma directory");
-        }
-    }
-
 
     /**
       * print the usage hints and prefix them with a message.
@@ -813,24 +648,6 @@ public class Server implements Runnable {
      */
     public void stopApplication(String name) {
         appManager.stop(name);
-    }
-
-    private static InetSocketAddress getInetSocketAddress(String inetAddrPort)
-            throws UnknownHostException {
-        InetAddress addr = null;
-        int c = inetAddrPort.indexOf(':');
-        if (c >= 0) {
-            String a = inetAddrPort.substring(0, c);
-            if (a.indexOf('/') > 0)
-                a = a.substring(a.indexOf('/') + 1);
-            inetAddrPort = inetAddrPort.substring(c + 1);
-
-            if (a.length() > 0 && !"0.0.0.0".equals(a)) {
-                addr = InetAddress.getByName(a);
-            }
-        }
-        int port = Integer.parseInt(inetAddrPort);
-        return new InetSocketAddress(addr, port);
     }
 }
 
