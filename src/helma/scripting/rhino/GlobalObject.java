@@ -70,7 +70,7 @@ public class GlobalObject extends ImporterTopLevel implements PropertyRecorder {
                                    "renderSkin", "renderSkinAsString", "getProperty",
                                    "authenticate", "createSkin", "format", "encode",
                                    "encodeXml", "encodeForm", "stripTags", "formatParagraphs",
-                                   "getXmlDocument", "getHtmlDocument", "seal",
+                                   "getXmlDocument", "seal",
                                    "getDBConnection", "getURL", "write", "writeln",
                                    "serialize", "deserialize", "defineLibraryScope",
                                    "wrapJavaMap", "unwrapJavaMap", "toJava", "definePrototype"
