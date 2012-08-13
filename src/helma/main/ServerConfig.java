@@ -23,232 +23,252 @@ import java.io.File;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
+import java.util.HashMap;
 
 /**
  * Utility class for server config
  */
- 
+
 public class ServerConfig {
 
-    private InetSocketAddress xmlrpcPort = null;
-    private InetSocketAddress websrvPort = null;
-    private InetSocketAddress ajp13Port  = null;
-    private File propFile   = null;
-    private File homeDir    = null;
-    private File configFile = null;
-    private String[] apps = null;
-    
-    private volatile static ServerConfig uniqueInstance = null;
+	private HashMap<String, InetSocketAddress> inetPorts = new HashMap<String, InetSocketAddress>();
+	private File propFile = null;
+	private File homeDir = null;
+	private File configFile = null;
+	private String[] apps = null;
+	private static final String[] portsToConfigure = { getHttpPortKey(),
+			getXmlrpcPortKey(), getAjp13PortKey() };
 
-    private ServerConfig() {
-    	
-    }
+	private volatile static ServerConfig uniqueInstance = null;
 
-    public static ServerConfig getInstance() throws Exception {
-        if (uniqueInstance == null) {
-        	synchronized (ServerConfig.class) {
-            	uniqueInstance = new ServerConfig();				
+	private ServerConfig() {
+		// init Ports
+		for (int i = 0; i < portsToConfigure.length; i++) {
+			inetPorts.put(portsToConfigure[i], null);
+		}
+	}
+
+	public static ServerConfig getInstance() throws Exception {
+		if (uniqueInstance == null) {
+			synchronized (ServerConfig.class) {
+				uniqueInstance = new ServerConfig();
 			}
-	        // get possible environment setting for helma home
-	        if (System.getProperty("helma.home") != null) {
-	        	uniqueInstance.setHomeDir(new File(System.getProperty("helma.home")));
-	        }
+			// get possible environment setting for helma home
+			if (System.getProperty("helma.home") != null) {
+				uniqueInstance.setHomeDir(new File(System
+						.getProperty("helma.home")));
+			}
+
+			guessConfig(uniqueInstance);
+
+			// create system properties
+			ResourceProperties sysProps = new ResourceProperties();
+			sysProps.addResource(new FileResource(uniqueInstance.getPropFile()));
+			for (int i = 0; i < portsToConfigure.length; i++) {
+				String currentPort = portsToConfigure[i];
+				// check if there's a property setting for those ports not
+				// specified via command line
+				try {
+					// no webserver port configured so do something
+					if (uniqueInstance.inetPorts.get(currentPort) == null) {
+						if (sysProps.getProperty(currentPort) != null) {
+							uniqueInstance.inetPorts.put(currentPort,
+									getInetSocketAddress(sysProps
+											.getProperty(currentPort)));
+						} else if (System.getProperty(currentPort) != null) {
+							uniqueInstance.inetPorts.put(currentPort,
+									getInetSocketAddress(System
+											.getProperty(currentPort)));
+						}
+					}
+				} catch (Exception e) {
+					throw new Exception("Error parsing " + currentPort
+							+ " or property from server.properties: " + e);
+				}
+			}
+		}
+		return uniqueInstance;
+	}
+	public static String getHttpPortKey() {
+		return "helma.httpPort";
+	}
+
+	public static String getXmlrpcPortKey() {
+		return "helma.xmlrpcPort";
+	}
 	
-	        guessConfig(uniqueInstance);
-	
-	        // create system properties
-	        ResourceProperties sysProps = new ResourceProperties();
-	        sysProps.addResource(new FileResource(uniqueInstance.getPropFile()));
-	
-	        // check if there's a property setting for those ports not specified via command line
-	        try {
-		        if (!uniqueInstance.hasWebsrvPort() && sysProps.getProperty("webPort") != null) {
-		        	uniqueInstance.setWebsrvPort(getInetSocketAddress(sysProps.getProperty("webPort")));
-		        } else if (System.getProperty("helma.httpport") != null) {
-		        	uniqueInstance.setWebsrvPort(getInetSocketAddress(System.getProperty("helma.httpport")));
-		        }
-	        } catch (Exception portx) {
-	            throw new Exception("Error parsing web server port property from server.properties: " + portx);
-	        }
-	
-	        if (!uniqueInstance.hasAjp13Port() && sysProps.getProperty("ajp13Port") != null) {
-	            try {
-	            	uniqueInstance.setAjp13Port(getInetSocketAddress(sysProps.getProperty("ajp13Port")));
-	            } catch (Exception portx) {
-	                throw new Exception("Error parsing AJP1.3 server port property from server.properties: " + portx);
-	            }
-	        }
-	
-	        if (!uniqueInstance.hasXmlrpcPort() && sysProps.getProperty("xmlrpcPort") != null) {
-	            try {
-	            	uniqueInstance.setXmlrpcPort(getInetSocketAddress(sysProps.getProperty("xmlrpcPort")));
-	            } catch (Exception portx) {
-	                throw new Exception("Error parsing XML-RPC server port property from server.properties: " + portx);
-	            }
-	        }
-        }
-        return uniqueInstance;
+	public static String getAjp13PortKey() {
+		return "helma.ajp13Port";
 	}
 
 	public boolean hasPropFile() {
-        return (propFile != null);
-    }
+		return (propFile != null);
+	}
 
-    public boolean hasConfigFile() {
-        return (configFile != null);
-    }
+	public boolean hasConfigFile() {
+		return (configFile != null);
+	}
 
-    public boolean hasHomeDir() {
-        return (homeDir != null);
-    }
+	public boolean hasHomeDir() {
+		return (homeDir != null);
+	}
 
-    public boolean hasXmlrpcPort() {
-        return (xmlrpcPort != null);
-    }
+	public boolean hasWebsrvPort() {
+		return (inetPorts.get(getHttpPortKey()) != null);
+	}
 
-    public boolean hasWebsrvPort() {
-        return (websrvPort != null);
-    }
+	public boolean hasXmlrpcPort() {
+		return (inetPorts.get(getXmlrpcPortKey()) != null);
+	}
 
-    public boolean hasAjp13Port() {
-        return (ajp13Port != null);
-    }
+	public boolean hasAjp13Port() {
+		return (inetPorts.get(getAjp13Port()) != null);
+	}
 
-    public boolean hasApps() {
-        return (apps != null);
-    }
+	public boolean hasApps() {
+		return (apps != null);
+	}
 
-    public InetSocketAddress getXmlrpcPort() {
-        return xmlrpcPort;
-    }
+	public InetSocketAddress getWebsrvPort() {
+		return inetPorts.get(getHttpPortKey());
+	}
 
-    public void setXmlrpcPort(InetSocketAddress xmlrpcPort) {
-        this.xmlrpcPort = xmlrpcPort;
-    }
+	public void setWebsrvPort(InetSocketAddress websrvPort) {
+		inetPorts.put(getHttpPortKey(), websrvPort);
+	}
 
-    public InetSocketAddress getWebsrvPort() {
-        return websrvPort;
-    }
+	public InetSocketAddress getXmlrpcPort() {
+		return inetPorts.get(getXmlrpcPortKey());
+	}
 
-    public void setWebsrvPort(InetSocketAddress websrvPort) {
-        this.websrvPort = websrvPort;
-    }
+	public void setXmlrpcPort(InetSocketAddress xmlrpcPort) {
+		inetPorts.put(getXmlrpcPortKey(), xmlrpcPort);
+	}
 
-    public InetSocketAddress getAjp13Port() {
-        return ajp13Port;
-    }
+	public InetSocketAddress getAjp13Port() {
+		return inetPorts.get(getAjp13PortKey());
+	}
 
-    public void setAjp13Port(InetSocketAddress ajp13Port) {
-        this.ajp13Port = ajp13Port;
-    }
+	public void setAjp13Port(InetSocketAddress ajp13Port) {
+		inetPorts.put(getAjp13PortKey(), ajp13Port);
+	}
 
-    public File getPropFile() {
-        return propFile;
-    }
+	public File getPropFile() {
+		return propFile;
+	}
 
-    public void setPropFile(File propFile) {
-        this.propFile = propFile == null ? null : propFile.getAbsoluteFile();
-    }
+	public void setPropFile(File propFile) {
+		this.propFile = propFile == null ? null : propFile.getAbsoluteFile();
+	}
 
-    public File getHomeDir() {
-        return homeDir;
-    }
+	public File getHomeDir() {
+		return homeDir;
+	}
 
-    public void setHomeDir(File homeDir) {
-        this.homeDir = homeDir == null ? null : homeDir.getAbsoluteFile();
-    }
-    
-    public File getConfigFile() {
+	public void setHomeDir(File homeDir) {
+		this.homeDir = homeDir == null ? null : homeDir.getAbsoluteFile();
+	}
+
+	public File getConfigFile() {
 		return configFile;
 	}
 
 	public void setConfigFile(File configFile) {
-		this.configFile = configFile == null ? null : configFile.getAbsoluteFile();
+		this.configFile = configFile == null ? null : configFile
+				.getAbsoluteFile();
 	}
 
-    public String[] getApps() {
-        return apps;
-    }
+	public String[] getApps() {
+		return apps;
+	}
 
-    public void setApps(String[] apps) {
-        this.apps = apps;
-    }
-    
-    /**
-     * check if we are running on a Java 2 VM - otherwise exit with an error message
-     */
-   public static void checkJavaVersion() {
-       String javaVersion = System.getProperty("java.version");
+	public void setApps(String[] apps) {
+		this.apps = apps;
+	}
 
-       if ((javaVersion == null) || javaVersion.startsWith("1.4")
-				                  || javaVersion.startsWith("1.3")
-                                 || javaVersion.startsWith("1.2")
-                                 || javaVersion.startsWith("1.1")
-                                 || javaVersion.startsWith("1.0")) {
-           System.err.println("This version of Helma requires Java 1.5 or greater.");
+	/**
+	 * check if we are running on a Java 2 VM - otherwise exit with an error
+	 * message
+	 */
+	public static void checkJavaVersion() {
+		String javaVersion = System.getProperty("java.version");
 
-           if (javaVersion == null) { // don't think this will ever happen, but you never know
-               System.err.println("Your Java Runtime did not provide a version number. Please update to a more recent version.");
-           } else {
-               System.err.println("Your Java Runtime is version " + javaVersion +
-                                  ". Please update to a more recent version.");
-           }
+		if ((javaVersion == null) || javaVersion.startsWith("1.4")
+				|| javaVersion.startsWith("1.3")
+				|| javaVersion.startsWith("1.2")
+				|| javaVersion.startsWith("1.1")
+				|| javaVersion.startsWith("1.0")) {
+			System.err
+					.println("This version of Helma requires Java 1.5 or greater.");
 
-           System.exit(1);
-       }
-   }
-   /**
-    * get main property file from home dir or vice versa,
-    * depending on what we have
-    */
-  public static void guessConfig(ServerConfig config) throws Exception {
-      // get property file from hopHome:
-      if (!config.hasPropFile()) {
-          if (config.hasHomeDir()) {
-              config.setPropFile(new File(config.getHomeDir(), "server.properties"));
-          } else {
-              config.setPropFile(new File("server.properties"));
-          }
-      }
+			if (javaVersion == null) { // don't think this will ever happen, but
+										// you never know
+				System.err
+						.println("Your Java Runtime did not provide a version number. Please update to a more recent version.");
+			} else {
+				System.err.println("Your Java Runtime is version "
+						+ javaVersion
+						+ ". Please update to a more recent version.");
+			}
 
-      // create system properties
-      ResourceProperties sysProps = new ResourceProperties();
-      sysProps.addResource(new FileResource(config.getPropFile()));
+			System.exit(1);
+		}
+	}
 
-      // try to get hopHome from property file
-      if (!config.hasHomeDir() && sysProps.getProperty("hophome") != null) {
-          config.setHomeDir(new File(sysProps.getProperty("hophome")));
-      }
+	/**
+	 * get main property file from home dir or vice versa, depending on what we
+	 * have
+	 */
+	public static void guessConfig(ServerConfig config) throws Exception {
+		// get property file from hopHome:
+		if (!config.hasPropFile()) {
+			if (config.hasHomeDir()) {
+				config.setPropFile(new File(config.getHomeDir(),
+						"server.properties"));
+			} else {
+				config.setPropFile(new File("server.properties"));
+			}
+		}
 
-      // use the directory where server.properties is located:
-      if (!config.hasHomeDir() && config.hasPropFile()) {
-          config.setHomeDir(config.getPropFile().getAbsoluteFile().getParentFile());
-      }
+		// create system properties
+		ResourceProperties sysProps = new ResourceProperties();
+		sysProps.addResource(new FileResource(config.getPropFile()));
 
-      if (!config.hasPropFile()) {
-          throw new Exception ("no server.properties found");
-      }
+		// try to get hopHome from property file
+		if (!config.hasHomeDir() && sysProps.getProperty("hophome") != null) {
+			config.setHomeDir(new File(sysProps.getProperty("hophome")));
+		}
 
-      if (!config.hasHomeDir()) {
-          throw new Exception ("couldn't determine helma directory");
-      }
-  }
-  
-  private static InetSocketAddress getInetSocketAddress(String inetAddrPort)
-          throws UnknownHostException {
-      InetAddress addr = null;
-      int c = inetAddrPort.indexOf(':');
-      if (c >= 0) {
-          String a = inetAddrPort.substring(0, c);
-          if (a.indexOf('/') > 0)
-              a = a.substring(a.indexOf('/') + 1);
-          inetAddrPort = inetAddrPort.substring(c + 1);
+		// use the directory where server.properties is located:
+		if (!config.hasHomeDir() && config.hasPropFile()) {
+			config.setHomeDir(config.getPropFile().getAbsoluteFile()
+					.getParentFile());
+		}
 
-          if (a.length() > 0 && !"0.0.0.0".equals(a)) {
-              addr = InetAddress.getByName(a);
-          }
-      }
-      int port = Integer.parseInt(inetAddrPort);
-      return new InetSocketAddress(addr, port);
-  }
+		if (!config.hasPropFile()) {
+			throw new Exception("no server.properties found");
+		}
+
+		if (!config.hasHomeDir()) {
+			throw new Exception("couldn't determine helma directory");
+		}
+	}
+
+	private static InetSocketAddress getInetSocketAddress(String inetAddrPort)
+			throws UnknownHostException {
+		InetAddress addr = null;
+		int c = inetAddrPort.indexOf(':');
+		if (c >= 0) {
+			String a = inetAddrPort.substring(0, c);
+			if (a.indexOf('/') > 0)
+				a = a.substring(a.indexOf('/') + 1);
+			inetAddrPort = inetAddrPort.substring(c + 1);
+
+			if (a.length() > 0 && !"0.0.0.0".equals(a)) {
+				addr = InetAddress.getByName(a);
+			}
+		}
+		int port = Integer.parseInt(inetAddrPort);
+		return new InetSocketAddress(addr, port);
+	}
 }
