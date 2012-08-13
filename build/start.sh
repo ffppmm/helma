@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # Shell script for starting Helma with a JDK-like virtual machine.
 
 # To add JAR files to the classpath, simply place them into the
@@ -75,4 +75,4 @@ if [ "$HOP_HOME" ]; then
 fi
 
 # Invoke the Java VM
-$JAVACMD $JAVA_OPTIONS -jar "$INSTALL_DIR/launcher.jar" $SWITCHES $*
+$JAVACMD $JAVA_OPTIONS -jar "$INSTALL_DIR/hop.jar" -cp $(echo lib/*.jar | tr ' ' ':') $SWITCHES $*

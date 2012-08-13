@@ -17,21 +17,29 @@
 package helma.main;
 
 import helma.extensions.HelmaExtension;
+import helma.framework.core.Application;
 import helma.framework.repository.FileResource;
-import helma.framework.core.*;
 import helma.objectmodel.db.DbSource;
-import helma.util.*;
+import helma.util.Logging;
+import helma.util.ResourceProperties;
+import helma.util.StringUtils;
+
+import java.io.File;
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.ServerSocket;
+import java.net.UnknownHostException;
+import java.util.Hashtable;
+import java.util.Locale;
+import java.util.StringTokenizer;
+import java.util.TimeZone;
+import java.util.Vector;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.xmlrpc.*;
-
-import java.io.*;
-import java.rmi.registry.*;
-import java.rmi.server.*;
-import java.util.*;
-import java.net.*;
-
-import helma.util.ResourceProperties;
+import org.apache.xmlrpc.WebServer;
+import org.apache.xmlrpc.XmlRpc;
 
 /**
  * Helma server main class.
@@ -63,7 +71,7 @@ public class Server implements Runnable {
     // explicitly listed hosts.
     public boolean paranoid;
     private ApplicationManager appManager;
-    private Vector extensions;
+    private Vector<HelmaExtension> extensions;
     private Thread mainThread;
 
     // configuration
@@ -147,11 +155,12 @@ public class Server implements Runnable {
     public static void checkJavaVersion() {
         String javaVersion = System.getProperty("java.version");
 
-        if ((javaVersion == null) || javaVersion.startsWith("1.3")
+        if ((javaVersion == null) || javaVersion.startsWith("1.4")
+				                  || javaVersion.startsWith("1.3")
                                   || javaVersion.startsWith("1.2")
                                   || javaVersion.startsWith("1.1")
                                   || javaVersion.startsWith("1.0")) {
-            System.err.println("This version of Helma requires Java 1.4 or greater.");
+            System.err.println("This version of Helma requires Java 1.5 or greater.");
 
             if (javaVersion == null) { // don't think this will ever happen, but you never know
                 System.err.println("Your Java Runtime did not provide a version number. Please update to a more recent version.");
@@ -189,12 +198,14 @@ public class Server implements Runnable {
         sysProps.addResource(new FileResource(config.getPropFile()));
 
         // check if there's a property setting for those ports not specified via command line
-        if (!config.hasWebsrvPort() && sysProps.getProperty("webPort") != null) {
-            try {
-                config.setWebsrvPort(getInetSocketAddress(sysProps.getProperty("webPort")));
-            } catch (Exception portx) {
-                throw new Exception("Error parsing web server port property from server.properties: " + portx);
-            }
+        try {
+	        if (!config.hasWebsrvPort() && sysProps.getProperty("webPort") != null) {
+	            config.setWebsrvPort(getInetSocketAddress(sysProps.getProperty("webPort")));
+	        } else if (System.getProperty("helma.httpport") != null) {
+	        	config.setWebsrvPort(getInetSocketAddress(System.getProperty("helma.httpport")));
+	        }
+        } catch (Exception portx) {
+            throw new Exception("Error parsing web server port property from server.properties: " + portx);
         }
 
         if (!config.hasAjp13Port() && sysProps.getProperty("ajp13Port") != null) {
@@ -224,6 +235,7 @@ public class Server implements Runnable {
       */
     public static void parseArgs(ServerConfig config, String[] args) throws Exception {
         for (int i = 0; i < args.length; i++) {
+        	System.out.println(args[i]);
             if (args[i].equals("-h") && ((i + 1) < args.length)) {
                 config.setHomeDir(new File(args[++i]));
             } else if (args[i].equals("-f") && ((i + 1) < args.length)) {
@@ -451,7 +463,7 @@ public class Server implements Runnable {
         dbSources = new Hashtable();
 
         // try to load the extensions
-        extensions = new Vector();
+        extensions = new Vector<HelmaExtension>();
         if (sysProps.getProperty("extensions") != null) {
             initExtensions();
         }
@@ -468,7 +480,7 @@ public class Server implements Runnable {
             String extClassName = tok.nextToken().trim();
 
             try {
-                Class extClass = Class.forName(extClassName);
+                Class<?> extClass = Class.forName(extClassName);
                 HelmaExtension ext = (HelmaExtension) extClass.newInstance();
                 ext.init(this);
                 extensions.add(ext);
@@ -780,8 +792,8 @@ public class Server implements Runnable {
      *
      * @return ...
      */
-    public Vector getExtensions() {
-        return extensions;
+    public Vector<HelmaExtension> getExtensions() {
+        return getExtensions();
     }
 
     /**
