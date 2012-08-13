@@ -2,7 +2,7 @@
 # Shell script for starting Helma with a JDK-like virtual machine.
 
 # To add JAR files to the classpath, simply place them into the
-# lib/ext directory.
+# lib/ directory.
 
 # uncomment to set JAVA_HOME variable
 # JAVA_HOME=/usr/lib/java
@@ -11,14 +11,8 @@
 # HOP_HOME=/usr/local/helma
 
 # options to pass to the Java virtual machine
-# JAVA_OPTIONS="-server -Xmx128m"
+JAVA_OPTIONS="-server -Xmx128m"
 
-# Set TCP ports for Helma servers
-# (comment/uncomment to de/activate)
-HTTP_PORT=8080
-# XMLRPC_PORT=8081
-# AJP13_PORT=8009
-# RMI_PORT=5050
 
 ###########################################################
 ###### No user configuration needed below this line #######
@@ -37,11 +31,6 @@ else
    JAVACMD=java
 fi
 
-# Get the Helma installation directory
-INSTALL_DIR="${0%/*}"
-cd $INSTALL_DIR
-INSTALL_DIR=$PWD
-
 # get HOP_HOME variable if it isn't set
 if [ -z "$HOP_HOME" ]; then
   # try to get HOP_HOME from script file and pwd
@@ -54,25 +43,5 @@ else
 fi
 echo "Starting Helma in directory $HOP_HOME"
 
-if [ "$HTTP_PORT" ]; then
-   SWITCHES="$SWITCHES -w $HTTP_PORT"
-   echo Starting HTTP server on port $HTTP_PORT
-fi
-if [ "$XMLRPC_PORT" ]; then
-   SWITCHES="$SWITCHES -x $XMLRPC_PORT"
-   echo Starting XML-RPC server on port $XMLRPC_PORT
-fi
-if [ "$AJP13_PORT" ]; then
-   SWITCHES="$SWITCHES -jk $AJP13_PORT"
-   echo Starting AJP13 listener on port $AJP13_PORT
-fi
-if [ "$RMI_PORT" ]; then
-   SWITCHES="$SWITCHES -p $RMI_PORT"
-   echo Starting RMI server on port $RMI_PORT
-fi
-if [ "$HOP_HOME" ]; then
-   SWITCHES="$SWITCHES -h $HOP_HOME"
-fi
-
 # Invoke the Java VM
-$JAVACMD $JAVA_OPTIONS -jar "$INSTALL_DIR/hop.jar" -cp $(echo lib/*.jar | tr ' ' ':') $SWITCHES $*
+$JAVACMD $JAVA_OPTIONS -cp $(echo dependency/*.jar | tr ' ' ':'):$(echo *.jar) helma.main.Server
