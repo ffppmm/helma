@@ -22,7 +22,6 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.XMLReaderAdapter;
 import org.ccil.cowan.tagsoup.Parser;
-import org.apache.html.dom.HTMLBuilder;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -82,50 +81,5 @@ public class XmlUtils {
 
         doc.normalize();
         return doc;
-    }
-
-    /**
-     *
-     *
-     * @param obj ...
-     *
-     * @return ...
-     *
-     * @throws IOException ...
-     */
-    public static HTMLDocument parseHtml(Object obj)
-                              throws IOException, SAXException {
-        try {
-            Class.forName("org.apache.html.dom.HTMLDocumentImpl");
-        } catch (Throwable notfound) {
-            throw new RuntimeException("Couldn't load Xerces HTML DOM classes. " +
-                "Make sure you have xercesImpl.jar and xml-apis.jar in your classpath.");
-        }
-
-        if (obj instanceof String) {
-            try {
-                // first try to interpret string as URL
-                URL url = new URL(obj.toString());
-                return getHtmlDocument(new InputStreamReader(url.openStream()));
-            } catch (MalformedURLException nourl) {
-                // if not a URL, maybe it is the XML itself
-                return getHtmlDocument(new StringReader(obj.toString()));
-            }
-        } else if (obj instanceof InputStream) {
-            return getHtmlDocument(new InputStreamReader((InputStream) obj));
-        } else if (obj instanceof Reader) {
-            return getHtmlDocument((Reader) obj);
-        } else {
-            throw new RuntimeException("Unrecognized argument to parseHtml: " + obj);
-        }
-    }
-
-    private static HTMLDocument getHtmlDocument(Reader reader)
-            throws IOException, SAXException {
-        XMLReaderAdapter parser = new XMLReaderAdapter(new Parser());
-        HTMLBuilder builder = new HTMLBuilder();
-        parser.setDocumentHandler(builder);
-        parser.parse(new InputSource(reader));
-        return builder.getHTMLDocument();
     }
 }

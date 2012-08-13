@@ -1,3 +1,4 @@
 classes/*
 launcher.jar
 lib/helma*.jar
+/target

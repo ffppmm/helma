@@ -352,28 +352,6 @@ public class GlobalObject extends ImporterTopLevel implements PropertyRecorder {
     }
 
     /**
-     *  Try to parse an object to a XML DOM tree. The argument must be
-     *  either a URL, a piece of XML, an InputStream or a Reader.
-     */
-    public Object getHtmlDocument(Object src) {
-        try {
-            Object p = src;
-            if (p instanceof Wrapper) {
-                p = ((Wrapper) p).unwrap();
-            }
-            Object doc = helma.util.XmlUtils.parseHtml(p);
-
-            return Context.toObject(doc, this);
-        } catch (IOException iox) {
-            app.logError("Error creating HTML document", iox);
-        } catch (SAXException sx) {
-            app.logError("Error creating HTML document", sx);
-        }
-
-        return null;
-    }
-
-    /**
      * Creates a libary namespace in the global scope.
      *
      * @param name the name of the libary namespace
