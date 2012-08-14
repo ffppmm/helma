@@ -24,9 +24,17 @@
 
 package helma.image;
 
-import java.awt.*;
-import java.awt.geom.*;
-import java.awt.image.*;
+import java.awt.AlphaComposite;
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
+import java.awt.geom.Point2D;
+import java.awt.geom.Rectangle2D;
+import java.awt.image.BufferedImage;
+import java.awt.image.BufferedImageOp;
+import java.awt.image.ColorModel;
+import java.awt.image.DataBufferInt;
+import java.awt.image.ImageConsumer;
+import java.awt.image.ImageFilter;
 import java.util.Hashtable;
 
 public class ImageFilterOp implements BufferedImageOp {
@@ -242,7 +250,8 @@ public class ImageFilterOp implements BufferedImageOp {
             }
         }
 
-        public void setProperties(Hashtable props) {
+        @SuppressWarnings("rawtypes")
+		public void setProperties(Hashtable props) {
         }
 
         public void setColorModel(ColorModel model) {

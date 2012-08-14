@@ -16,17 +16,22 @@
 
 package helma.servlet;
 
-import helma.framework.*;
 import helma.framework.core.Application;
-import helma.main.*;
-import javax.servlet.*;
+import helma.main.Server;
+
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
 
 /**
  *  Servlet client that runs a Helma application for the embedded
  *  web server
  */
 public final class EmbeddedServletClient extends AbstractServletClient {
-    private Application app = null;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = -1716809853688477356L;
+	private Application app = null;
     private String appName;
 
     /**

@@ -189,7 +189,7 @@ public class ImageGenerator {
     }
 
     public BufferedImage read(ImageInputStream stream) throws IOException {
-        Iterator iter = ImageIO.getImageReaders(stream);
+        Iterator<ImageReader> iter = ImageIO.getImageReaders(stream);
         if (!iter.hasNext())
             return null;
 
@@ -280,7 +280,7 @@ public class ImageGenerator {
 
             // Find a writer for that file suffix
             ImageWriter writer = null;
-            Iterator iter = ImageIO.getImageWritersBySuffix(extension);
+            Iterator<ImageWriter> iter = ImageIO.getImageWritersBySuffix(extension);
             if (iter.hasNext())
                 writer = (ImageWriter) iter.next();
             if (writer != null) {
@@ -317,7 +317,7 @@ public class ImageGenerator {
     public void write(ImageWrapper wrapper, OutputStream out, String mimeType,
             float quality, boolean alpha) throws IOException {
         // Find a writer for that type
-        Iterator iter = ImageIO.getImageWritersByMIMEType(mimeType);
+        Iterator<ImageWriter> iter = ImageIO.getImageWritersByMIMEType(mimeType);
         if (iter.hasNext()) {
             ImageWriter writer = (ImageWriter) iter.next();
             ImageOutputStream ios = null;

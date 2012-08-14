@@ -19,18 +19,45 @@
 
 package helma.servlet;
 
-import helma.framework.*;
+import helma.framework.CookieTrans;
+import helma.framework.RequestTrans;
+import helma.framework.ResponseTrans;
+import helma.framework.UploadStatus;
 import helma.framework.core.Application;
-import helma.util.*;
-import java.io.*;
-import java.util.*;
-import java.security.SecureRandom;
-import java.security.NoSuchAlgorithmException;
-import javax.servlet.*;
-import javax.servlet.http.*;
+import helma.util.Base64;
+import helma.util.MimePart;
+import helma.util.UrlEncoded;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
+import java.io.Writer;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+import java.util.StringTokenizer;
+
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+import javax.servlet.ServletInputStream;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.fileupload.FileItem;
+import org.apache.commons.fileupload.FileUpload;
+import org.apache.commons.fileupload.FileUploadBase;
+import org.apache.commons.fileupload.FileUploadException;
+import org.apache.commons.fileupload.ProgressListener;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
-import org.apache.commons.fileupload.*;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.fileupload.servlet.ServletRequestContext;
 
@@ -40,7 +67,12 @@ import org.apache.commons.fileupload.servlet.ServletRequestContext;
  */
 public abstract class AbstractServletClient extends HttpServlet {
 
-    // limit to HTTP uploads per file in kB
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = -6096445259839663680L;
+
+	// limit to HTTP uploads per file in kB
     int uploadLimit = 1024;
 
     // limit to HTTP upload
@@ -214,7 +246,7 @@ public abstract class AbstractServletClient extends HttpServlet {
             parseParameters(request, reqtrans, encoding);
 
             // read file uploads
-            List uploads = null;
+            List<FileItem> uploads = null;
             ServletRequestContext reqcx = new ServletRequestContext(request);
 
             if (ServletFileUpload.isMultipartContent(reqcx)) {
@@ -255,7 +287,7 @@ public abstract class AbstractServletClient extends HttpServlet {
             // delete uploads if any
             if (uploads != null) {
                 for (int i = 0; i < uploads.size(); i++) {
-                    ((FileItem) uploads.get(i)).delete();
+                    uploads.get(i).delete();
                 }
             }
 
@@ -625,9 +657,9 @@ public abstract class AbstractServletClient extends HttpServlet {
      * Put name and value pair in map.  When name already exist, add value
      * to array of values.
      */
-    private static void putMapEntry(Map map, String name, String value) {
+    private static void putMapEntry(Map<String, String[]> map, String name, String value) {
         String[] newValues = null;
-        String[] oldValues = (String[]) map.get(name);
+        String[] oldValues = map.get(name);
 
         if (oldValues == null) {
             newValues = new String[1];
@@ -641,7 +673,7 @@ public abstract class AbstractServletClient extends HttpServlet {
         map.put(name, newValues);
     }
 
-    protected List parseUploads(ServletRequestContext reqcx, RequestTrans reqtrans,
+	protected List<FileItem> parseUploads(ServletRequestContext reqcx, RequestTrans reqtrans,
                                 final UploadStatus uploadStatus, String encoding)
             throws FileUploadException, UnsupportedEncodingException {
         // handle file upload
@@ -660,11 +692,13 @@ public abstract class AbstractServletClient extends HttpServlet {
             });
         }
 
-        List uploads = upload.parseRequest(reqcx);
-        Iterator it = uploads.iterator();
+        @SuppressWarnings("unchecked")
+		List<FileItem> uploads = upload.parseRequest(reqcx);
+        
+        Iterator<FileItem> it = uploads.iterator();
 
         while (it.hasNext()) {
-            FileItem item = (FileItem) it.next();
+            FileItem item = it.next();
             String name = item.getFieldName();
             Object value;
             // check if this is an ordinary HTML form element or a file upload
@@ -693,7 +727,7 @@ public abstract class AbstractServletClient extends HttpServlet {
             return;
         }
 
-        HashMap parameters = new HashMap();
+        HashMap<String, String[]> parameters = new HashMap<String, String[]>();
 
         // Parse any query string parameters from the request
         if (queryString != null) {
@@ -752,7 +786,7 @@ public abstract class AbstractServletClient extends HttpServlet {
      *
      * @exception UnsupportedEncodingException if the data is malformed
      */
-    public static void parseParameters(Map map, byte[] data, String encoding, boolean isPost)
+    public static void parseParameters(Map<String, String[]> map, byte[] data, String encoding, boolean isPost)
                                 throws UnsupportedEncodingException {
         if ((data != null) && (data.length > 0)) {
             int ix = 0;

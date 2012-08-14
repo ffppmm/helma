@@ -222,13 +222,13 @@ public class ImageInfo {
 	private int height;
 	private int bitsPerPixel;
     private int numColors;
-	private int colorType = COLOR_TYPE_UNKNOWN;
+	// private int colorType = COLOR_TYPE_UNKNOWN;
 	private boolean progressive;
 	private int format;
 	private InputStream in;
 	private DataInput din;
 	private boolean collectComments = true;
-	private Vector comments;
+	private Vector<String> comments;
 	private boolean determineNumberOfImages;
 	private int numberOfImages;
 	private int physicalHeightDpi;
@@ -238,7 +238,7 @@ public class ImageInfo {
 
 	private void addComment(String s) {
 		if (comments == null) {
-			comments = new Vector();
+			comments = new Vector<String>();
 		}
 		comments.addElement(s);
 	}
@@ -738,11 +738,11 @@ public class ImageInfo {
 			return false;
 		}
 		format = FORMAT_SWF;
-		int bitSize = (int)readUBits( 5 );
-		int minX = (int)readSBits( bitSize );
-		int maxX = (int)readSBits( bitSize );
-		int minY = (int)readSBits( bitSize );
-		int maxY = (int)readSBits( bitSize );
+		int bitSize = (int) readUBits( 5 );
+		// int minX = (int) readSBits( bitSize );
+		int maxX = (int) readSBits( bitSize );
+		// int minY = (int) readSBits( bitSize );
+		int maxY = (int) readSBits( bitSize );
 		width = maxX/20; //cause we're in twips
 		height = maxY/20;  //cause we're in twips
 		setPhysicalWidthDpi(72);
@@ -1201,7 +1201,9 @@ public class ImageInfo {
 
         return (int)uBits;        
     }  
-   
+  
+    /**
+     * never used !!!
 	private void synchBits()
 	{
 		bitBuf = 0;
@@ -1213,6 +1215,7 @@ public class ImageInfo {
 		result.append((char)firstChar);
 		return readLine(result);
 	}
+     */
 
 	private static void run(String sourceName, InputStream in, ImageInfo imageInfo, boolean verbose) {
 		imageInfo.setInput(in);
