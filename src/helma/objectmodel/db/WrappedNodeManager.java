@@ -105,11 +105,11 @@ public final class WrappedNodeManager {
      * @param rel
      * @return
      */
-    public List getNodes(Node home, Relation rel) {
+    public List<NodeHandle> getNodes(Node home, Relation rel) {
         Transactor tx = checkLocalTransactor();
         try {
             beginLocalTransaction(tx, "getNodes");
-            List list = nmgr.getNodes(home, rel);
+            List<NodeHandle> list = nmgr.getNodes(home, rel);
             commitLocalTransaction(tx);
             return list;
         } catch (Exception x) {
@@ -126,7 +126,7 @@ public final class WrappedNodeManager {
      * @param rel
      * @return
      */
-    public List getNodeIDs(Node home, Relation rel) {
+    public List<NodeHandle> getNodeIDs(Node home, Relation rel) {
         try {
             return nmgr.getNodeIDs(home, rel);
         } catch (Exception x) {
@@ -195,7 +195,7 @@ public final class WrappedNodeManager {
      * @param rel
      * @return
      */
-    public Vector getPropertyNames(Node home, Relation rel) {
+    public Vector<String> getPropertyNames(Node home, Relation rel) {
         try {
             return nmgr.getPropertyNames(home, rel);
         } catch (Exception x) {

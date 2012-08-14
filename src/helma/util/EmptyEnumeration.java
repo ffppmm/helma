@@ -21,7 +21,7 @@ import java.util.Enumeration;
 /**
  * Utility class for empty enum
  */
-public class EmptyEnumeration implements Enumeration {
+public class EmptyEnumeration implements Enumeration<Object> {
     /**
      *
      *

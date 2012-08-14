@@ -146,7 +146,7 @@ public interface INode extends INodeState, IPathElement {
     /**
      * Get an enumeration of this node's unnamed child nodes
      */
-    public Enumeration getSubnodes();
+    public Enumeration<Object> getSubnodes();
 
     /**
      * Get a named child node with the given name or id.
@@ -176,7 +176,7 @@ public interface INode extends INodeState, IPathElement {
     /**
      *  Get an enumeration over the node's properties.
      */
-    public Enumeration properties();
+    public Enumeration<String> properties();
 
     /**
      * Get a property with the given name.

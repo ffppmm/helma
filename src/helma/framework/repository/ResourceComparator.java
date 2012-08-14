@@ -16,13 +16,14 @@
 
 package helma.framework.repository;
 
-import java.util.Comparator;
 import helma.framework.core.Application;
+
+import java.util.Comparator;
 
 /**
  * Sorts resources according to the order of their repositories
  */
-public class ResourceComparator implements Comparator {
+public class ResourceComparator implements Comparator<Object> {
 
     // the application where the top-level repositories can be found
     protected Application app;

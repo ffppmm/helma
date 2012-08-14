@@ -40,7 +40,7 @@ public class WeakCacheMap extends CacheMap {
      * @param loadFactor the load factor
      * @return a new Map used for internal caching
      */
-    protected Map createTable(int capacity, float loadFactor) {
-        return new WeakHashMap(capacity, loadFactor);
+    protected Map<Object, Object> createTable(int capacity, float loadFactor) {
+        return new WeakHashMap<Object, Object>(capacity, loadFactor);
     }
 }

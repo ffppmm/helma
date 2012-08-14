@@ -16,9 +16,9 @@
 
 package helma.framework.repository;
 
-import java.util.List;
-import java.util.Iterator;
 import java.io.IOException;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * Repository represents an abstract container of resources (e.g. code, skins, ...).
@@ -59,7 +59,7 @@ public interface Repository {
      * @return direct resources
      * @throws IOException
      */
-    public Iterator getResources() throws IOException;
+    public Iterator<Resource> getResources() throws IOException;
 
     /**
      * Returns all direct and indirect resources
@@ -67,7 +67,7 @@ public interface Repository {
      * @return resources recursive
      * @throws IOException
      */
-    public List getAllResources() throws IOException;
+    public List<Resource> getAllResources() throws IOException;
 
     /**
      * Returns this repository's direct child repositories

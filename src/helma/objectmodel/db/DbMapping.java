@@ -62,7 +62,7 @@ public final class DbMapping {
     private DbMapping groupbyMapping;
 
     // Map of property names to Relations objects
-    private HashMap prop2db;
+    private HashMap<String, Relation> prop2db;
 
     // Map of db columns to Relations objects.
     // Case insensitive, keys are stored in lower case so
@@ -1349,19 +1349,19 @@ public final class DbMapping {
      *
      * @return the property enumeration
      */
-    public Enumeration getPropertyEnumeration() {
-        HashSet set = new HashSet();
+    public Enumeration<String> getPropertyEnumeration() {
+        HashSet<String> set = new HashSet<String>();
 
         collectPropertyNames(set);
 
-        final Iterator it = set.iterator();
+        final Iterator<String> it = set.iterator();
 
-        return new Enumeration() {
+        return new Enumeration<String>() {
                 public boolean hasMoreElements() {
                     return it.hasNext();
                 }
 
-                public Object nextElement() {
+                public String nextElement() {
                     return it.next();
                 }
             };
@@ -1372,7 +1372,7 @@ public final class DbMapping {
      *
      * @param basket the set to put properties into
      */
-    private void collectPropertyNames(HashSet basket) {
+    private void collectPropertyNames(HashSet<String> basket) {
         // fetch propnames from parent mapping first, than add our own.
         if (parentMapping != null) {
             parentMapping.collectPropertyNames(basket);

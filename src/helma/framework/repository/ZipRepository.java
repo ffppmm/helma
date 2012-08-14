@@ -20,7 +20,8 @@ import helma.util.StringUtils;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
+import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -112,9 +113,9 @@ public final class ZipRepository extends AbstractRepository {
 
             try {
                 zipfile = getZipFile();
-                Enumeration en = zipfile.entries();
-                HashMap newRepositories = new HashMap();
-                HashMap newResources = new HashMap();
+                Enumeration<? extends ZipEntry> en = zipfile.entries();
+                HashMap<String, Repository> newRepositories = new HashMap<String, Repository>();
+                HashMap<String, Resource> newResources = new HashMap<String, Resource>();
 
                 while (en.hasMoreElements()) {
                     ZipEntry entry = (ZipEntry) en.nextElement();
@@ -154,7 +155,7 @@ public final class ZipRepository extends AbstractRepository {
                 ex.printStackTrace();
                 repositories = emptyRepositories;
                 if (resources == null) {
-                    resources = new HashMap();
+                    resources = new HashMap<String, Resource>();
                 } else {
                     resources.clear();
                 }

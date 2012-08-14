@@ -16,19 +16,19 @@
 
 package helma.framework.repository;
 
-import java.io.IOException;
 import java.io.File;
-import java.util.List;
+import java.io.IOException;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
 
 public class SingleFileRepository implements Repository {
 
     final Resource res;
     final Repository parent;
     final Repository[] repositories;
-    final LinkedList resources = new LinkedList();
-    final LinkedList allResources = new LinkedList();
+    final LinkedList<Resource> resources = new LinkedList<Resource>();
+    final LinkedList<Resource> allResources = new LinkedList<Resource>();
     final boolean isScriptFile;
 
     /**
@@ -162,7 +162,7 @@ public class SingleFileRepository implements Repository {
      * @return resources recursive
      * @throws java.io.IOException
      */
-    public List getAllResources() throws IOException {
+    public List<Resource> getAllResources() throws IOException {
         return resources;
     }
 
@@ -172,7 +172,7 @@ public class SingleFileRepository implements Repository {
      * @return direct resources
      * @throws java.io.IOException
      */
-    public Iterator getResources() throws IOException {
+    public Iterator<Resource> getResources() throws IOException {
         return resources.iterator();
     }
 
@@ -330,7 +330,7 @@ public class SingleFileRepository implements Repository {
          * @return resources recursive
          * @throws java.io.IOException
          */
-        public List getAllResources() throws IOException {
+        public List<Resource> getAllResources() throws IOException {
             return allResources;
         }
 
@@ -340,7 +340,7 @@ public class SingleFileRepository implements Repository {
          * @return direct resources
          * @throws java.io.IOException
          */
-        public Iterator getResources() throws IOException {
+        public Iterator<Resource> getResources() throws IOException {
             return allResources.iterator();
         }
 

@@ -864,13 +864,13 @@ public final class NodeManager {
      *  Loades subnodes via subnode relation. Only the ID index is loaded, the nodes are
      *  loaded later on demand.
      */
-    public List getNodeIDs(Node home, Relation rel) throws Exception {
+    public List<NodeHandle> getNodeIDs(Node home, Relation rel) throws Exception {
         DbMapping type = rel == null ? null : rel.otherType;
         if (type == null || !type.isRelational()) {
             // this should never be called for embedded nodes
             throw new RuntimeException("getNodeIDs called for non-relational node " + home);
         }
-        List retval = new ArrayList();
+        List<NodeHandle> retval = new ArrayList<NodeHandle>();
 
         // if we do a groupby query (creating an intermediate layer of groupby nodes),
         // retrieve the value of that field instead of the primary key
@@ -951,7 +951,7 @@ public final class NodeManager {
      *  actually loades all nodes in one go, which is better for small node collections.
      *  This method is used when xxx.loadmode=aggressive is specified.
      */
-    public List getNodes(Node home, Relation rel) throws Exception {
+    public List<NodeHandle> getNodes(Node home, Relation rel) throws Exception {
         // This does not apply for groupby nodes - use getNodeIDs instead
         assert rel.groupby == null;
 
@@ -961,7 +961,7 @@ public final class NodeManager {
                                        home);
         }
 
-        List retval = new ArrayList();
+        List<NodeHandle> retval = new ArrayList<NodeHandle>();
         DbMapping dbm = rel.otherType;
 
         Connection con = dbm.getConnection();
@@ -1227,14 +1227,14 @@ public final class NodeManager {
     /**
      *  Similar to getNodeIDs, but returns a List that contains the nodes property names instead of IDs
      */
-    public Vector getPropertyNames(Node home, Relation rel)
+    public Vector<String> getPropertyNames(Node home, Relation rel)
                             throws Exception {
         DbMapping type = rel == null ? null : rel.otherType;
         if (type == null || !type.isRelational()) {
             // this should never be called for embedded nodes
             throw new RuntimeException("getPropertyNames called for non-relational node " + home);
         }
-        Vector retval = new Vector();
+        Vector<String> retval = new Vector<String>();
 
         Connection con = rel.otherType.getConnection();
         // set connection to read-only mode

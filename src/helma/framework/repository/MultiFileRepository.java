@@ -65,8 +65,8 @@ public class MultiFileRepository extends FileRepository {
 
             File[] list = directory.listFiles();
 
-            ArrayList newRepositories = new ArrayList(list.length);
-            HashMap newResources = new HashMap(list.length);
+            ArrayList<Repository> newRepositories = new ArrayList<Repository>(list.length);
+            HashMap<String, Resource> newResources = new HashMap<String, Resource>(list.length);
 
             for (int i = 0; i < list.length; i++) {
                 // create both directories and zip files as top-level repositories,

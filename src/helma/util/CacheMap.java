@@ -60,8 +60,8 @@ public class CacheMap implements ObjectCache {
     private int eachCapacity;
 
     // The tables.
-    private Map oldTable;
-    private Map newTable;
+    private Map<Object, Object> oldTable;
+    private Map<Object, Object> newTable;
 
     // the application to output messages to
     private Application app = null;
@@ -103,7 +103,7 @@ public class CacheMap implements ObjectCache {
         eachCapacity = (int) (threshold / loadFactor) + 2;
         // create tables - we'll never insert into the initial oldTable,
         // it's a dummy that will be lost on the first cache rotation.
-        oldTable = new HashMap();
+        oldTable = new HashMap<Object, Object>();
         newTable = createTable(eachCapacity, loadFactor);
     }
 
@@ -327,8 +327,8 @@ public class CacheMap implements ObjectCache {
      * @param loadFactor the load factor
      * @return a new Map used for internal caching
      */
-    protected Map createTable(int capacity, float loadFactor) {
-        return new HashMap(capacity, loadFactor);
+    protected Map<Object, Object> createTable(int capacity, float loadFactor) {
+        return new HashMap<Object, Object>(capacity, loadFactor);
     }
 
 }

@@ -27,7 +27,11 @@ import java.io.*;
  */
 public class ScriptingException extends Exception {
 
-    String scriptStack = null;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = -7191341724784015678L;
+	String scriptStack = null;
 
     /**
      * Construct a ScriptingException given an error message and wrapped exception.
@@ -46,14 +50,7 @@ public class ScriptingException extends Exception {
      */
     private void setScriptStack(Throwable cause) {
         if (cause instanceof RhinoException) {
-            FilenameFilter filter = new FilenameFilter() {
-                public boolean accept(File dir, String name) {
-                    return name.endsWith(".js") ||
-                           name.endsWith(".hac") ||
-                           name.endsWith(".hsp");
-                }
-            };
-            scriptStack = ((RhinoException) cause).getScriptStackTrace(filter);
+            scriptStack = ((RhinoException) cause).getScriptStackTrace();
         }
     }
 

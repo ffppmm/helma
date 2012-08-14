@@ -16,11 +16,11 @@
 
 package helma.framework.repository;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Iterator;
-import java.io.IOException;
+import java.util.List;
 
 /**
  * Provides common methods and fields for the default implementations of the
@@ -42,7 +42,7 @@ public abstract class AbstractRepository implements Repository {
     /**
      * Holds direct resources
      */
-    HashMap resources;
+    HashMap<String, Resource> resources;
 
     /**
      * Cached name for faster access
@@ -117,7 +117,7 @@ public abstract class AbstractRepository implements Repository {
     /**
      * Get an iterator over the resources contained in this repository.
      */
-    public synchronized Iterator getResources() {
+    public synchronized Iterator<Resource> getResources() {
         update();
 
         return resources.values().iterator();
@@ -143,10 +143,10 @@ public abstract class AbstractRepository implements Repository {
      * Get a deep list of this repository's resources, including all resources
      * contained in sub-reposotories.
      */
-    public synchronized List getAllResources() throws IOException {
+    public synchronized List<Resource> getAllResources() throws IOException {
         update();
 
-        ArrayList allResources = new ArrayList();
+        ArrayList<Resource> allResources = new ArrayList<Resource>();
         allResources.addAll(resources.values());
 
         for (int i = 0; i < repositories.length; i++) {

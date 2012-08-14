@@ -40,7 +40,7 @@ public final class Node implements INode {
     private SubnodeList subnodes;
 
     // Named subnodes (properties) of this node
-    private Hashtable propMap;
+    private Hashtable<String, Property> propMap;
 
     protected long created;
     protected long lastmodified;
@@ -1491,13 +1491,13 @@ public final class Node implements INode {
         return getLoadedSubnodes();
     }
 
-    private Enumeration getLoadedSubnodes() {
+    private Enumeration<Object> getLoadedSubnodes() {
         final SubnodeList list = subnodes;
         if (list == null) {
             return new EmptyEnumeration();
         }
 
-        return new Enumeration() {
+        return new Enumeration<Object>() {
             int pos = 0;
 
             public boolean hasMoreElements() {
@@ -1535,7 +1535,7 @@ public final class Node implements INode {
     /**
      *  Get all properties of this node.
      */
-    public Enumeration properties() {
+    public Enumeration<String> properties() {
         if ((dbmap != null) && dbmap.isRelational()) {
             // return the properties defined in type.properties, if there are any
             return dbmap.getPropertyEnumeration();
@@ -1553,7 +1553,7 @@ public final class Node implements INode {
         }
 
         // sorry, no properties for this Node
-        return new EmptyEnumeration();
+        return (new Vector<String>()).elements();
     }
 
     /**
@@ -1795,7 +1795,7 @@ public final class Node implements INode {
         }
 
         if (propMap == null) {
-            propMap = new Hashtable();
+            propMap = new Hashtable<String, Property>();
         }
 
         propname = propname.trim();

@@ -16,8 +16,12 @@
 
 package helma.framework.repository;
 
-import java.net.*;
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
 
 public class FileResource extends AbstractResource {
 
