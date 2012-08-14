@@ -2571,4 +2571,8 @@ public final class Node implements INode {
     private String correctPropertyName(String propname) {
         return getApp().correctPropertyName(propname);
     }
+
+	public WrappedNodeManager getNodeManager() {
+		return nmgr;
+	}
 }

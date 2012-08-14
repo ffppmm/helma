@@ -20,7 +20,11 @@ import java.io.Serializable;
 
 public class UploadStatus implements Serializable {
 
-    long current = 0;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 8335579045959177198L;
+	long current = 0;
     long total = 0;
     int itemsRead = 0;
     String error = null;

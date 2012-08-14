@@ -18,22 +18,59 @@ package helma.framework.core;
 
 import helma.extensions.ConfigurationException;
 import helma.extensions.HelmaExtension;
-import helma.framework.*;
-import helma.framework.repository.*;
+import helma.framework.ApplicationStoppedException;
+import helma.framework.IPathElement;
+import helma.framework.RequestTrans;
+import helma.framework.ResponseTrans;
+import helma.framework.UploadStatus;
+import helma.framework.repository.FileRepository;
+import helma.framework.repository.FileResource;
+import helma.framework.repository.Repository;
+import helma.framework.repository.Resource;
+import helma.framework.repository.ResourceComparator;
 import helma.main.Server;
-import helma.objectmodel.*;
-import helma.objectmodel.db.*;
-import helma.util.*;
+import helma.objectmodel.DatabaseException;
+import helma.objectmodel.INode;
+import helma.objectmodel.TransientNode;
+import helma.objectmodel.db.DbMapping;
+import helma.objectmodel.db.DbSource;
+import helma.objectmodel.db.Node;
+import helma.objectmodel.db.NodeManager;
+import helma.objectmodel.db.WrappedNodeManager;
 import helma.scripting.ScriptingEngine;
 import helma.scripting.ScriptingException;
+import helma.util.CronJob;
+import helma.util.CryptResource;
+import helma.util.Logger;
+import helma.util.Logging;
+import helma.util.ResourceProperties;
+import helma.util.SystemMap;
+import helma.util.UrlEncoded;
 
-import java.io.*;
-import java.lang.reflect.*;
-import java.rmi.*;
-import java.util.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Method;
+import java.rmi.RemoteException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.EmptyStackException;
+import java.util.Enumeration;
+import java.util.HashSet;
+import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Stack;
+import java.util.StringTokenizer;
+import java.util.Vector;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import java.util.ArrayList;
 
 
 /**
@@ -47,7 +84,7 @@ public final class Application implements Runnable {
     private String name;
 
     // application sources
-    ArrayList repositories;
+    ArrayList<Repository> repositories;
 
     // properties and db-properties
     ResourceProperties props;
@@ -96,12 +133,12 @@ public final class Application implements Runnable {
     /**
      * Collections for evaluator thread pooling
      */
-    protected Stack freeThreads;
-    protected Vector allThreads;
+    protected Stack<RequestEvaluator> freeThreads;
+    protected Vector<RequestEvaluator> allThreads;
     boolean running = false;
     boolean debug;
     long starttime;
-    Hashtable dbSources;
+    Hashtable<String, DbSource> dbSources;
 
     // map of app modules reflected at app.modules
     Map modules;
@@ -113,7 +150,7 @@ public final class Application implements Runnable {
     ThreadGroup threadgroup;
 
     // threadlocal variable for the current RequestEvaluator
-    ThreadLocal currentEvaluator = new ThreadLocal();
+    ThreadLocal<RequestEvaluator> currentEvaluator = new ThreadLocal<RequestEvaluator>();
 
     // Map of requesttrans -> active requestevaluators
     Hashtable activeRequests;
@@ -165,15 +202,15 @@ public final class Application implements Runnable {
     private long lastPropertyRead = -1L;
 
     // the set of prototype/function pairs which are allowed to be called via XML-RPC
-    private HashSet xmlrpcAccess;
+    private HashSet<String> xmlrpcAccess;
 
     // the name under which this app serves XML-RPC requests. Defaults to the app name
     private String xmlrpcHandlerName;
 
     // the list of currently active cron jobs
-    Hashtable activeCronJobs = null;
+    Hashtable<String,CronRunner> activeCronJobs = null;
     // the list of custom cron jobs
-    Hashtable customCronJobs = null;
+    Hashtable<String,CronJob> customCronJobs = null;
 
     private ResourceComparator resourceComparator;
     private Resource currentCodeResource;
@@ -230,7 +267,7 @@ public final class Application implements Runnable {
         
         this.caseInsensitive = "true".equalsIgnoreCase(server.getAppsProperties(name).getProperty("caseInsensitive"));
 
-        this.repositories = new ArrayList();
+        this.repositories = new ArrayList<Repository>();
         this.repositories.addAll(Arrays.asList(repositories));
         resourceComparator = new ResourceComparator(this);
 
@@ -304,7 +341,7 @@ public final class Application implements Runnable {
 
         updateProperties();
 
-        dbSources = new Hashtable();
+        dbSources = new Hashtable<String, DbSource>();
         modules = new SystemMap();
     }
 
@@ -381,7 +418,7 @@ public final class Application implements Runnable {
             }
 
             if (Server.getServer() != null) {
-                Vector extensions = Server.getServer().getExtensions();
+                Vector<HelmaExtension> extensions = Server.getServer().getExtensions();
 
                 for (int i = 0; i < extensions.size(); i++) {
                     HelmaExtension ext = (HelmaExtension) extensions.get(i);
@@ -396,12 +433,12 @@ public final class Application implements Runnable {
             }
 
             // create and init evaluator/thread lists
-            freeThreads = new Stack();
-            allThreads = new Vector();
+            freeThreads = new Stack<RequestEvaluator>();
+            allThreads = new Vector<RequestEvaluator>();
 
             activeRequests = new Hashtable();
-            activeCronJobs = new Hashtable();
-            customCronJobs = new Hashtable();
+            activeCronJobs = new Hashtable<String, CronRunner>();
+            customCronJobs = new Hashtable<String, CronJob>();
 
             // create the skin manager
             skinmgr = new SkinManager(Application.this);
@@ -530,7 +567,7 @@ public final class Application implements Runnable {
 
         // stop evaluators
         if (allThreads != null) {
-            for (Enumeration e = allThreads.elements(); e.hasMoreElements();) {
+            for (Enumeration<RequestEvaluator> e = allThreads.elements(); e.hasMoreElements();) {
                 RequestEvaluator ev = (RequestEvaluator) e.nextElement();
                 ev.stopTransactor();
                 ev.shutdown();
@@ -550,7 +587,7 @@ public final class Application implements Runnable {
 
         // tell the extensions that we're stopped.
         if (Server.getServer() != null) {
-            Vector extensions = Server.getServer().getExtensions();
+            Vector<HelmaExtension> extensions = Server.getServer().getExtensions();
 
             for (int i = 0; i < extensions.size(); i++) {
                 HelmaExtension ext = (HelmaExtension) extensions.get(i);
@@ -778,7 +815,7 @@ public final class Application implements Runnable {
     }
 
     /**
-     *  Called to execute a method via XML-RPC, usally by helma.main.ApplicationManager
+     *  Called to execute a method via XML-RPC, usually by helma.main.ApplicationManager
      *  which acts as default handler/request dispatcher.
      */
     public Object executeXmlRpc(String method, Vector args)
@@ -1480,7 +1517,7 @@ public final class Application implements Runnable {
         // the nice effect of being purged when the underlying resource is updated,
         // so cache invalidation happens implicitely.
 
-        Class clazz = obj.getClass();
+        Class<? extends Object> clazz = obj.getClass();
         String className = clazz.getName();
         String protoName = classMapping.getProperty(className);
         // fast path: direct hit, either positive or negative
@@ -1662,7 +1699,7 @@ public final class Application implements Runnable {
 
         // when interrupted, shutdown running cron jobs
         synchronized (activeCronJobs) {
-            for (Iterator i = activeCronJobs.values().iterator(); i.hasNext();) {
+            for (Iterator<CronRunner> i = activeCronJobs.values().iterator(); i.hasNext();) {
                 ((CronRunner) i.next()).interrupt();
                 i.remove();
             }
@@ -1678,7 +1715,7 @@ public final class Application implements Runnable {
      */
     private void executeCronJobs() {
         // loop-local cron job data
-        List jobs = CronJob.parse(props.getSubProperties("cron."));
+        List<CronJob> jobs = CronJob.parse(props.getSubProperties("cron."));
         Date date = new Date();
 
         jobs.addAll(customCronJobs.values());

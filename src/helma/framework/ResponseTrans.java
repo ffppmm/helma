@@ -73,7 +73,7 @@ public final class ResponseTrans extends Writer implements Serializable {
     private String etag = null;
 
     // cookies
-    Map cookies;
+    Map<String, CookieTrans> cookies;
 
     // the buffer used to build the response
     private transient StringBuffer buffer = null;
@@ -82,13 +82,13 @@ public final class ResponseTrans extends Writer implements Serializable {
     private transient StringBuffer cachedBuffer = null;
 
     // these are used to implement the _as_string variants for Hop templates.
-    private transient Stack buffers;
+    private transient Stack<StringBuffer> buffers;
 
     // the path used to tell where to look for skins
     private transient Object[] skinpath = null;
 
     // hashmap for skin caching
-    private transient HashMap skincache;
+    private transient HashMap<Object, Skin> skincache;
 
     // buffer for debug messages - will be automatically appended to response
     private transient StringBuffer debugBuffer;
@@ -941,7 +941,7 @@ public final class ResponseTrans extends Writer implements Serializable {
      */
     public void cacheSkin(Object id, Skin skin) {
         if (skincache == null) {
-            skincache = new HashMap();
+            skincache = new HashMap<Object, Skin>();
         }
 
         skincache.put(id, skin);

@@ -17,6 +17,7 @@
 package helma.objectmodel.db;
 
 import helma.objectmodel.DatabaseException;
+import helma.objectmodel.INode;
 import helma.objectmodel.ITransaction;
 
 import java.sql.Connection;
@@ -36,13 +37,13 @@ public class Transactor {
     NodeManager nmgr;
 
     // List of nodes to be updated
-    private Map dirtyNodes;
+    private Map<Key, INode> dirtyNodes;
 
     // List of visited clean nodes
-    private Map cleanNodes;
+    private Map<Key, INode> cleanNodes;
 
     // List of nodes whose child index has been modified
-    private Set parentNodes;
+    private Set<INode> parentNodes;
 
     // Is a transaction in progress?
     private volatile boolean active;
@@ -52,10 +53,10 @@ public class Transactor {
     protected ITransaction txn;
 
     // Transactions for SQL data sources
-    private Map sqlConnections;
+    private Map<DbSource, Connection> sqlConnections;
 
     // Set of SQL connections that already have been verified
-    private Map testedConnections;
+    private Map<DbSource, Long> testedConnections;
 
     // when did the current transaction start?
     private long tstart;
@@ -66,7 +67,7 @@ public class Transactor {
     // the thread we're associated with
     private Thread thread;
 
-    private static final ThreadLocal txtor = new ThreadLocal();
+    private static final ThreadLocal<Transactor> txtor = new ThreadLocal<Transactor>();
 
     /**
      * Creates a new Transactor object.
@@ -77,12 +78,12 @@ public class Transactor {
         this.thread = Thread.currentThread();
         this.nmgr = nmgr;
 
-        dirtyNodes = new LinkedHashMap();
-        cleanNodes = new HashMap();
-        parentNodes = new HashSet();
+        dirtyNodes = new LinkedHashMap<Key, INode>();
+        cleanNodes = new HashMap<Key, INode>();
+        parentNodes = new HashSet<INode>();
 
-        sqlConnections = new HashMap();
-        testedConnections = new HashMap();
+        sqlConnections = new HashMap<DbSource, Connection>();
+        testedConnections = new HashMap<DbSource, Long>();
         active = false;
         killed = false;
     }
@@ -308,25 +309,25 @@ public class Transactor {
         int updated = 0;
         int deleted = 0;
 
-        ArrayList insertedNodes = null;
-        ArrayList updatedNodes = null;
-        ArrayList deletedNodes = null;
-        ArrayList modifiedParentNodes = null;
+        ArrayList<Node> insertedNodes = null;
+        ArrayList<Node> updatedNodes = null;
+        ArrayList<Node> deletedNodes = null;
+        ArrayList<Node> modifiedParentNodes = null;
         // if nodemanager has listeners collect dirty nodes
         boolean hasListeners = nmgr.hasNodeChangeListeners();
 
         if (hasListeners) {
-            insertedNodes = new ArrayList();
-            updatedNodes = new ArrayList();
-            deletedNodes = new ArrayList();
-            modifiedParentNodes = new ArrayList();
+            insertedNodes = new ArrayList<Node>();
+            updatedNodes = new ArrayList<Node>();
+            deletedNodes = new ArrayList<Node>();
+            modifiedParentNodes = new ArrayList<Node>();
         }
 
         if (!dirtyNodes.isEmpty()) {
             Object[] dirty = dirtyNodes.values().toArray();
 
             // the set to collect DbMappings to be marked as changed
-            HashSet dirtyDbMappings = new HashSet();
+            HashSet<DbMapping> dirtyDbMappings = new HashSet<DbMapping>();
             Log eventLog = nmgr.app.getEventLog();
 
             for (int i = 0; i < dirty.length; i++) {
@@ -394,7 +395,7 @@ public class Transactor {
 
             // set last data change times in db-mappings
             // long now = System.currentTimeMillis();
-            for (Iterator i = dirtyDbMappings.iterator(); i.hasNext(); ) {
+            for (Iterator<DbMapping> i = dirtyDbMappings.iterator(); i.hasNext(); ) {
                 DbMapping dbm = (DbMapping) i.next();
                 if (dbm != null) {
                     dbm.setLastDataChange();
@@ -406,7 +407,7 @@ public class Transactor {
 
         if (!parentNodes.isEmpty()) {
             // set last subnode change times in parent nodes
-            for (Iterator i = parentNodes.iterator(); i.hasNext(); ) {
+            for (Iterator<INode> i = parentNodes.iterator(); i.hasNext(); ) {
                 Node node = (Node) i.next();
                 node.markSubnodesChanged();
                 if (hasListeners) {
@@ -459,10 +460,8 @@ public class Transactor {
             node.clearWriteLock();
         }
 
-        long now = System.currentTimeMillis();
-
         // set last subnode change times in parent nodes
-        for (Iterator i = parentNodes.iterator(); i.hasNext(); ) {
+        for (Iterator<INode> i = parentNodes.iterator(); i.hasNext(); ) {
             Node node = (Node) i.next();
             node.markSubnodesChanged();
         }
@@ -527,7 +526,7 @@ public class Transactor {
      */
     public void closeConnections() {
         if (sqlConnections != null) {
-            for (Iterator i = sqlConnections.values().iterator(); i.hasNext();) {
+            for (Iterator<Connection> i = sqlConnections.values().iterator(); i.hasNext();) {
                 try {
                     Connection con = (Connection) i.next();
 

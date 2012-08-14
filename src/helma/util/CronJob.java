@@ -182,7 +182,7 @@ public class CronJob {
   }
 
 
-  public static List parse(Properties props) {
+  public static List<CronJob> parse(Properties props) {
       Hashtable jobs = new Hashtable ();
       Enumeration e = props.keys ();
       while (e.hasMoreElements ()) {

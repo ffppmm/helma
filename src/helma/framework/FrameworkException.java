@@ -23,6 +23,11 @@ package helma.framework;
  */
 public class FrameworkException extends RuntimeException {
     /**
+	 * 
+	 */
+	private static final long serialVersionUID = -8477797850472128617L;
+
+	/**
      * Creates a new FrameworkException object.
      *
      * @param msg ...

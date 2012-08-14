@@ -24,7 +24,11 @@ import java.util.Date;
  * A property implementation for Nodes stored inside a database.
  */
 public final class TransientProperty implements IProperty, Serializable {
-    protected String propname;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 3128899239601365229L;
+	protected String propname;
     protected TransientNode node;
     public String svalue;
     public boolean bvalue;

@@ -22,7 +22,11 @@ import java.io.*;
  * This is passed to NodeListeners when a node is modified.
  */
 public class NodeEvent implements Serializable {
-    public static final int CONTENT_CHANGED = 0;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 4322426080131107600L;
+	public static final int CONTENT_CHANGED = 0;
     public static final int PROPERTIES_CHANGED = 1;
     public static final int NODE_REMOVED = 2;
     public static final int NODE_RENAMED = 3;

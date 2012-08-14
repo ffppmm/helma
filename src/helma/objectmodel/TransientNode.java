@@ -18,12 +18,12 @@ package helma.objectmodel;
 
 import helma.framework.IPathElement;
 import helma.framework.core.Application;
-import helma.framework.core.RequestEvaluator;
 import helma.objectmodel.db.DbMapping;
-import helma.objectmodel.db.Relation;
 import helma.objectmodel.db.Node;
-import helma.util.*;
-import java.io.*;
+import helma.objectmodel.db.Relation;
+import helma.objectmodel.db.WrappedNodeManager;
+
+import java.io.Serializable;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.Hashtable;
@@ -36,10 +36,14 @@ import java.util.Vector;
  * object, class helma.objectmodel.db.Node has to be used.
  */
 public class TransientNode implements INode, Serializable {
-    private static long idgen = 0;
-    protected Hashtable propMap;
-    protected Hashtable nodeMap;
-    protected Vector nodes;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 6761318174723519138L;
+	private static long idgen = 0;
+    protected Hashtable<String, IProperty> propMap;
+    protected Hashtable<String, INode> nodeMap;
+    protected Vector<INode> nodes;
     protected TransientNode parent;
     transient String prototype;
     protected long created;
@@ -61,10 +65,6 @@ public class TransientNode implements INode, Serializable {
         name = id;
         created = lastmodified = System.currentTimeMillis();
         this.app=app;
-    }
-    
-    private TransientNode() {
-        app=null;
     }
 
     /**
@@ -203,11 +203,11 @@ public class TransientNode implements INode, Serializable {
         }
 
         if (nodeMap == null) {
-            nodeMap = new Hashtable();
+            nodeMap = new Hashtable<String, INode>();
         }
 
         if (nodes == null) {
-            nodes = new Vector();
+            nodes = new Vector<INode>();
         }
 
         nodeMap.put(elem.getID(), elem);
@@ -316,21 +316,19 @@ public class TransientNode implements INode, Serializable {
         // IServer.getLogger().log ("removing: "+ node);
         releaseNode(node);
 
-        TransientNode n = (TransientNode) node;
-
-        if ((n.getParent() == this) && n.anonymous) {
+        if ((node.getParent() == this) && node.isAnonymous()) {
 
             // remove all subnodes, giving them a chance to destroy themselves.
-            Vector v = new Vector(); // removeElement modifies the Vector we are enumerating, so we are extra careful.
+            Vector<INode> v = new Vector<INode>(); // removeElement modifies the Vector we are enumerating, so we are extra careful.
 
-            for (Enumeration e3 = n.getSubnodes(); e3.hasMoreElements();) {
+            for (Enumeration<INode> e3 = node.getSubnodes(); e3.hasMoreElements();) {
                 v.addElement(e3.nextElement());
             }
 
             int m = v.size();
 
             for (int i = 0; i < m; i++) {
-                n.removeNode((TransientNode) v.elementAt(i));
+                node.removeNode((TransientNode) v.elementAt(i));
             }
         }
     }
@@ -364,20 +362,20 @@ public class TransientNode implements INode, Serializable {
      *
      * @return ...
      */
-    public Enumeration getSubnodes() {
-        return (nodes == null) ? new Vector().elements() : nodes.elements();
+    public Enumeration<INode> getSubnodes() {
+        return (nodes == null) ? new Vector<INode>().elements() : nodes.elements();
     }
 
     /**
      *  property-related
      */
-    public Enumeration properties() {
-        return (propMap == null) ? new EmptyEnumeration() : propMap.keys();
+    public Enumeration<String> properties() {
+        return (propMap == null) ? new Vector<String>().elements() : propMap.keys();
     }
 
-    private TransientProperty getProperty(String propname) {
-        TransientProperty prop = (propMap == null) ? null 
-                : (TransientProperty) propMap.get(correctPropertyName(propname));
+    private IProperty getProperty(String propname) {
+    	IProperty prop = (propMap == null) ? null 
+                : propMap.get(correctPropertyName(propname));
 
         // check if we have to create a virtual node
         if ((prop == null) && (dbmap != null)) {
@@ -391,14 +389,14 @@ public class TransientNode implements INode, Serializable {
         return prop;
     }
 
-    private TransientProperty makeVirtualNode(String propname, Relation rel) {
+    private IProperty makeVirtualNode(String propname, Relation rel) {
         INode node = new Node(rel.getPropName(), rel.getPrototype(),
                                                    dbmap.getWrappedNodeManager());
 
         node.setDbMapping(rel.getVirtualMapping());
         setNode(propname, node);
 
-        return (TransientProperty) propMap.get(correctPropertyName(propname));
+        return propMap.get(correctPropertyName(propname));
     }
 
     public IProperty get(String propname) {
@@ -412,7 +410,7 @@ public class TransientNode implements INode, Serializable {
     }
 
     public String getString(String propname) {
-        TransientProperty prop = getProperty(propname);
+    	IProperty prop = getProperty(propname);
 
         try {
             return prop.getStringValue();
@@ -423,7 +421,7 @@ public class TransientNode implements INode, Serializable {
     }
 
     public long getInteger(String propname) {
-        TransientProperty prop = getProperty(propname);
+    	IProperty prop = getProperty(propname);
 
         try {
             return prop.getIntegerValue();
@@ -434,7 +432,7 @@ public class TransientNode implements INode, Serializable {
     }
 
     public double getFloat(String propname) {
-        TransientProperty prop = getProperty(propname);
+    	IProperty prop = getProperty(propname);
 
         try {
             return prop.getFloatValue();
@@ -445,7 +443,7 @@ public class TransientNode implements INode, Serializable {
     }
 
     public Date getDate(String propname) {
-        TransientProperty prop = getProperty(propname);
+    	IProperty prop = getProperty(propname);
 
         try {
             return prop.getDateValue();
@@ -456,7 +454,7 @@ public class TransientNode implements INode, Serializable {
     }
 
     public boolean getBoolean(String propname) {
-        TransientProperty prop = getProperty(propname);
+    	IProperty prop = getProperty(propname);
 
         try {
             return prop.getBooleanValue();
@@ -467,7 +465,7 @@ public class TransientNode implements INode, Serializable {
     }
 
     public INode getNode(String propname) {
-        TransientProperty prop = getProperty(propname);
+    	IProperty prop = getProperty(propname);
 
         try {
             return prop.getNodeValue();
@@ -478,7 +476,7 @@ public class TransientNode implements INode, Serializable {
     }
 
     public Object getJavaObject(String propname) {
-        TransientProperty prop = getProperty(propname);
+    	IProperty prop = getProperty(propname);
 
         try {
             return prop.getJavaObjectValue();
@@ -489,14 +487,14 @@ public class TransientNode implements INode, Serializable {
     }
 
     // create a property if it doesn't exist for this name
-    private TransientProperty initProperty(String propname) {
+    private IProperty initProperty(String propname) {
         if (propMap == null) {
-            propMap = new Hashtable();
+            propMap = new Hashtable<String, IProperty>();
         }
 
         propname = propname.trim();
         String cpn = correctPropertyName(propname);
-        TransientProperty prop = (TransientProperty) propMap.get(cpn);
+        IProperty prop = propMap.get(cpn);
 
         if (prop == null) {
             prop = new TransientProperty(propname, this);
@@ -507,43 +505,43 @@ public class TransientNode implements INode, Serializable {
     }
 
     public void setString(String propname, String value) {
-        TransientProperty prop = initProperty(propname);
+    	IProperty prop = initProperty(propname);
         prop.setStringValue(value);
         lastmodified = System.currentTimeMillis();
     }
 
     public void setInteger(String propname, long value) {
-        TransientProperty prop = initProperty(propname);
+    	IProperty prop = initProperty(propname);
         prop.setIntegerValue(value);
         lastmodified = System.currentTimeMillis();
     }
 
     public void setFloat(String propname, double value) {
-        TransientProperty prop = initProperty(propname);
+    	IProperty prop = initProperty(propname);
         prop.setFloatValue(value);
         lastmodified = System.currentTimeMillis();
     }
 
     public void setBoolean(String propname, boolean value) {
-        TransientProperty prop = initProperty(propname);
+    	IProperty prop = initProperty(propname);
         prop.setBooleanValue(value);
         lastmodified = System.currentTimeMillis();
     }
 
     public void setDate(String propname, Date value) {
-        TransientProperty prop = initProperty(propname);
+    	IProperty prop = initProperty(propname);
         prop.setDateValue(value);
         lastmodified = System.currentTimeMillis();
     }
 
     public void setJavaObject(String propname, Object value) {
-        TransientProperty prop = initProperty(propname);
+    	IProperty prop = initProperty(propname);
         prop.setJavaObjectValue(value);
         lastmodified = System.currentTimeMillis();
     }
 
     public void setNode(String propname, INode value) {
-        TransientProperty prop = initProperty(propname);
+    	IProperty prop = initProperty(propname);
         prop.setNodeValue(value);
 
         // check if the main identity of this node is as a named property
@@ -603,4 +601,8 @@ public class TransientNode implements INode, Serializable {
     private String correctPropertyName(String propname) {
         return app.correctPropertyName(propname);
     }
+
+	public WrappedNodeManager getNodeManager() {
+		return null;
+	}
 }

@@ -23,6 +23,11 @@ package helma.objectmodel;
  */
 public class ObjectNotFoundException extends Exception {
     /**
+	 * 
+	 */
+	private static final long serialVersionUID = -5368941052804232094L;
+
+	/**
      * Creates a new ObjectNotFoundException object.
      *
      * @param msg ...

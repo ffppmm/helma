@@ -31,10 +31,22 @@ import java.util.Date;
  * A property implementation for Nodes stored inside a database. Basically
  * the same as for transient nodes, with a few hooks added.
  */
-public final class Property implements IProperty, Serializable, Cloneable, Comparable {
+public final class Property implements IProperty, Serializable, Cloneable, Comparable<Object> {
     static final long serialVersionUID = -1022221688349192379L;
+    
+    /**
+     * the name of the property
+     */
     private String propname;
-    private Node node;
+    
+    /**
+     * node value
+     */
+    private INode node;
+    
+    /**
+     * java object value
+     */
     private Object value;
     private int type;
     transient boolean dirty;
@@ -471,7 +483,7 @@ public final class Property implements IProperty, Serializable, Cloneable, Compa
         if ((type == NODE) && (value != null)) {
             NodeHandle nhandle = (NodeHandle) value;
 
-            return nhandle.getNode(node.nmgr);
+            return nhandle.getNode(node.getNodeManager());
         }
 
         return null;
@@ -544,4 +556,15 @@ public final class Property implements IProperty, Serializable, Cloneable, Compa
         Property p = (Property) obj;
         return value == null ? p.value == null : value.equals(p.value);
     }
+
+	public void setNodeValue(INode value) {
+        if (type == JAVAOBJECT) {
+            this.value = null;
+        }
+
+        type = NODE;
+        this.node = value;
+		
+	}
+
 }

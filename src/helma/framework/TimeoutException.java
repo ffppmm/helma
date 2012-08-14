@@ -23,6 +23,11 @@ package helma.framework;
  */
 public class TimeoutException extends RuntimeException {
     /**
+	 * 
+	 */
+	private static final long serialVersionUID = 3853135482278393735L;
+
+	/**
      * Creates a new TimeoutException object.
      */
     public TimeoutException() {

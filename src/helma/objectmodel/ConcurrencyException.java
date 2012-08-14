@@ -23,6 +23,11 @@ package helma.objectmodel;
  */
 public class ConcurrencyException extends Error {
     /**
+	 * 
+	 */
+	private static final long serialVersionUID = 4031542073544406467L;
+
+	/**
      * Creates a new ConcurrencyException object.
      *
      * @param msg ...

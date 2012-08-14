@@ -99,4 +99,18 @@ public interface IProperty {
      * @return ...
      */
     public Object getJavaObjectValue();
+
+	public void setStringValue(String value);
+
+	public void setIntegerValue(long value);
+
+	public void setFloatValue(double value);
+
+	public void setBooleanValue(boolean value);
+
+	public void setDateValue(Date value);
+
+	public void setJavaObjectValue(Object value);
+
+	public void setNodeValue(INode value);
 }

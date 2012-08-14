@@ -18,7 +18,10 @@ package helma.objectmodel;
 
 import helma.framework.IPathElement;
 import helma.objectmodel.db.DbMapping;
-import java.util.*;
+import helma.objectmodel.db.WrappedNodeManager;
+
+import java.util.Date;
+import java.util.Enumeration;
 
 /**
  * Interface that all Nodes implement. Currently, there are two implementations:
@@ -146,7 +149,7 @@ public interface INode extends INodeState, IPathElement {
     /**
      * Get an enumeration of this node's unnamed child nodes
      */
-    public Enumeration<Object> getSubnodes();
+    public Enumeration<INode> getSubnodes();
 
     /**
      * Get a named child node with the given name or id.
@@ -257,4 +260,9 @@ public interface INode extends INodeState, IPathElement {
      * Unset the property with the given name..
      */
     public void unset(String name);
+    
+    /**
+     * Return the node manager of the node
+     */
+    public WrappedNodeManager getNodeManager();
 }
