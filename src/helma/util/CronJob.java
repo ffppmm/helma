@@ -85,18 +85,19 @@ import java.util.StringTokenizer;
 
 public class CronJob {
 
-   private static HashSet all = new HashSet (2);
-   private static String ALL_VALUE = "*";
+   private static HashSet<Integer> all = new HashSet<Integer> (2);
+   // if someone wants to start a cron job in this year we have a Problem
+   private static Integer ALL_VALUE = new Integer(666666666);
    static {
-      all.add (ALL_VALUE);
+      all.add(ALL_VALUE);
    }
 
-   private HashSet year;
-   private HashSet month;
-   private HashSet day;
-   private HashSet weekday;
-   private HashSet hour;
-   private HashSet minute;
+   private HashSet<Integer> year;
+   private HashSet<Integer> month;
+   private HashSet<Integer> day;
+   private HashSet<Integer> weekday;
+   private HashSet<Integer> hour;
+   private HashSet<Integer> minute;
 
    private String name     = null;
    private String function = null;
@@ -206,7 +207,7 @@ public class CronJob {
              if (jobName == null || jobName.equals(""))
                 continue;
             String jobSpec = st.nextToken ();
-            if (jobSpec==null || jobSpec.equals("")) // might happen with cron.testname. = XXX
+            if (jobSpec==null || jobSpec.equals("")) // might happen with cron.testname. = someCronFunction
                continue;
             CronJob job = (CronJob) jobs.get (jobName);
             if (job==null) {
@@ -241,13 +242,13 @@ public class CronJob {
               it.remove();
           }
       }
-      List jobVec = new ArrayList (jobs.values());
+      ArrayList<CronJob> jobVec = new ArrayList<CronJob> (jobs.values());
       return sort (jobVec);
    }
 
-    public static List sort (List list) {
-      Collections.sort (list, new Comparator() {
-        public int compare (Object o1, Object o2) {
+    public static List<CronJob> sort (List<CronJob> list) {
+      Collections.sort (list, new Comparator<CronJob>() {
+        public int compare (CronJob o1, CronJob o2) {
             CronJob cron1 = (CronJob) o1;
             CronJob cron2 = (CronJob) o2;
             if (cron1.getTimeout () > cron2.getTimeout ())
@@ -257,8 +258,9 @@ public class CronJob {
             else
                 return 0;
         }
-        public boolean equals (Object o1, Object o2) {
-            if (o1!=null) {
+        
+        public boolean equals (CronJob o1, CronJob o2) {
+            if (o1 != null) {
                 return o1.equals (o2);
             } else {
                 return false;
@@ -445,12 +447,12 @@ public class CronJob {
    */
    public CronJob (String name) {
       this.name = name;
-      year = new HashSet (all);
-      month = new HashSet (all);
-      day = new HashSet (all);
-      weekday = new HashSet (all);
-      hour = new HashSet (all);
-      minute = new HashSet (all);
+      year = new HashSet<Integer>(all);
+      month = new HashSet<Integer>(all);
+      day = new HashSet<Integer>(all);
+      weekday = new HashSet<Integer>(all);
+      hour = new HashSet<Integer>(all);
+      minute = new HashSet<Integer>(all);
    }
 
   /**
