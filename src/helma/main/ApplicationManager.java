@@ -372,7 +372,7 @@ public class ApplicationManager implements XmlRpcHandler {
             ignoreDirs = conf.getProperty("ignore");
 
             // read and configure app repositories
-            ArrayList repositoryList = new ArrayList();
+            ArrayList<Repository> repositoryList = new ArrayList<Repository>();
             Class[] parameters = { String.class };
             for (int i = 0; true; i++) {
                 String repositoryArgs = conf.getProperty("repository." + i);

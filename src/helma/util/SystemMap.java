@@ -26,10 +26,15 @@ import java.util.Map;
  *  wrap maps as native objects within a scripting engine rather
  *  than exposing them through Java reflection. 
  */
-public class SystemMap extends HashMap {
+public class SystemMap extends HashMap<String, Object> {
 
 
     /**
+	 * 
+	 */
+	private static final long serialVersionUID = 2926260006469380544L;
+
+	/**
      *  Construct an empty SystemMap.
      */
     public SystemMap() {
@@ -46,7 +51,7 @@ public class SystemMap extends HashMap {
     /**
      *  Construct a SystemMap with the contents of Map map.
      */
-    public SystemMap(Map map) {
+    public SystemMap(Map<String, Object> map) {
         super(map);
     }
 
@@ -59,10 +64,10 @@ public class SystemMap extends HashMap {
         StringBuffer buf = new StringBuffer();
         buf.append("{");
 
-        Iterator i = entrySet().iterator();
+        Iterator<Map.Entry<String, Object>> i = entrySet().iterator();
             boolean hasNext = i.hasNext();
             while (hasNext) {
-            Map.Entry e = (Map.Entry) (i.next());
+            Map.Entry<String, Object> e = i.next();
                 Object key = e.getKey();
                 Object value = e.getValue();
                 append(buf, key);

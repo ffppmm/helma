@@ -38,6 +38,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 /**
  * This represents a Helma skin, i.e. a template created from containing Macro tags
@@ -370,7 +371,7 @@ public final class Skin {
         // default render parameters - may be overridden if macro changes
         // param.prefix/suffix/default
         StandardParams standardParams = new StandardParams();
-        Map namedParams = null;
+        Map<String, Object> namedParams = null;
         List positionalParams = null;
         // filters defined via <% foo | bar %>
         Macro filterChain;
@@ -889,8 +890,8 @@ public final class Skin {
                 arguments[offset] = new SystemMap(4);
             } else if (hasNestedMacros) {
                 SystemMap map = new SystemMap((int) (namedParams.size() * 1.5));
-                for (Iterator it = namedParams.entrySet().iterator(); it.hasNext(); ) {
-                    Map.Entry entry = (Map.Entry) it.next();
+                for (Iterator<Map.Entry<String, Object>> it = namedParams.entrySet().iterator(); it.hasNext(); ) {
+                    Map.Entry<String, Object> entry = it.next();
                     Object value = entry.getValue();
                     if (!(value instanceof String))
                         value = processParameter(value, cx);

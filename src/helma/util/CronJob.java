@@ -196,8 +196,8 @@ public class CronJob {
 
 
   public static List<CronJob> parse(Properties props) {
-      Hashtable jobs = new Hashtable ();
-      Enumeration e = props.keys ();
+      Hashtable<String, CronJob> jobs = new Hashtable<String, CronJob> ();
+      Enumeration<Object> e = props.keys ();
       while (e.hasMoreElements ()) {
          String key = (String) e.nextElement ();
          try {
@@ -234,7 +234,7 @@ public class CronJob {
          } catch (NoSuchElementException nsee) {
          }
       }
-      Iterator it = jobs.values().iterator();
+      Iterator<CronJob> it = jobs.values().iterator();
       while (it.hasNext()) {
           CronJob job = (CronJob) it.next();
           if (job.getFunction() == null) {

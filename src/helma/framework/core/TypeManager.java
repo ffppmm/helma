@@ -45,7 +45,7 @@ public final class TypeManager {
 
     private Application app;
     // map of prototypes
-    private HashMap prototypes;
+    private HashMap<String, Prototype> prototypes;
 
     // set of Java archives
     private HashSet jarfiles;
@@ -281,7 +281,7 @@ public final class TypeManager {
      *
      * @return a collection containing the prototypes
      */
-    public synchronized Collection getPrototypes() {
+    public synchronized Collection<Prototype> getPrototypes() {
         return Collections.unmodifiableCollection(prototypes.values());
     }
 

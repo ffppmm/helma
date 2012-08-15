@@ -472,12 +472,12 @@ public final class RhinoCore implements ScopeProvider {
      * @param protoName the name of the prototype
      * @return an array containing all compiled properties of the given prototype
      */
-    public Map getPrototypeProperties(String protoName) {
+    public SystemMap getPrototypeProperties(String protoName) {
         TypeInfo type = getPrototypeInfo(protoName);
         SystemMap map = new SystemMap();
-        Iterator it = type.compiledProperties.iterator();
+        Iterator<String> it = type.compiledProperties.iterator();
         while(it.hasNext()) {
-            Object key = it.next();
+            String key = it.next();
             if (key instanceof String)
                 map.put(key, type.objProto.get((String) key, type.objProto));
         }
@@ -970,10 +970,10 @@ public final class RhinoCore implements ScopeProvider {
 
         // a set of property keys that were in script compilation.
         // Used to decide which properties should be removed if not renewed.
-        Set compiledProperties;
+        Set<String> compiledProperties;
 
         // a set of property keys that were present before first script compilation
-        final Set predefinedProperties;
+        final Set<String> predefinedProperties;
 
         String error;
 
