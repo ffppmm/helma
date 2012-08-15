@@ -15,6 +15,6 @@ STARTING BUILD
 
 The syntax to build an create a target dir with all needed files:
 
-mvn clear package dependency:copy-dependencies
+mvn clean package dependency:copy-dependencies
 
 Maven will do all other things, like copying required libraries. Thats it.
