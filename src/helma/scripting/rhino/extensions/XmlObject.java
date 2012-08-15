@@ -16,10 +16,13 @@
 
 package helma.scripting.rhino.extensions;
 
-import helma.scripting.rhino.*;
 import helma.objectmodel.INode;
 import helma.objectmodel.db.Node;
-import helma.objectmodel.dom.*;
+import helma.objectmodel.dom.XmlConverter;
+import helma.objectmodel.dom.XmlReader;
+import helma.objectmodel.dom.XmlWriter;
+import helma.scripting.rhino.RhinoCore;
+
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;

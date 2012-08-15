@@ -16,7 +16,9 @@
 
 package helma.util;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.Stack;
 
 /**
  * This is a utility class to encode special characters and do formatting

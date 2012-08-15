@@ -16,9 +16,10 @@
 
 package helma.util;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
+import java.io.IOException;
+import java.net.InetAddress;
+import java.util.StringTokenizer;
+import java.util.Vector;
 
 /**
  * A class for paranoid servers to filter IP addresses.

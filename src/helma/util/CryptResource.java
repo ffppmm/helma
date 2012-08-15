@@ -16,12 +16,12 @@
 
 package helma.util;
 
+import helma.framework.repository.Resource;
+
 import java.io.BufferedReader;
 import java.io.StringReader;
 import java.util.Properties;
 import java.util.StringTokenizer;
-import helma.framework.repository.Resource;
-import helma.framework.repository.Resource;
 
 /**
  *  This file authenticates against a passwd source

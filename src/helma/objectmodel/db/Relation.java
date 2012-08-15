@@ -22,10 +22,10 @@ import helma.objectmodel.IProperty;
 import helma.util.StringUtils;
 
 import java.sql.SQLException;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
-import java.util.Enumeration;
 import java.util.Vector;
 
 /**

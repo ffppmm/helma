@@ -17,21 +17,22 @@
 package helma.util;
 
 import java.io.PrintStream;
-import java.util.*;
+import java.util.Hashtable;
+import java.util.Vector;
 
 /**
  * Utility class for timing a series of events
  */
 public class Timer {
-    private Vector timeline;
-    private Hashtable events;
+    private Vector<String> timeline;
+    private Hashtable<String, Event> events;
 
     /**
      * Creates a new Timer object.
      */
     public Timer() {
-        timeline = new Vector();
-        events = new Hashtable();
+        timeline = new Vector<String>();
+        events = new Hashtable<String, Event>();
     }
 
     /**

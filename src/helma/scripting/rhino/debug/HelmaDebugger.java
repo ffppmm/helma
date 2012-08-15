@@ -16,21 +16,36 @@
 
 package helma.scripting.rhino.debug;
 
-import org.mozilla.javascript.tools.debugger.SwingGui;
-import org.mozilla.javascript.tools.debugger.Dim;
-
-import javax.swing.tree.*;
-import javax.swing.*;
-import javax.swing.event.TreeSelectionListener;
-import javax.swing.event.TreeSelectionEvent;
-import java.util.*;
-import java.awt.event.KeyEvent;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.KeyAdapter;
-import java.awt.*;
-
 import helma.util.StringUtils;
+
+import java.awt.BorderLayout;
+import java.awt.Component;
+import java.awt.Container;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Vector;
+
+import javax.swing.JList;
+import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
+import javax.swing.JTree;
+import javax.swing.SwingUtilities;
+import javax.swing.event.TreeSelectionEvent;
+import javax.swing.event.TreeSelectionListener;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.MutableTreeNode;
+import javax.swing.tree.TreePath;
+import javax.swing.tree.TreeSelectionModel;
+
+import org.mozilla.javascript.tools.debugger.Dim;
+import org.mozilla.javascript.tools.debugger.SwingGui;
 
 
 public class HelmaDebugger extends Dim implements TreeSelectionListener {

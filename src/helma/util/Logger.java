@@ -16,11 +16,17 @@
 
 package helma.util;
 
-import org.apache.commons.logging.Log;
+import java.io.PrintStream;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Collections;
+import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
 
-import java.io.*;
-import java.text.*;
-import java.util.*;
+import org.apache.commons.logging.Log;
 
 /**
  * A simple logger that writes to a PrintStream such as System.out.

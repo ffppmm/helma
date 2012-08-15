@@ -16,13 +16,13 @@
 
 package helma.scripting;
 
-import helma.framework.repository.Resource;
 import helma.framework.core.Application;
 import helma.framework.core.RequestEvaluator;
+import helma.framework.repository.Resource;
 
-import java.io.OutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.Map;
 
 /**

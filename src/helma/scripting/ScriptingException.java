@@ -16,9 +16,11 @@
 
 package helma.scripting;
 
-import org.mozilla.javascript.RhinoException;
+import java.io.PrintStream;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 
-import java.io.*;
+import org.mozilla.javascript.RhinoException;
 
 /**
  * The base class for wrapped exceptions thrown by invocation of the scripting engine.

@@ -21,9 +21,15 @@ import helma.objectmodel.INode;
 import helma.objectmodel.ITransaction;
 
 import java.sql.Connection;
-import java.sql.Statement;
 import java.sql.SQLException;
-import java.util.*;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 

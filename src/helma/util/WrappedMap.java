@@ -16,9 +16,9 @@
 
 package helma.util;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
-import java.util.Collection;
 
 /**
  *  A Map that wraps another map. We use this class to be able to

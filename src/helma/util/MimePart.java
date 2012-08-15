@@ -16,11 +16,18 @@
 
 package helma.util;
 
-import org.apache.commons.fileupload.FileItem;
-
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
 import java.util.Date;
 import java.util.StringTokenizer;
+
+import org.apache.commons.fileupload.FileItem;
 
 /**
  * This represents a MIME part of a HTTP file upload

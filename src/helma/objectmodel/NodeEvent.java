@@ -16,7 +16,7 @@
 
 package helma.objectmodel;
 
-import java.io.*;
+import java.io.Serializable;
 
 /**
  * This is passed to NodeListeners when a node is modified.

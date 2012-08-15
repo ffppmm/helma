@@ -16,12 +16,19 @@
 
 package helma.util;
 
+import helma.framework.core.Application;
+import helma.framework.repository.Repository;
+import helma.framework.repository.Resource;
+
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.*;
-import helma.framework.core.*;
-import helma.framework.repository.Resource;
-import helma.framework.repository.Repository;
+import java.util.Enumeration;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
+import java.util.TreeSet;
 
 /**
  *  A property dictionary that is updated from property resources

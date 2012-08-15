@@ -21,12 +21,22 @@
 package helma.scripting.rhino.extensions;
 
 import helma.objectmodel.db.DbSource;
-import java.util.Enumeration;
-import java.util.Vector;
+
 import java.io.IOException;
 import java.io.Reader;
 import java.math.BigDecimal;
-import java.sql.*;
+import java.sql.Clob;
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.Driver;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.sql.Types;
+import java.util.Enumeration;
+import java.util.Vector;
 
 
 /**

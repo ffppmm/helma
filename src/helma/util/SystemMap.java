@@ -17,7 +17,9 @@
 package helma.util;
 
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
 /**
  * Map class used internally by Helma. We use this class to be able to

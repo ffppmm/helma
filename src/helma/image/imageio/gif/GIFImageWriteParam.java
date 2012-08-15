@@ -20,8 +20,10 @@
 
 package helma.image.imageio.gif;
 
-import java.util.*;
-import javax.imageio.*;
+import java.util.Locale;
+import java.util.Properties;
+
+import javax.imageio.ImageWriteParam;
 
 public class GIFImageWriteParam extends ImageWriteParam {
 

@@ -19,22 +19,23 @@ package helma.scripting.rhino.extensions;
 
 
 import java.io.BufferedReader;
+import java.io.EOFException;
 import java.io.File;
-import java.io.Reader;
-import java.io.Writer;
 import java.io.FileReader;
 import java.io.FileWriter;
-import java.io.PrintWriter;
-import java.io.EOFException;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.Reader;
+import java.io.Writer;
+import java.lang.reflect.Member;
+import java.lang.reflect.Method;
+
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Function;
 import org.mozilla.javascript.FunctionObject;
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.ScriptableObject;
 import org.mozilla.javascript.Undefined;
-import java.lang.reflect.Member;
-import java.lang.reflect.Method;
 
 /**
   * An EcmaScript FileIO 'File' object

@@ -16,8 +16,15 @@
 
 package helma.util;
 
-import java.io.*;
-import java.util.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Properties;
+import java.util.Set;
 
 /**
  *  A property dictionary that is updated from a property file each time the

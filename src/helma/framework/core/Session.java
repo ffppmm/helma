@@ -16,13 +16,16 @@
 
 package helma.framework.core;
 
-import helma.objectmodel.*;
-import helma.objectmodel.db.*;
 import helma.framework.ResponseTrans;
 import helma.framework.UploadStatus;
+import helma.objectmodel.INode;
+import helma.objectmodel.TransientNode;
+import helma.objectmodel.db.Node;
+import helma.objectmodel.db.NodeHandle;
 
-import java.io.*;
-import java.util.*;
+import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Iterator;
 
 /**
  * This represents a session currently using the Hop application.

@@ -11,7 +11,9 @@
 
 package helma.objectmodel.db;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 public class SegmentedSubnodeList extends SubnodeList {
 

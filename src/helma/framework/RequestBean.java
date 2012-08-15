@@ -16,9 +16,10 @@
 
 package helma.framework;
 
-import javax.servlet.http.HttpServletRequest;
 import java.io.Serializable;
 import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * 

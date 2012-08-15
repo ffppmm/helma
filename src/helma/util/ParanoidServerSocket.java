@@ -17,7 +17,8 @@
 package helma.util;
 
 import java.io.IOException;
-import java.net.*;
+import java.net.ServerSocket;
+import java.net.Socket;
 
 /**
  * A server socket that can allow connections to only a few selected hosts.

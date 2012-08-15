@@ -15,17 +15,25 @@
  */
 package helma.scripting.rhino;
 
+import helma.objectmodel.INode;
+import helma.objectmodel.db.DbKey;
+import helma.objectmodel.db.DbMapping;
+import helma.objectmodel.db.Node;
+import helma.objectmodel.db.WrappedNodeManager;
+
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.Properties;
 
-import helma.objectmodel.INode;
-import helma.objectmodel.db.DbMapping;
-import helma.objectmodel.db.DbKey;
-import helma.objectmodel.db.Node;
-import helma.objectmodel.db.WrappedNodeManager;
-
-import org.mozilla.javascript.*;
+import org.mozilla.javascript.BaseFunction;
+import org.mozilla.javascript.Context;
+import org.mozilla.javascript.EvaluatorException;
+import org.mozilla.javascript.Function;
+import org.mozilla.javascript.FunctionObject;
+import org.mozilla.javascript.JavaScriptException;
+import org.mozilla.javascript.ScriptRuntime;
+import org.mozilla.javascript.Scriptable;
+import org.mozilla.javascript.ScriptableObject;
 
 public class HopObjectCtor extends FunctionObject {
 
