@@ -23,6 +23,7 @@ import helma.objectmodel.ConcurrencyException;
 import helma.objectmodel.INode;
 import helma.objectmodel.IProperty;
 import helma.objectmodel.TransientNode;
+import helma.util.EmptyEnumeration;
 
 import java.util.Date;
 import java.util.Enumeration;
@@ -1496,7 +1497,7 @@ public final class Node implements INode {
     private Enumeration<Object> getLoadedSubnodes() {
         final SubnodeList list = subnodes;
         if (list == null) {
-            return new Vector<Object>().elements();
+            return new EmptyEnumeration();
         }
 
         return new Enumeration<Object>() {
