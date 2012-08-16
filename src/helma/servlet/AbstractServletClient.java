@@ -42,6 +42,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.StringTokenizer;
+import java.util.Vector;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
@@ -657,17 +658,16 @@ public abstract class AbstractServletClient extends HttpServlet {
      * Put name and value pair in map.  When name already exist, add value
      * to array of values.
      */
-    private static void putMapEntry(Map<String, String[]> map, String name, String value) {
-        String[] newValues = null;
-        String[] oldValues = map.get(name);
-
+    private static void putMapEntry(Map<String, Vector<String>> map, String name, String value) {
+    	Vector<String> newValues = null;
+    	Vector<String> oldValues = map.get(name);
+    	
         if (oldValues == null) {
-            newValues = new String[1];
-            newValues[0] = value;
+            newValues = new Vector<String>();
+            newValues.add(value);
         } else {
-            newValues = new String[oldValues.length + 1];
-            System.arraycopy(oldValues, 0, newValues, 0, oldValues.length);
-            newValues[oldValues.length] = value;
+            newValues = new Vector<String>(oldValues);
+            newValues.add(value);
         }
 
         map.put(name, newValues);
@@ -727,7 +727,7 @@ public abstract class AbstractServletClient extends HttpServlet {
             return;
         }
 
-        HashMap<String, String[]> parameters = new HashMap<String, String[]>();
+        HashMap<String, Vector<String>> parameters = new HashMap<String, Vector<String>>();
 
         // Parse any query string parameters from the request
         if (queryString != null) {
@@ -786,7 +786,7 @@ public abstract class AbstractServletClient extends HttpServlet {
      *
      * @exception UnsupportedEncodingException if the data is malformed
      */
-    public static void parseParameters(Map<String, String[]> map, byte[] data, String encoding, boolean isPost)
+    public static void parseParameters(Map<String, Vector<String>> map, byte[] data, String encoding, boolean isPost)
                                 throws UnsupportedEncodingException {
         if ((data != null) && (data.length > 0)) {
             int ix = 0;

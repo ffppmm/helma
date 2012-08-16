@@ -21,6 +21,7 @@ import helma.util.StringUtils;
 import helma.util.SystemMap;
 
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
@@ -70,7 +71,7 @@ public class RequestTrans implements Serializable {
     private String session;
 
     // the map of form and cookie data
-    private final Map values = new DataComboMap();
+    private final Map<String, Object> values = new DataComboMap();
 
     private ParamComboMap params;
     private ParameterMap queryParams, postParams, cookies;
@@ -82,7 +83,7 @@ public class RequestTrans implements Serializable {
     private long ifModifiedSince = -1;
 
     // set of ETags the client sent with If-None-Match header
-    private final Set etags = new HashSet();
+    private final Set<String> etags = new HashSet<String>();
 
     // when was execution started on this request?
     private final long startTime;
@@ -211,7 +212,7 @@ public class RequestTrans implements Serializable {
     /**
      * @return a map containing the cookies sent with this request
      */
-    public Map getCookies() {
+    public Map<String, Object> getCookies() {
         if (cookies == null) {
             cookies = new ParameterMap();
         }
@@ -221,7 +222,7 @@ public class RequestTrans implements Serializable {
     /**
      * @return the combined query and post parameters for this request
      */
-    public Map getParams() {
+    public Map<String, Object> getParams() {
         if (params == null) {
             params = new ParamComboMap();
         }
@@ -231,7 +232,7 @@ public class RequestTrans implements Serializable {
     /**
      * @return get the query parameters for this request
      */
-    public Map getQueryParams() {
+    public Map<String, Object> getQueryParams() {
         if (queryParams == null) {
             queryParams = new ParameterMap();
         }
@@ -241,7 +242,7 @@ public class RequestTrans implements Serializable {
     /**
      * @return get the post parameters for this request
      */
-    public Map getPostParams() {
+    public Map<String, Object> getPostParams() {
         if (postParams == null) {
             postParams = new ParameterMap();
         }
@@ -251,7 +252,7 @@ public class RequestTrans implements Serializable {
     /**
      * set the request parameters
      */
-    public void setParameters(Map parameters, boolean isPost) {
+    public void setParameters(Map<String, Collection<String>> parameters, boolean isPost) {
         if (isPost) {
             postParams = new ParameterMap(parameters);
         } else {
@@ -302,7 +303,7 @@ public class RequestTrans implements Serializable {
     /**
      *  Get the data map for this request transmitter.
      */
-    public Map getRequestData() {
+    public Map<String, Object> getRequestData() {
         return values;
     }
 
@@ -540,7 +541,7 @@ public class RequestTrans implements Serializable {
      *
      * @return ...
      */
-    public Set getETags() {
+    public Set<String> getETags() {
         return etags;
     }
 
@@ -643,23 +644,21 @@ public class RequestTrans implements Serializable {
             super();
         }
 
-        public ParameterMap(Map<String, Object> map) {
+        public ParameterMap(Map<String, Collection<String>> map) {
             super((int) (map.size() / 0.75f) + 1);
-            for (Iterator<Map.Entry<String, Object>> i = map.entrySet().iterator(); i.hasNext(); ) {
-                Map.Entry<String, Object> e = i.next();
+            for (Iterator<java.util.Map.Entry<String, Collection<String>>> i = map.entrySet().iterator(); i.hasNext(); ) {
+                java.util.Map.Entry<String, Collection<String>> e = i.next();
                 put(e.getKey(), e.getValue());
             }
         }
 
-        public Object put(String key, Object value) {
-            if (key instanceof String) {
-                String name = (String) key;
-                int bracket = name.indexOf('[');
-                if (bracket > -1 && name.endsWith("]")) {
-                    Matcher matcher = paramPattern.matcher(name);
-                    String partName = name.substring(0, bracket);
-                    return putInternal(partName, matcher, value);
-                }
+		public Object put(String key, Object value) {
+            String name = key;
+            int bracket = name.indexOf('[');
+            if (bracket > -1 && name.endsWith("]")) {
+                Matcher matcher = paramPattern.matcher(name);
+                String partName = name.substring(0, bracket);
+                return putInternal(partName, matcher, value);
             }
             Object previous = super.get(key);
             if (previous != null && (previous instanceof Map || value instanceof Map))
@@ -715,7 +714,12 @@ public class RequestTrans implements Serializable {
 
     class DataComboMap extends SystemMap {
 
-        public Object get(Object key) {
+        /**
+		 * 
+		 */
+		private static final long serialVersionUID = 5737810055554406299L;
+
+		public Object get(Object key) {
             Object value = super.get(key);
             if (value != null)
                 return value;
@@ -732,16 +736,16 @@ public class RequestTrans implements Serializable {
             return get(key) != null;
         }
 
-        public Set entrySet() {
-            Set entries = new HashSet(super.entrySet());
+        public Set<Map.Entry<String, Object>> entrySet() {
+            Set<Entry<String, Object>> entries = new HashSet<Entry<String, Object>>(super.entrySet());
             if (postParams != null) entries.addAll(postParams.entrySet());
             if (queryParams != null) entries.addAll(queryParams.entrySet());
             if (cookies != null) entries.addAll(cookies.entrySet());
             return entries;
         }
 
-        public Set keySet() {
-            Set keys = new HashSet(super.keySet());
+        public Set<String> keySet() {
+            Set<String> keys = new HashSet<String>(super.keySet());
             if (postParams != null) keys.addAll(postParams.keySet());
             if (queryParams != null) keys.addAll(queryParams.keySet());
             if (cookies != null) keys.addAll(cookies.keySet());
@@ -750,7 +754,12 @@ public class RequestTrans implements Serializable {
     }
 
     class ParamComboMap extends SystemMap {
-        public Object get(Object key) {
+        /**
+		 * 
+		 */
+		private static final long serialVersionUID = -9177176570950359431L;
+
+		public Object get(Object key) {
             Object value;
             if (postParams != null && (value = postParams.get(key)) != null)
                 return value;
@@ -763,15 +772,15 @@ public class RequestTrans implements Serializable {
             return get(key) != null;
         }
 
-        public Set entrySet() {
-            Set entries = new HashSet();
+        public Set<Map.Entry<String, Object>> entrySet() {
+            Set<Map.Entry<String, Object>> entries = new HashSet<Map.Entry<String, Object>>();
             if (postParams != null) entries.addAll(postParams.entrySet());
             if (queryParams != null) entries.addAll(queryParams.entrySet());
             return entries;
         }
 
-        public Set keySet() {
-            Set keys = new HashSet();
+        public Set<String> keySet() {
+            Set<String> keys = new HashSet<String>();
             if (postParams != null) keys.addAll(postParams.keySet());
             if (queryParams != null) keys.addAll(queryParams.keySet());
             return keys;
