@@ -111,13 +111,13 @@ public final class ResponseTrans extends Writer implements Serializable {
     private transient Throwable error;
 
     // the res.data map of form and cookie data
-    private transient Map values = new SystemMap();
+    private transient Map<String, Object> values = new SystemMap();
 
     // the res.handlers map of macro handlers
-    private transient Map handlers = new SystemMap();
+    private transient Map<String, Object> handlers = new SystemMap();
 
     // the res.meta map for meta response data
-    private transient Map meta = new SystemMap();
+    private transient Map<String, Object> meta = new SystemMap();
 
     // the request trans for this response
     private transient RequestTrans reqtrans;
@@ -156,21 +156,21 @@ public final class ResponseTrans extends Writer implements Serializable {
     /**
      *  Get the data map for this response transmitter.
      */
-    public Map getResponseData() {
+    public Map<String, Object> getResponseData() {
         return values;
     }
 
     /**
      *  Get the macro handlers map for this response transmitter.
      */
-    public Map getMacroHandlers() {
+    public Map<String, Object> getMacroHandlers() {
         return handlers;
     }
 
     /**
      *  Get the meta info map for this response transmitter.
      */
-    public Map getMetaData() {
+    public Map<String, Object> getMetaData() {
         return meta;
     }
 
@@ -229,7 +229,7 @@ public final class ResponseTrans extends Writer implements Serializable {
      */
     public synchronized StringBuffer pushBuffer(StringBuffer buf) {
         if (buffers == null) {
-            buffers = new Stack();
+            buffers = new Stack<StringBuffer>();
         }
 
         if (buffer != null) {
@@ -990,7 +990,7 @@ public final class ResponseTrans extends Writer implements Serializable {
         CookieTrans c = null;
 
         if (cookies == null) {
-            cookies = new HashMap();
+            cookies = new HashMap<String, CookieTrans>();
         } else {
             c = (CookieTrans) cookies.get(key);
         }

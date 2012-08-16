@@ -139,36 +139,51 @@ public class RequestBean implements Serializable {
     /**
      * @return The req.data map containing request parameters, cookies and
      * assorted HTTP headers
+     * 
+     * FIXME: Don't know what to do with functions that don't have Types
      */
-    public Map getData() {
+    @SuppressWarnings("rawtypes")
+	public Map getData() {
         return req.getRequestData();
     }
 
     /**
      * @return the req.params map containing combined query and post parameters
+     * 
+     * FIXME: Don't know what to do with functions that don't have Types
      */
-    public Map getParams() {
+    @SuppressWarnings("rawtypes")
+	public Map getParams() {
         return req.getParams();
     }
 
     /**
      * @return the req.queryParams map containing parameters parsed from the query string
+     * 
+     * FIXME: Don't know what to do with functions that don't have Types
      */
-    public Map getQueryParams() {
+    @SuppressWarnings("rawtypes")
+	public Map getQueryParams() {
         return req.getQueryParams();
     }
 
     /**
      * @return the req.postParams map containing params parsed from post data
+     * 
+     * FIXME: Don't know what to do with functions that don't have Types
      */
-    public Map getPostParams() {
+    @SuppressWarnings("rawtypes")
+	public Map getPostParams() {
         return req.getPostParams();
     }
 
     /**
      * @return the req.cookies map containing request cookies
+     * 
+     * FIXME: Don't know what to do with functions that don't have Types
      */
-    public Map getCookies() {
+    @SuppressWarnings("rawtypes")
+	public Map getCookies() {
         return req.getCookies();
     }
 

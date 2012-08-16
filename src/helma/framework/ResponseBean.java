@@ -31,7 +31,12 @@ import javax.servlet.http.HttpServletResponse;
  * 
  */
 public class ResponseBean implements Serializable {
-    ResponseTrans res;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = -5053305634746158133L;
+	
+	ResponseTrans res;
 
     /**
      * Creates a new ResponseBean object.
@@ -348,8 +353,11 @@ public class ResponseBean implements Serializable {
      * Get the data map for the response
      *
      * @return the data object
+     * 
+     * FIXME: Don't know what to do with functions that don't have Types
      */
-    public Map getData() {
+    @SuppressWarnings("rawtypes")
+	public Map getData() {
         return res.getResponseData();
     }
 
@@ -357,8 +365,11 @@ public class ResponseBean implements Serializable {
      * Get the macro handlers map for the response
      *
      * @return the macro handlers map
+     * 
+     * FIXME: Don't know what to do with functions that don't have Types
      */
-    public Map getHandlers() {
+    @SuppressWarnings("rawtypes")
+	public Map getHandlers() {
         return res.getMacroHandlers();
     }
     
@@ -366,8 +377,11 @@ public class ResponseBean implements Serializable {
      * Get the meta map for the response
      *
      * @return the meta map
+     * 
+     * FIXME: Don't know what to do with functions that don't have Types
      */
-    public Map getMeta() {
+    @SuppressWarnings("rawtypes")
+	public Map getMeta() {
         return res.getMetaData();
     }
 
