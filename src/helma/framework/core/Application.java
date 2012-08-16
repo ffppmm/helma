@@ -38,7 +38,6 @@ import helma.objectmodel.db.Node;
 import helma.objectmodel.db.NodeManager;
 import helma.objectmodel.db.WrappedNodeManager;
 import helma.scripting.ScriptingEngine;
-import helma.scripting.ScriptingException;
 import helma.util.CronJob;
 import helma.util.CryptResource;
 import helma.util.Logger;
@@ -50,7 +49,6 @@ import helma.util.UrlEncoded;
 import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.lang.reflect.Method;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -64,6 +62,7 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Stack;
 import java.util.StringTokenizer;
@@ -141,7 +140,7 @@ public final class Application implements Runnable {
     Hashtable<String, DbSource> dbSources;
 
     // map of app modules reflected at app.modules
-    Map modules;
+    Map<String, Object> modules;
 
     // internal worker thread for scheduler, session cleanup etc.
     Thread worker;
@@ -153,7 +152,7 @@ public final class Application implements Runnable {
     ThreadLocal<RequestEvaluator> currentEvaluator = new ThreadLocal<RequestEvaluator>();
 
     // Map of requesttrans -> active requestevaluators
-    Hashtable activeRequests;
+    Hashtable<RequestTrans, RequestEvaluator> activeRequests;
 
     String logDir;
 
@@ -436,7 +435,7 @@ public final class Application implements Runnable {
             freeThreads = new Stack<RequestEvaluator>();
             allThreads = new Vector<RequestEvaluator>();
 
-            activeRequests = new Hashtable();
+            activeRequests = new Hashtable<RequestTrans, RequestEvaluator>();
             activeCronJobs = new Hashtable<String, CronRunner>();
             customCronJobs = new Hashtable<String, CronJob>();
 
@@ -818,7 +817,7 @@ public final class Application implements Runnable {
      *  Called to execute a method via XML-RPC, usually by helma.main.ApplicationManager
      *  which acts as default handler/request dispatcher.
      */
-    public Object executeXmlRpc(String method, Vector args)
+    public Object executeXmlRpc(String method, Vector<Object> args)
                          throws Exception {
         xmlrpcCount += 1;
 
@@ -840,7 +839,7 @@ public final class Application implements Runnable {
     }
 
 
-    public Object executeExternal(String method, Vector args)
+    public Object executeExternal(String method, Vector<String> args)
                         throws Exception {
         Object retval = null;
         RequestEvaluator ev = null;
@@ -894,53 +893,7 @@ public final class Application implements Runnable {
         if (rootObject != null) {
             return rootObject;
         }
-        // check if we have a custom root object class
-        if (rootObjectClass != null) {
-            // create custom root element.
-            try {
-                if (classMapping.containsKey("root.factory.class") &&
-                        classMapping.containsKey("root.factory.method")) {
-                    String rootFactory = classMapping.getProperty("root.factory.class");
-                    Class c = typemgr.getClassLoader().loadClass(rootFactory);
-                    Method m = c.getMethod(
-                            classMapping.getProperty("root.factory.method"),
-                            (Class[]) null);
-                    rootObject = m.invoke(c, (Object[]) null);
-                } else {
-                    String rootClass = classMapping.getProperty("root");
-                    Class c = typemgr.getClassLoader().loadClass(rootClass);
-                    rootObject = c.newInstance();
-                }
-            } catch (Exception e) {
-                throw new RuntimeException("Error creating root object: " +
-                        e.toString());
-            }
-            return rootObject;
-        } else if (rootObjectPropertyName != null || rootObjectFunctionName != null) {
-            // get root object from a global scripting engine property or function
-            if (engine == null) {
-                RequestEvaluator reval = getEvaluator();
-                try {
-                    return getDataRootFromEngine(reval.getScriptingEngine());
-                } finally {
-                    releaseEvaluator(reval);
-                }
-            } else {
-                return getDataRootFromEngine(engine);
-            }
-        } else {
-            // no custom root object is defined - use standard helma objectmodel
-            return nmgr.getRootNode();
-        }
-    }
-
-    private Object getDataRootFromEngine(ScriptingEngine engine)
-            throws ScriptingException {
-        return rootObjectPropertyName != null ?
-                engine.getGlobalProperty(rootObjectPropertyName) :
-                engine.invoke(null, rootObjectFunctionName,
-                        RequestEvaluator.EMPTY_ARGS,
-                        ScriptingEngine.ARGS_WRAP_DEFAULT, true);
+        return nmgr.getRootNode();
     }
 
     /**
@@ -1044,7 +997,7 @@ public final class Application implements Runnable {
     /**
      * Return a collection containing all prototypes defined for this application
      */
-    public Collection getPrototypes() {
+    public Collection<Prototype> getPrototypes() {
         return typemgr.getPrototypes();
     }
 
@@ -1055,7 +1008,7 @@ public final class Application implements Runnable {
      * @param typeProps custom type properties map
      * @return the new prototype
      */
-    public Prototype definePrototype(String name, Map typeProps) {
+    public Prototype definePrototype(String name, Properties typeProps) {
         Prototype proto = typemgr.getPrototype(name);
         if (proto == null) {
             proto = typemgr.createPrototype(name, null, typeProps);
@@ -1091,7 +1044,7 @@ public final class Application implements Runnable {
      * Return a list of Helma nodes (HopObjects -  the database object representing the user,
      *  not the session object) representing currently logged in users.
      */
-    public List getActiveUsers() {
+    public List<INode> getActiveUsers() {
         return sessionMgr.getActiveUsers();
     }
 
@@ -1099,18 +1052,18 @@ public final class Application implements Runnable {
      * Return a list of Helma nodes (HopObjects -  the database object representing the user,
      *  not the session object) representing registered users of this application.
      */
-    public List getRegisteredUsers() {
-        ArrayList list = new ArrayList();
+    public List<INode> getRegisteredUsers() {
+        ArrayList<INode> list = new ArrayList<INode>();
         INode users = getUserRoot();
 
         // add all child nodes to the list
-        for (Enumeration e = users.getSubnodes(); e.hasMoreElements();) {
+        for (Enumeration<INode> e = users.getSubnodes(); e.hasMoreElements();) {
             list.add(e.nextElement());
         }
 
         // if none, try to get them from properties (internal db)
         if (list.size() == 0) {
-            for (Enumeration e = users.properties(); e.hasMoreElements();) {
+            for (Enumeration<String> e = users.properties(); e.hasMoreElements();) {
                 list.add(users.getNode((String) e.nextElement()));
             }
         }
@@ -1122,7 +1075,7 @@ public final class Application implements Runnable {
      * Return an array of <code>SessionBean</code> objects currently associated
      * with a given Helma user.
      */
-    public List getSessionsForUsername(String username) {
+    public List<SessionBean> getSessionsForUsername(String username) {
         return sessionMgr.getSessionsForUsername(username);
     }
 
@@ -1136,7 +1089,7 @@ public final class Application implements Runnable {
     /**
      *  Return the whole session map.
      */
-    public Map getSessions() {
+    public Map<String, Session> getSessions() {
         return sessionMgr.getSessions();
     }
 
@@ -1274,7 +1227,7 @@ public final class Application implements Runnable {
      * @throws UnsupportedEncodingException if the application's charset property
      *         is not a valid encoding name
      */
-    public String getNodeHref(Object elem, String actionName, Map queryParams)
+    public String getNodeHref(Object elem, String actionName, Map<String, Object> queryParams)
             throws UnsupportedEncodingException {
         StringBuffer buffer = new StringBuffer(baseURI);
 
@@ -1290,11 +1243,11 @@ public final class Application implements Runnable {
         return buffer.toString();
     }
 
-    private int appendQueryParams(StringBuffer buffer, Map params,
+    private int appendQueryParams(StringBuffer buffer, Map<String, Object> params,
                                   String prefix, int count)
             throws UnsupportedEncodingException {
-        for (Iterator it = params.entrySet().iterator(); it.hasNext();) {
-            Map.Entry entry = (Map.Entry) it.next();
+        for (Iterator<Entry<String, Object>> it = params.entrySet().iterator(); it.hasNext();) {
+            Entry<String, Object> entry = it.next();
             Object value = entry.getValue();
             if (value == null) {
                 continue;
@@ -1302,7 +1255,7 @@ public final class Application implements Runnable {
             String key = UrlEncoded.encode(entry.getKey().toString(), charset);
             if (prefix != null) key = prefix + '[' + key + ']';
             if (value instanceof Map) {
-                count = appendQueryParams(buffer, (Map) value, key, count);
+                count = appendQueryParams(buffer, (Map<String, Object>) value, key, count);
             } else {
                 buffer.append(count++ == 0 ? '?' : '&');
                 buffer.append(key);
@@ -1530,7 +1483,7 @@ public final class Application implements Runnable {
         // and the code is streamlined a bit to take advantage of this.
         while (clazz != Object.class) {
             // check interfaces
-            Class[] classes = clazz.getInterfaces();
+            Class<?>[] classes = clazz.getInterfaces();
             for (int i = 0; i < classes.length; i++) {
                 protoName = classMapping.getProperty(classes[i].getName());
                 if (protoName != null) {
@@ -1728,8 +1681,8 @@ public final class Application implements Runnable {
             logEvent("Cron jobs still running from last minute: " + activeCronJobs);
         }
 
-        for (Iterator i = jobs.iterator(); i.hasNext();) {
-            CronJob job = (CronJob) i.next();
+        for (Iterator<CronJob> i = jobs.iterator(); i.hasNext();) {
+            CronJob job = i.next();
 
             if (job.appliesToDate(date)) {
                 // check if the job is already active ...
@@ -1789,8 +1742,8 @@ public final class Application implements Runnable {
      */
     public String getJavaClassForPrototype(String typename) {
 
-        for (Iterator it = classMapping.entrySet().iterator(); it.hasNext();) {
-            Map.Entry entry = (Map.Entry) it.next();
+        for (Iterator<Map.Entry<Object, Object>> it = classMapping.entrySet().iterator(); it.hasNext();) {
+            Map.Entry<Object, Object> entry = it.next();
 
             if (typename.equals(entry.getValue())) {
                 return (String) entry.getKey();
@@ -1875,7 +1828,7 @@ public final class Application implements Runnable {
      * Returns the repositories of this application
      * @return iterator through application repositories
      */
-    public List getRepositories() {
+    public List<Repository> getRepositories() {
         return Collections.unmodifiableList(repositories);
     }
 
@@ -1980,7 +1933,7 @@ public final class Application implements Runnable {
             // update the XML-RPC access list, containting prototype.method
             // entries of functions that may be called via XML-RPC
             String xmlrpcAccessProp = props.getProperty("xmlrpcaccess");
-            HashSet xra = new HashSet();
+            HashSet<String> xra = new HashSet<String>();
 
             if (xmlrpcAccessProp != null) {
                 StringTokenizer st = new StringTokenizer(xmlrpcAccessProp, ",; ");
@@ -2001,7 +1954,7 @@ public final class Application implements Runnable {
 
             // update extensions
             if (Server.getServer() != null) {
-                Vector extensions = Server.getServer().getExtensions();
+                Vector<HelmaExtension> extensions = Server.getServer().getExtensions();
 
                 for (int i = 0; i < extensions.size(); i++) {
                     HelmaExtension ext = (HelmaExtension) extensions.get(i);

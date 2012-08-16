@@ -57,7 +57,20 @@ package helma.util;
  *  SUCH DAMAGE.
  */
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.Enumeration;
+import java.util.GregorianCalendar;
+import java.util.HashSet;
+import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Properties;
+import java.util.StringTokenizer;
 
 
 /**
@@ -183,8 +196,8 @@ public class CronJob {
 
 
   public static List<CronJob> parse(Properties props) {
-      Hashtable jobs = new Hashtable ();
-      Enumeration e = props.keys ();
+      Hashtable<String, CronJob> jobs = new Hashtable<String, CronJob> ();
+      Enumeration<Object> e = props.keys ();
       while (e.hasMoreElements ()) {
          String key = (String) e.nextElement ();
          try {
@@ -221,7 +234,7 @@ public class CronJob {
          } catch (NoSuchElementException nsee) {
          }
       }
-      Iterator it = jobs.values().iterator();
+      Iterator<CronJob> it = jobs.values().iterator();
       while (it.hasNext()) {
           CronJob job = (CronJob) it.next();
           if (job.getFunction() == null) {

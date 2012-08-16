@@ -22,14 +22,11 @@ import helma.framework.repository.FileResource;
 import helma.objectmodel.db.DbSource;
 import helma.util.Logging;
 import helma.util.ResourceProperties;
-import helma.util.StringUtils;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
-import java.net.UnknownHostException;
 import java.util.Hashtable;
 import java.util.Locale;
 import java.util.StringTokenizer;

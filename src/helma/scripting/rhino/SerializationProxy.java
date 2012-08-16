@@ -17,11 +17,12 @@
 package helma.scripting.rhino;
 
 import helma.objectmodel.INode;
-import helma.objectmodel.db.NodeHandle;
 import helma.objectmodel.db.Node;
-import org.mozilla.javascript.Context;
+import helma.objectmodel.db.NodeHandle;
 
 import java.io.Serializable;
+
+import org.mozilla.javascript.Context;
 
 /**
  * Serialization proxy/placeholder interface. This is used for

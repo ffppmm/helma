@@ -17,16 +17,15 @@
 package helma.main;
 
 
-import org.eclipse.jetty.server.Connector;
+import java.io.File;
+import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.net.URL;
+
 import org.eclipse.jetty.ajp.Ajp13SocketConnector;
-import org.eclipse.jetty.server.bio.SocketConnector;
+import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.nio.SelectChannelConnector;
 import org.eclipse.jetty.xml.XmlConfiguration;
-
-import java.net.URL;
-import java.net.InetSocketAddress;
-import java.io.IOException;
-import java.io.File;
 
 public class JettyServer {
 

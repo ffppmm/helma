@@ -17,10 +17,10 @@
 package helma.util;
 
 
-import java.util.StringTokenizer;
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
-import java.util.ArrayList;
+import java.util.StringTokenizer;
 
 /**
  * Utility class for String manipulation.

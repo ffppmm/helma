@@ -16,8 +16,12 @@
 
 package helma.util;
 
-import java.io.*;
-import javax.activation.*;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+
+import javax.activation.DataSource;
 
 /**
  * Makes MimeParts usable as Datasources in the Java Activation Framework (JAF)

@@ -16,29 +16,34 @@
 
 package helma.scripting.rhino.extensions;
 
-import helma.image.*;
+import helma.image.ImageGenerator;
+import helma.image.ImageInfo;
+import helma.image.ImageWaiter;
+import helma.image.ImageWrapper;
 import helma.util.MimePart;
 
 import java.awt.Image;
-import java.awt.image.*;
-import org.mozilla.javascript.Context;
-import org.mozilla.javascript.Function;
-import org.mozilla.javascript.FunctionObject;
-import org.mozilla.javascript.Scriptable;
-import org.mozilla.javascript.ScriptableObject;
-import org.mozilla.javascript.NativeJavaObject;
-import org.mozilla.javascript.BaseFunction;
-import org.mozilla.javascript.Wrapper;
-
-import java.lang.reflect.Member;
-import java.lang.reflect.Method;
-import java.io.InputStream;
+import java.awt.image.BufferedImage;
+import java.awt.image.BufferedImageOp;
+import java.awt.image.ImageFilter;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.net.URL;
+import java.io.InputStream;
+import java.lang.reflect.Member;
+import java.lang.reflect.Method;
 import java.net.MalformedURLException;
+import java.net.URL;
+
+import org.mozilla.javascript.BaseFunction;
+import org.mozilla.javascript.Context;
+import org.mozilla.javascript.Function;
+import org.mozilla.javascript.FunctionObject;
+import org.mozilla.javascript.NativeJavaObject;
+import org.mozilla.javascript.Scriptable;
+import org.mozilla.javascript.ScriptableObject;
+import org.mozilla.javascript.Wrapper;
 
 /**
  * Extension to provide Helma with Image processing features.

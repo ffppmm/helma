@@ -20,12 +20,18 @@
 
 package helma.image.imageio.gif;
 
-import java.awt.image.*;
-import java.io.*;
-import javax.imageio.*;
-import javax.imageio.metadata.*;
+import helma.image.GIFEncoder;
 
-import helma.image.*;
+import java.awt.image.BufferedImage;
+import java.awt.image.RenderedImage;
+import java.io.DataOutput;
+import java.io.IOException;
+
+import javax.imageio.IIOImage;
+import javax.imageio.ImageTypeSpecifier;
+import javax.imageio.ImageWriteParam;
+import javax.imageio.ImageWriter;
+import javax.imageio.metadata.IIOMetadata;
 
 public class GIFImageWriter extends ImageWriter {
     GIFEncoder encoder;

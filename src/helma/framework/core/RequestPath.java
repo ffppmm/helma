@@ -16,10 +16,13 @@
 
 package helma.framework.core;
 
-import java.util.*;
-import java.io.UnsupportedEncodingException;
-
 import helma.util.UrlEncoded;
+
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  *  Represents a URI request path that has been resolved to an object path.

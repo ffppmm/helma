@@ -16,10 +16,10 @@
 
 package helma.util;
 
-import java.util.Map;
-import java.util.HashMap;
-import java.util.Set;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * A Map that wraps another map and creates a new copy of the 

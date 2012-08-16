@@ -17,15 +17,18 @@
 package helma.objectmodel.db;
 
 import helma.framework.IPathElement;
-import helma.framework.core.RequestEvaluator;
 import helma.framework.core.Application;
+import helma.framework.core.RequestEvaluator;
 import helma.objectmodel.ConcurrencyException;
 import helma.objectmodel.INode;
 import helma.objectmodel.IProperty;
 import helma.objectmodel.TransientNode;
 import helma.util.EmptyEnumeration;
 
-import java.util.*;
+import java.util.Date;
+import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.Vector;
 
 /**
  * An implementation of INode that can be stored in the internal database or

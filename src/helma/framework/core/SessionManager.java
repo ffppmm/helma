@@ -20,17 +20,31 @@ import helma.objectmodel.db.NodeHandle;
 import helma.objectmodel.db.Transactor;
 import helma.scripting.ScriptingEngine;
 
-import java.util.*;
-import java.io.*;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.NotSerializableException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.List;
+import java.util.Map;
 
 public class SessionManager {
 
-    protected Hashtable sessions;
+    protected Hashtable<String, Session> sessions;
 
     protected Application app;
 
     public SessionManager() {
-        sessions = new Hashtable();
+        sessions = new Hashtable<String, Session>();
     }
 
     public void init(Application app) {
@@ -65,8 +79,14 @@ public class SessionManager {
      * actual changes from the table itself, which is managed by the application.
      * It is safe and allowed to manipulate the session objects contained in the table, though.
      */
-    public Map getSessions() {
-        return (Map) sessions.clone();
+    public Map<String, Session> getSessions() {
+    	Hashtable<String, Session> clone = new Hashtable<String, Session>();
+        Enumeration<String> e = sessions.keys();
+        while (e.hasMoreElements()) {
+        	String key = e.nextElement();
+        	clone.put(key, sessions.get(key));
+        }
+		return clone;
     }
 
     /**
@@ -89,14 +109,14 @@ public class SessionManager {
      * Return an array of <code>SessionBean</code> objects currently associated with a given
      * Helma user.
      */
-    public List getSessionsForUsername(String username) {
-        ArrayList list = new ArrayList();
+    public List<SessionBean> getSessionsForUsername(String username) {
+        ArrayList<SessionBean> list = new ArrayList<SessionBean>();
 
         if (username == null) {
             return list;
         }
 
-        Enumeration e = sessions.elements();
+        Enumeration<Session> e = sessions.elements();
         while (e.hasMoreElements()) {
             Session s = (Session) e.nextElement();
 
@@ -113,10 +133,10 @@ public class SessionManager {
      * Return a list of Helma nodes (HopObjects -  the database object representing the user,
      *  not the session object) representing currently logged in users.
      */
-    public List getActiveUsers() {
-        ArrayList list = new ArrayList();
+    public List<INode> getActiveUsers() {
+        ArrayList<INode> list = new ArrayList<INode>();
 
-        for (Enumeration e = sessions.elements(); e.hasMoreElements();) {
+        for (Enumeration<Session> e = sessions.elements(); e.hasMoreElements();) {
             Session s = (Session) e.nextElement();
 
             if (s != null && s.isLoggedIn()) {
@@ -152,7 +172,7 @@ public class SessionManager {
             synchronized (sessions) {
                 p.writeInt(sessions.size());
 
-                for (Enumeration e = sessions.elements(); e.hasMoreElements();) {
+                for (Enumeration<Session> e = sessions.elements(); e.hasMoreElements();) {
                     try {
                         engine.serialize(e.nextElement(), p);
                         // p.writeObject(e.nextElement());
@@ -200,7 +220,7 @@ public class SessionManager {
             ObjectInputStream p = new ObjectInputStream(istream);
             int size = p.readInt();
             int ct = 0;
-            Hashtable newSessions = new Hashtable();
+            Hashtable<String, Session> newSessions = new Hashtable<String, Session>();
 
             while (ct < size) {
                 Session session = (Session) engine.deserialize(p);

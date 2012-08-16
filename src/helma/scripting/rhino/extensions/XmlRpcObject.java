@@ -18,12 +18,19 @@ package helma.scripting.rhino.extensions;
 
 import helma.framework.core.Application;
 import helma.scripting.rhino.RhinoCore;
-import org.apache.xmlrpc.XmlRpcClient;
-import org.mozilla.javascript.*;
 
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.util.Vector;
+
+import org.apache.xmlrpc.XmlRpcClient;
+import org.mozilla.javascript.BaseFunction;
+import org.mozilla.javascript.Context;
+import org.mozilla.javascript.EvaluatorException;
+import org.mozilla.javascript.Function;
+import org.mozilla.javascript.FunctionObject;
+import org.mozilla.javascript.Scriptable;
+import org.mozilla.javascript.ScriptableObject;
 
 /**
  * An extension to transparently call and serve XML-RPC from Rhino.

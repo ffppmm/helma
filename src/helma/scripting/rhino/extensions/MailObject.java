@@ -16,13 +16,18 @@
 
 package helma.scripting.rhino.extensions;
 
-import helma.util.*;
-import org.mozilla.javascript.*;
-import java.io.*;
-import java.util.*;
+import helma.util.MimePart;
+import helma.util.MimePartDataSource;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.Serializable;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
-import javax.activation.*;
+import java.util.Properties;
+
+import javax.activation.DataHandler;
+import javax.activation.FileDataSource;
 import javax.mail.Address;
 import javax.mail.Message;
 import javax.mail.Multipart;
@@ -34,6 +39,14 @@ import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import javax.mail.internet.MimeUtility;
+
+import org.mozilla.javascript.Context;
+import org.mozilla.javascript.Function;
+import org.mozilla.javascript.FunctionObject;
+import org.mozilla.javascript.Scriptable;
+import org.mozilla.javascript.ScriptableObject;
+import org.mozilla.javascript.Undefined;
+import org.mozilla.javascript.Wrapper;
 
 /**
  * A JavaScript wrapper around a JavaMail message class to send

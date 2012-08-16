@@ -18,25 +18,54 @@ package helma.scripting.rhino;
 
 import helma.extensions.ConfigurationException;
 import helma.extensions.HelmaExtension;
-import helma.framework.*;
+import helma.framework.IPathElement;
+import helma.framework.RedirectException;
+import helma.framework.RequestBean;
+import helma.framework.RequestTrans;
+import helma.framework.ResponseBean;
+import helma.framework.ResponseTrans;
+import helma.framework.TimeoutException;
+import helma.framework.core.Application;
+import helma.framework.core.ApplicationBean;
+import helma.framework.core.RequestEvaluator;
+import helma.framework.core.RequestPath;
+import helma.framework.core.Skin;
 import helma.framework.repository.Resource;
-import helma.framework.core.*;
 import helma.main.Server;
-import helma.objectmodel.*;
+import helma.objectmodel.ConcurrencyException;
+import helma.objectmodel.INode;
 import helma.objectmodel.db.DbMapping;
-import helma.objectmodel.db.Relation;
 import helma.objectmodel.db.Node;
-import helma.scripting.*;
-import helma.scripting.rhino.debug.Tracer;
+import helma.objectmodel.db.Relation;
+import helma.scripting.ScriptingEngine;
+import helma.scripting.ScriptingException;
 import helma.scripting.rhino.debug.Profiler;
+import helma.scripting.rhino.debug.Tracer;
 import helma.util.StringUtils;
-import org.mozilla.javascript.*;
-import org.mozilla.javascript.serialize.ScriptableOutputStream;
-import org.mozilla.javascript.serialize.ScriptableInputStream;
 
-import java.util.*;
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.io.OutputStream;
 import java.lang.ref.WeakReference;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Vector;
+import java.util.WeakHashMap;
+
+import org.mozilla.javascript.Callable;
+import org.mozilla.javascript.Context;
+import org.mozilla.javascript.Function;
+import org.mozilla.javascript.NativeObject;
+import org.mozilla.javascript.ScriptRuntime;
+import org.mozilla.javascript.Scriptable;
+import org.mozilla.javascript.ScriptableObject;
+import org.mozilla.javascript.Undefined;
+import org.mozilla.javascript.WrappedException;
+import org.mozilla.javascript.Wrapper;
+import org.mozilla.javascript.serialize.ScriptableInputStream;
+import org.mozilla.javascript.serialize.ScriptableOutputStream;
 
 /**
  * This is the implementation of ScriptingEnvironment for the Mozilla Rhino EcmaScript interpreter.

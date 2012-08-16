@@ -17,10 +17,14 @@
 package helma.scripting.rhino.debug;
 
 import helma.framework.ResponseTrans;
-import helma.util.HtmlEncoder;
-import org.mozilla.javascript.*;
-import org.mozilla.javascript.debug.*;
+
 import java.util.ArrayList;
+
+import org.mozilla.javascript.Context;
+import org.mozilla.javascript.Scriptable;
+import org.mozilla.javascript.debug.DebugFrame;
+import org.mozilla.javascript.debug.DebuggableScript;
+import org.mozilla.javascript.debug.Debugger;
 
 public class Tracer implements Debugger {
 

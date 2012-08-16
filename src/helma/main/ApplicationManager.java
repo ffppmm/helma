@@ -16,23 +16,26 @@
 
 package helma.main;
 
-import helma.framework.core.*;
-import helma.framework.repository.Repository;
+import helma.framework.core.Application;
 import helma.framework.repository.FileRepository;
+import helma.framework.repository.Repository;
+import helma.servlet.EmbeddedServletClient;
+import helma.util.ResourceProperties;
 import helma.util.StringUtils;
-import org.apache.xmlrpc.XmlRpcHandler;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.Vector;
+
 import org.apache.commons.logging.Log;
-import org.eclipse.jetty.servlet.ServletContextHandler;
+import org.apache.xmlrpc.XmlRpcHandler;
 import org.eclipse.jetty.server.handler.ContextHandler;
 import org.eclipse.jetty.server.handler.ContextHandlerCollection;
 import org.eclipse.jetty.server.handler.ResourceHandler;
-import org.eclipse.jetty.servlet.ServletHandler;
+import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
-
-import java.io.*;
-import java.util.*;
-import helma.util.ResourceProperties;
-import helma.servlet.EmbeddedServletClient;
 
 /**
  * This class is responsible for starting and stopping Helma applications.
@@ -369,7 +372,7 @@ public class ApplicationManager implements XmlRpcHandler {
             ignoreDirs = conf.getProperty("ignore");
 
             // read and configure app repositories
-            ArrayList repositoryList = new ArrayList();
+            ArrayList<Repository> repositoryList = new ArrayList<Repository>();
             Class[] parameters = { String.class };
             for (int i = 0; true; i++) {
                 String repositoryArgs = conf.getProperty("repository." + i);

@@ -16,15 +16,21 @@
 
 package helma.framework.core;
 
-import helma.objectmodel.db.DbMapping;
-import helma.framework.repository.Resource;
 import helma.framework.repository.Repository;
+import helma.framework.repository.Resource;
+import helma.objectmodel.db.DbMapping;
 import helma.util.StringUtils;
 
-import java.io.*;
+import java.io.IOException;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 /**
  * The type manager periodically checks the prototype definitions for its
@@ -39,7 +45,7 @@ public final class TypeManager {
 
     private Application app;
     // map of prototypes
-    private HashMap prototypes;
+    private HashMap<String, Prototype> prototypes;
 
     // set of Java archives
     private HashSet jarfiles;
@@ -275,7 +281,7 @@ public final class TypeManager {
      *
      * @return a collection containing the prototypes
      */
-    public synchronized Collection getPrototypes() {
+    public synchronized Collection<Prototype> getPrototypes() {
         return Collections.unmodifiableCollection(prototypes.values());
     }
 

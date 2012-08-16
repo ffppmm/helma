@@ -16,8 +16,11 @@
 
 package helma.util;
 
-import java.io.*;
-import java.util.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.util.Properties;
+import java.util.StringTokenizer;
 
 /**
  *  This file authenticates against a passwd file

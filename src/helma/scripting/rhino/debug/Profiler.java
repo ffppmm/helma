@@ -1,14 +1,18 @@
 package helma.scripting.rhino.debug;
 
-import org.mozilla.javascript.debug.Debugger;
-import org.mozilla.javascript.debug.DebuggableScript;
-import org.mozilla.javascript.debug.DebugFrame;
+import helma.util.StringUtils;
+
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.Formatter;
+import java.util.HashMap;
+import java.util.Stack;
+
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Scriptable;
-
-import java.util.*;
-
-import helma.util.StringUtils;
+import org.mozilla.javascript.debug.DebugFrame;
+import org.mozilla.javascript.debug.DebuggableScript;
+import org.mozilla.javascript.debug.Debugger;
 
 public class Profiler implements Debugger {
 

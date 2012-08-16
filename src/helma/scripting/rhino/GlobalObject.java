@@ -16,22 +16,50 @@
 
 package helma.scripting.rhino;
 
-import helma.scripting.rhino.extensions.*;
-import helma.framework.core.*;
-import helma.objectmodel.db.*;
+import helma.framework.core.Application;
+import helma.framework.core.ApplicationBean;
+import helma.framework.core.Prototype;
+import helma.framework.core.Skin;
+import helma.objectmodel.db.DbSource;
+import helma.scripting.rhino.extensions.DatabaseObject;
+import helma.scripting.rhino.extensions.XmlObject;
 import helma.util.HtmlEncoder;
 import helma.util.MimePart;
 import helma.util.XmlUtils;
-import org.mozilla.javascript.*;
-import org.mozilla.javascript.serialize.*;
-import org.xml.sax.SAXException;
 
-import java.util.*;
+import java.io.BufferedInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
-import java.text.*;
-import java.io.*;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+import java.util.TimeZone;
+
+import org.mozilla.javascript.Context;
+import org.mozilla.javascript.EvaluatorException;
+import org.mozilla.javascript.Function;
+import org.mozilla.javascript.ImporterTopLevel;
+import org.mozilla.javascript.NativeJavaObject;
+import org.mozilla.javascript.NativeObject;
+import org.mozilla.javascript.ScriptRuntime;
+import org.mozilla.javascript.Scriptable;
+import org.mozilla.javascript.ScriptableObject;
+import org.mozilla.javascript.Undefined;
+import org.mozilla.javascript.Wrapper;
+import org.mozilla.javascript.serialize.ScriptableInputStream;
+import org.mozilla.javascript.serialize.ScriptableOutputStream;
 
 /**
  * Helma global object defines a number of custom global functions.

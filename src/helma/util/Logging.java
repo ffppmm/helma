@@ -16,9 +16,15 @@
 
 package helma.util;
 
-import org.apache.commons.logging.*;
-import java.io.*;
-import java.util.*;
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.HashMap;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogConfigurationException;
+import org.apache.commons.logging.LogFactory;
 
 /**
  *  Implementation of Jakarta Commons LogFactory that supports both

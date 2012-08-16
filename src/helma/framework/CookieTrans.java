@@ -17,6 +17,7 @@
 package helma.framework;
 
 import java.io.Serializable;
+
 import javax.servlet.http.Cookie;
 
 /**

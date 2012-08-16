@@ -16,10 +16,12 @@
 
 package helma.framework.core;
 
-import helma.objectmodel.INode;
 import helma.framework.repository.FileResource;
+import helma.objectmodel.INode;
 
-import java.io.*;
+import java.io.File;
+import java.io.FilenameFilter;
+import java.io.IOException;
 
 /**
  * Manages skins for a Helma application

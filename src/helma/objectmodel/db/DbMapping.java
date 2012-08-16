@@ -20,8 +20,19 @@ import helma.framework.core.Application;
 import helma.framework.core.Prototype;
 import helma.util.ResourceProperties;
 
-import java.sql.*;
-import java.util.*;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Properties;
+import java.util.StringTokenizer;
 
 /**
  * A DbMapping describes how a certain type of  Nodes is to mapped to a

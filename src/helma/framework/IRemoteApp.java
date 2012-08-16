@@ -16,7 +16,8 @@
 
 package helma.framework;
 
-import java.rmi.*;
+import java.rmi.Remote;
+import java.rmi.RemoteException;
 
 /**
  * RMI interface for an application. Currently only execute is used and supported.

@@ -23,8 +23,8 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Enumeration;
-import java.util.Properties;
 import java.util.Hashtable;
+import java.util.Properties;
 
 /**
  *  This class describes a releational data source (URL, driver, user and password).

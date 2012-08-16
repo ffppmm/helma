@@ -17,16 +17,23 @@
 package helma.framework;
 
 import helma.util.Base64;
-import helma.util.SystemMap;
 import helma.util.StringUtils;
+import helma.util.SystemMap;
 
+import java.io.Serializable;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.NoSuchElementException;
+import java.util.Set;
+import java.util.StringTokenizer;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.Cookie;
-import java.io.*;
-import java.util.*;
-import java.util.regex.Pattern;
-import java.util.regex.Matcher;
 
 /**
  * A Transmitter for a request from the servlet client. Objects of this
@@ -627,19 +634,24 @@ public class RequestTrans implements Serializable {
 
     class ParameterMap extends SystemMap {
 
-        public ParameterMap() {
+        /**
+		 * 
+		 */
+		private static final long serialVersionUID = 7632860503639617076L;
+
+		public ParameterMap() {
             super();
         }
 
-        public ParameterMap(Map map) {
+        public ParameterMap(Map<String, Object> map) {
             super((int) (map.size() / 0.75f) + 1);
-            for (Iterator i = map.entrySet().iterator(); i.hasNext(); ) {
-                Map.Entry e = (Map.Entry) i.next();
+            for (Iterator<Map.Entry<String, Object>> i = map.entrySet().iterator(); i.hasNext(); ) {
+                Map.Entry<String, Object> e = i.next();
                 put(e.getKey(), e.getValue());
             }
         }
 
-        public Object put(Object key, Object value) {
+        public Object put(String key, Object value) {
             if (key instanceof String) {
                 String name = (String) key;
                 int bracket = name.indexOf('[');

@@ -29,12 +29,12 @@
 // Moved to helma.util to use java.util.HashMap instead of java.util.Hashtable
 package helma.util;
 
-import java.util.Map;
-import java.util.HashMap;
-import java.util.Properties;
-
 import helma.framework.core.Application;
 import helma.objectmodel.ObjectCache;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Properties;
 
 
 /// A Hashtable that expires least-recently-used objects.

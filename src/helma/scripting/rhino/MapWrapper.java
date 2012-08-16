@@ -16,13 +16,14 @@
 
 package helma.scripting.rhino;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.ScriptableObject;
-import org.mozilla.javascript.Wrapper;
 import org.mozilla.javascript.Undefined;
-import java.util.HashMap;
-import java.util.Map;
+import org.mozilla.javascript.Wrapper;
 
 /**
  *  A class that wraps a Java Map as a native JavaScript object. This is
