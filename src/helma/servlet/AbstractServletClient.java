@@ -36,6 +36,7 @@ import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -658,9 +659,9 @@ public abstract class AbstractServletClient extends HttpServlet {
      * Put name and value pair in map.  When name already exist, add value
      * to array of values.
      */
-    private static void putMapEntry(Map<String, Vector<String>> map, String name, String value) {
+    private static void putMapEntry(Map<String, Collection<String>> map, String name, String value) {
     	Vector<String> newValues = null;
-    	Vector<String> oldValues = map.get(name);
+    	Collection<String> oldValues = map.get(name);
     	
         if (oldValues == null) {
             newValues = new Vector<String>();
@@ -727,7 +728,7 @@ public abstract class AbstractServletClient extends HttpServlet {
             return;
         }
 
-        HashMap<String, Vector<String>> parameters = new HashMap<String, Vector<String>>();
+        HashMap<String, Collection<String>> parameters = new HashMap<String, Collection<String>>();
 
         // Parse any query string parameters from the request
         if (queryString != null) {
@@ -786,7 +787,7 @@ public abstract class AbstractServletClient extends HttpServlet {
      *
      * @exception UnsupportedEncodingException if the data is malformed
      */
-    public static void parseParameters(Map<String, Vector<String>> map, byte[] data, String encoding, boolean isPost)
+    public static void parseParameters(Map<String, Collection<String>> map, byte[] data, String encoding, boolean isPost)
                                 throws UnsupportedEncodingException {
         if ((data != null) && (data.length > 0)) {
             int ix = 0;
