@@ -27,7 +27,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
-import java.util.Hashtable;
 import java.util.Locale;
 import java.util.StringTokenizer;
 import java.util.TimeZone;
@@ -73,9 +72,6 @@ public class Server implements Runnable {
 
     // configuration
     ServerConfig config;
-
-    // map of server-wide database sources
-    Hashtable dbSources;
 
     // the embedded web server
     // protected Serve websrv;
@@ -292,7 +288,6 @@ public class Server implements Runnable {
         // logger.debug("TimeZone = " +
         //                 TimeZone.getDefault().getDisplayName(Locale.getDefault()));
 
-        dbSources = new Hashtable();
 
         // try to load the extensions
         extensions = new Vector<HelmaExtension>();
