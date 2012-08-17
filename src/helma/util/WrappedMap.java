@@ -27,7 +27,8 @@ import java.util.Set;
  *  Additionally, instances of this class can be set to readonly
  *  so that the original map can't be modified.
  */
-public class WrappedMap implements Map {
+// FIXME: Typesafety
+public class WrappedMap implements Map<Object, Object> {
 
     // the wrapped map
     protected Map wrapped = null;
@@ -54,7 +55,11 @@ public class WrappedMap implements Map {
         this.readonly = readonly;
     }
 
-    /**
+    public WrappedMap() {
+    	this.readonly = true;
+	}
+
+	/**
      *  Set the readonly flag on or off
      */
     public void setReadonly(boolean readonly) {

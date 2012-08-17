@@ -45,7 +45,11 @@ import org.apache.commons.logging.LogFactory;
  * application specific functionality.
  */
 public class ApplicationBean implements Serializable {
-    transient Application app;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = -5053315391709405106L;
+	transient Application app;
     WrappedMap properties = null;
 
     /**
@@ -259,11 +263,11 @@ public class ApplicationBean implements Serializable {
      * @return an array of session beans
      */
     public SessionBean[] getSessions() {
-        Map sessions = app.getSessions();
+        Map<String, Session> sessions = app.getSessions();
         SessionBean[] array = new SessionBean[sessions.size()];
         int i = 0;
 
-        Iterator it = sessions.values().iterator();
+        Iterator<Session> it = sessions.values().iterator();
         while (it.hasNext()) {
             array[i++] = new SessionBean((Session) it.next());
         }
@@ -305,7 +309,7 @@ public class ApplicationBean implements Serializable {
      * @return an array of user nodes
      */
     public INode[] getActiveUsers() {
-        List activeUsers = app.getActiveUsers();
+        List<INode> activeUsers = app.getActiveUsers();
 
         return (INode[]) activeUsers.toArray(new INode[0]);
     }
@@ -315,7 +319,7 @@ public class ApplicationBean implements Serializable {
      * @return an array containing all registered users
      */
     public INode[] getRegisteredUsers() {
-        List registeredUsers = app.getRegisteredUsers();
+        List<INode> registeredUsers = app.getRegisteredUsers();
 
         return (INode[]) registeredUsers.toArray(new INode[0]);
     }
@@ -343,7 +347,7 @@ public class ApplicationBean implements Serializable {
             return new SessionBean[0];
         }
 
-        List userSessions = app.getSessionsForUsername(username);
+        List<SessionBean> userSessions = app.getSessionsForUsername(username);
 
         return (SessionBean[]) userSessions.toArray(new SessionBean[0]);
     }
@@ -390,7 +394,7 @@ public class ApplicationBean implements Serializable {
      *
      * @return a map of cron jobs
      */
-    public Map getCronJobs() {
+    public Map<Object, Object> getCronJobs() {
         return new WrappedMap(app.customCronJobs, true);
     }
 
@@ -415,7 +419,7 @@ public class ApplicationBean implements Serializable {
      *
      * @return the module map
      */
-    public Map getModules() {
+    public Map<String, Object> getModules() {
         return app.modules;
     }
 
@@ -476,7 +480,7 @@ public class ApplicationBean implements Serializable {
      *
      * @return a readonly wrapper around the application's app properties
      */
-    public Map getProperties() {
+    public Map<Object, Object> getProperties() {
         if (properties == null) {
             properties = new WrappedMap(app.getProperties(), true);
         }
@@ -488,7 +492,7 @@ public class ApplicationBean implements Serializable {
      *
      * @return a readonly wrapper around the application's db properties
      */
-    public Map getDbProperties() {
+    public Map<Object, Object> getDbProperties() {
         return new WrappedMap(app.getDbProperties(), true);
     }
 
@@ -504,10 +508,10 @@ public class ApplicationBean implements Serializable {
      *
      * @return a readonly wrapper around the application's apps.properties
      */
-    public Map getAppsProperties() {
+    public Map<Object, Object> getAppsProperties() {
         Server server = Server.getServer();
         if (server == null)
-            return new SystemMap();
+            return new WrappedMap();
         return new WrappedMap(server.getAppsProperties(app.getName()), true);
     }
 
@@ -580,10 +584,10 @@ public class ApplicationBean implements Serializable {
      *
      * @return a map containing the skin resources
      */
-    public Map getSkinfiles() {
-        Map skinz = new SystemMap();
+    public Map<String, Object> getSkinfiles() {
+        Map<String, Object> skinz = new SystemMap();
 
-        for (Iterator it = app.getPrototypes().iterator(); it.hasNext();) {
+        for (Iterator<Prototype> it = app.getPrototypes().iterator(); it.hasNext();) {
             Prototype p = (Prototype) it.next();
 
             Object skinmap = p.getScriptableSkinMap();
@@ -600,10 +604,10 @@ public class ApplicationBean implements Serializable {
      * @param skinpath an array of directory paths or HopObjects to search for skins
      * @return a map containing the skin resources
      */
-    public Map getSkinfilesInPath(Object[] skinpath) {
-        Map skinz = new SystemMap();
+    public Map<String, Object> getSkinfilesInPath(Object[] skinpath) {
+        Map<String, Object> skinz = new SystemMap();
 
-        for (Iterator it = app.getPrototypes().iterator(); it.hasNext();) {
+        for (Iterator<Prototype> it = app.getPrototypes().iterator(); it.hasNext();) {
             Prototype p = (Prototype) it.next();
 
             Object skinmap = p.getScriptableSkinMap(skinpath);

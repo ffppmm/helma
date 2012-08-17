@@ -1243,7 +1243,9 @@ public final class Application implements Runnable {
         return buffer.toString();
     }
 
-    private int appendQueryParams(StringBuffer buffer, Map<String, Object> params,
+    // FIXME: Type Safety
+	@SuppressWarnings("unchecked")
+	private int appendQueryParams(StringBuffer buffer, Map<String, Object> params,
                                   String prefix, int count)
             throws UnsupportedEncodingException {
         for (Iterator<Entry<String, Object>> it = params.entrySet().iterator(); it.hasNext();) {
