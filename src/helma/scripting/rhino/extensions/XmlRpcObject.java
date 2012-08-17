@@ -50,7 +50,11 @@ import org.mozilla.javascript.ScriptableObject;
  */
 public class XmlRpcObject extends BaseFunction {
 
-    String url = null;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1479373761583135438L;
+	String url = null;
     String method = null;
 
     XmlRpcObject(String url) {
@@ -123,7 +127,7 @@ public class XmlRpcObject extends BaseFunction {
             XmlRpcClient client = new XmlRpcClient(url);
 
             int l = args.length;
-            Vector v = new Vector();
+            Vector<Object> v = new Vector<Object>();
 
             for (int i = 0; i < l; i++) {
                 Object arg = core.processXmlRpcResponse(args[i]);
@@ -162,7 +166,8 @@ public class XmlRpcObject extends BaseFunction {
         return "[Remote "+url+"]";
     }
 
-    public Object getDefaultValue(Class hint) {
+    // TODO: Class<?>
+    public Object getDefaultValue(Class<?> hint) {
         if (hint == null || hint == String.class) {
             return toString();
         }

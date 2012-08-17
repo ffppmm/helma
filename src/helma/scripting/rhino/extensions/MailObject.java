@@ -54,7 +54,11 @@ import org.mozilla.javascript.Wrapper;
  */
 public class MailObject extends ScriptableObject implements Serializable {
 
-    public static final int OK = 0;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = -4834981850233741039L;
+	public static final int OK = 0;
     public static final int SUBJECT = 10;
     public static final int TEXT = 11;
     public static final int MIMEPART = 12;

@@ -129,7 +129,9 @@ public class XmlObject {
         writer.setDatabaseMode(dbmode);
         writer.write(node);
         writer.flush();
-        return out.toString("UTF-8");
+        String returnValue = out.toString("UTF-8");
+        writer.close();
+        return returnValue;
     }
 
     /**

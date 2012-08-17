@@ -77,7 +77,8 @@ public class DatabaseObject {
     DatabaseObject(String driverName) {
         this.driverName = driverName;
         try {
-            Class driverClass = Class.forName(driverName);
+        	// TODO: Class<?>
+            Class<?> driverClass = Class.forName(driverName);
             if (!Driver.class.isAssignableFrom(driverClass)) {
 
                 // System.err.println("##Bad class " + driverClass);
@@ -279,7 +280,7 @@ public class DatabaseObject {
         private transient Statement statement = null;
         private transient ResultSet resultSet = null;
         private transient ResultSetMetaData resultSetMetaData = null;
-        private transient Vector colNames = null;
+        private transient Vector<String> colNames = null;
         private transient boolean lastRowSeen = false;
         private transient boolean firstRowSeen = false;
         private transient Exception lastError = null;
@@ -302,14 +303,14 @@ public class DatabaseObject {
                 this.resultSetMetaData = resultSet.getMetaData();
                 int numcols = resultSetMetaData.getColumnCount();
                 //IServer.getLogger().log("$$NEXT : " + numcols);
-                colNames = new Vector(numcols);
+                colNames = new Vector<String>(numcols);
                 for (int i=0; i<numcols; i++) {
                    String colName = resultSetMetaData.getColumnLabel(i+1);
                    //IServer.getLogger().log("$$COL : " + colName);
                    colNames.addElement(colName);
                 }
             } catch(SQLException e) {
-                colNames = new Vector(); // An empty one
+                colNames = new Vector<String>(); // An empty one
                 throw new SQLException("Could not get column names: "+e);
 
                 // System.err.println("##Cannot get column names: " + e);
@@ -594,9 +595,9 @@ public class DatabaseObject {
          *
          * @return the enumerator - may have 0 length of coulmn names where not found
          */
-       public Enumeration getProperties() {
+       public Enumeration<String> getProperties() {
            if (resultSet == null) {
-                return (new Vector()).elements();
+                return (new Vector<String>()).elements();
            }
            return colNames.elements();
        }

@@ -155,7 +155,14 @@ public class ImageObject {
     }
 
     static class GetInfo extends BaseFunction {
-        public Object call(Context cx, Scriptable scope,
+        /**
+		 * 
+		 */
+		private static final long serialVersionUID = 109556119036857349L;
+
+		// TODO: remove these strange instanceof
+		@SuppressWarnings("resource")
+		public Object call(Context cx, Scriptable scope,
                            Scriptable thisObj, Object[] args) {
             if (args.length != 1) {
                 throw new IllegalArgumentException("Image.getInfo() expects one argument");
