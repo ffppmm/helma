@@ -35,7 +35,12 @@ import java.util.TreeSet;
  */
 public class ResourceProperties extends Properties {
 
-    // Delay between checks
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = -3615009124371630994L;
+
+	// Delay between checks
     private final long CACHE_TIME = 1500L;
 
     // Default properties. Note that in contrast to java.util.Properties,
@@ -62,7 +67,7 @@ public class ResourceProperties extends Properties {
     private String resourceName;
 
     // Sorted map of resources
-    private Set resources;
+    private Set<Resource> resources;
 
     // lower case key to original key mapping for case insensitive lookups
     private Properties keyMap = new Properties();
@@ -81,7 +86,7 @@ public class ResourceProperties extends Properties {
         // TODO: we can't use TreeSet because we don't have the app's resource comparator
         // Since resources don't implement Comparable, we can't add them to a "naked" TreeSet
         // As a result, resource ordering is random when updating.
-        resources = new LinkedHashSet();
+        resources = new LinkedHashSet<Resource>();
     }
 
     /**
@@ -89,7 +94,7 @@ public class ResourceProperties extends Properties {
      * Resources must be added manually afterwards
      */
     public ResourceProperties(Application app) {
-        resources = new TreeSet(app.getResourceComparator());
+        resources = new TreeSet<Resource>(app.getResourceComparator());
     }
 
     /**
@@ -101,7 +106,7 @@ public class ResourceProperties extends Properties {
     public ResourceProperties(Application app, String resourceName) {
         this.app = app;
         this.resourceName = resourceName;
-        resources = new TreeSet(app.getResourceComparator());
+        resources = new TreeSet<Resource>(app.getResourceComparator());
     }
 
     /**
@@ -148,7 +153,7 @@ public class ResourceProperties extends Properties {
     private ResourceProperties(ResourceProperties parentProperties, String prefix) {
         this.parentProperties = parentProperties;
         this.prefix = prefix;
-        resources = new LinkedHashSet();
+        resources = new LinkedHashSet<Resource>();
         setIgnoreCase(parentProperties.ignoreCase);        
         forceUpdate();
     }
@@ -198,7 +203,7 @@ public class ResourceProperties extends Properties {
      * Get an iterator over the properties' resources
      * @return iterator over the properties' resources
      */
-    public Iterator getResources() {
+    public Iterator<Resource> getResources() {
         return resources.iterator();
     }
 
@@ -224,7 +229,7 @@ public class ResourceProperties extends Properties {
             // next we try to load properties from the application's
             // repositories, if we belong to any application
             if (resourceName != null) {
-                Iterator iterator = app.getRepositories().iterator();
+                Iterator<?> iterator = app.getRepositories().iterator();
                 while (iterator.hasNext()) {
                     try {
                         Repository repository = (Repository) iterator.next();
@@ -243,10 +248,10 @@ public class ResourceProperties extends Properties {
             // if these are subproperties, reload them from the parent properties
             if (parentProperties != null && prefix != null) {
                 parentProperties.update();
-                Iterator it = parentProperties.entrySet().iterator();
+                Iterator<Map.Entry<Object, Object>> it = parentProperties.entrySet().iterator();
                 int prefixLength = prefix.length();
                 while (it.hasNext()) {
-                    Map.Entry entry = (Map.Entry) it.next();
+                    Map.Entry<Object, Object> entry = it.next();
                     String key = entry.getKey().toString();
                     if (key.regionMatches(ignoreCase, 0, prefix, 0, prefixLength)) {
                         temp.put(key.substring(prefixLength), entry.getValue());
@@ -257,7 +262,7 @@ public class ResourceProperties extends Properties {
 
             // at last we try to load properties from the resource list
             if (resources != null) {
-                Iterator iterator = resources.iterator();
+                Iterator<Resource> iterator = resources.iterator();
                 while (iterator.hasNext()) {
                     try {
                         Resource res = (Resource) iterator.next();
@@ -275,7 +280,7 @@ public class ResourceProperties extends Properties {
             // Copy over new properties ...
             putAll(temp);
             // ... and remove properties which have been removed.
-            Iterator it = super.keySet().iterator();
+            Iterator<?> it = super.keySet().iterator();
             while (it.hasNext()) {
                 if (!temp.containsKey(it.next())) {
                     it.remove();
@@ -337,7 +342,7 @@ public class ResourceProperties extends Properties {
      * Returns an enumeration of all values
      * @return values enumeration
      */
-    public Enumeration elements() {
+    public Enumeration<Object> elements() {
         if ((System.currentTimeMillis() - lastCheck) > CACHE_TIME) {
             update();
         }
@@ -381,7 +386,7 @@ public class ResourceProperties extends Properties {
         long checksum = 0;
 
         if (resourceName != null) {
-            Iterator iterator = app.getRepositories().iterator();
+            Iterator<?> iterator = app.getRepositories().iterator();
             while (iterator.hasNext()) {
                 Repository repository = (Repository) iterator.next();
                 Resource resource = repository.getResource(resourceName);
@@ -392,7 +397,7 @@ public class ResourceProperties extends Properties {
         }
 
         if (resources != null) {
-            Iterator iterator = resources.iterator();
+            Iterator<Resource> iterator = resources.iterator();
             while (iterator.hasNext()) {
                 checksum += ((Resource) iterator.next()).lastModified();
             }
@@ -464,7 +469,7 @@ public class ResourceProperties extends Properties {
      * Returns an enumeration of all keys
      * @return keys enumeration
      */
-    public Enumeration keys() {
+    public Enumeration<Object> keys() {
         if ((System.currentTimeMillis() - lastCheck) > CACHE_TIME) {
             update();
         }
@@ -475,7 +480,7 @@ public class ResourceProperties extends Properties {
      * Returns a set of all keys
      * @return keys set
      */
-    public Set keySet() {
+    public Set<Object> keySet() {
         if ((System.currentTimeMillis() - lastCheck) > CACHE_TIME) {
             update();
         }

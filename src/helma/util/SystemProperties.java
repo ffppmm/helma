@@ -32,7 +32,11 @@ import java.util.Set;
  */
 public final class SystemProperties extends Properties {
 
-    final static long cacheTime = 1500L;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = -144293960633712841L;
+	final static long cacheTime = 1500L;
     private SystemProperties defaultProps; // the default/fallback properties.
     private File file; // the underlying properties file from which we read.
     private long lastread; // time we last read the underlying properties file
@@ -40,7 +44,7 @@ public final class SystemProperties extends Properties {
     private long lastadd; // time we last added or removed additional props
 
     // map of additional properties
-    private HashMap additionalProps = null;
+    private HashMap<String, Properties> additionalProps = null;
 
     // are keys case sensitive? 
     private boolean ignoreCase = true;
@@ -156,8 +160,8 @@ public final class SystemProperties extends Properties {
 
         // read additional properties from zip files, if available
         if (additionalProps != null) {
-            for (Iterator i = additionalProps.values().iterator(); i.hasNext();)
-                putAll((Properties) i.next());
+            for (Iterator<Properties> i = additionalProps.values().iterator(); i.hasNext();)
+                putAll(i.next());
         }
 
         lastread = System.currentTimeMillis();
@@ -174,7 +178,7 @@ public final class SystemProperties extends Properties {
         in.close();
 
         if (additionalProps == null) {
-            additionalProps = new HashMap();
+            additionalProps = new HashMap<String, Properties>();
         }
         additionalProps.put(key, newProps);
 
@@ -290,7 +294,7 @@ public final class SystemProperties extends Properties {
     /**
      *  Overrides method to act on the wrapped properties object.
      */
-    public Enumeration keys() {
+    public Enumeration<Object> keys() {
         if ((System.currentTimeMillis() - lastcheck) > cacheTime) {
             checkFile();
         }
@@ -301,7 +305,7 @@ public final class SystemProperties extends Properties {
     /**
      *  Overrides method to act on the wrapped properties object.
      */
-    public Set keySet() {
+    public Set<Object> keySet() {
         if ((System.currentTimeMillis() - lastcheck) > cacheTime) {
             checkFile();
         }
@@ -312,7 +316,7 @@ public final class SystemProperties extends Properties {
     /**
      *  Overrides method to act on the wrapped properties object.
      */
-    public Enumeration elements() {
+    public Enumeration<Object> elements() {
         if ((System.currentTimeMillis() - lastcheck) > cacheTime) {
             checkFile();
         }

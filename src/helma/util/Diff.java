@@ -45,10 +45,10 @@ import java.util.TreeMap;
  * Compares two lists, returning a list of the additions, changes, and deletions
  * between them. A <code>Comparator</code> may be passed as an argument to the
  * constructor, and will thus be used. If not provided, the initial value in the
- * <code>a</code> ("from") list will be looked at to see if it supports the
+ * <code>source</code> list will be looked at to see if it supports the
  * <code>Comparable</code> interface. If so, its <code>equals</code> and
- * <code>compareTo</code> methods will be invoked on the instances in the "from"
- * and "to" lists; otherwise, for speed, hash codes from the objects will be
+ * <code>compareTo</code> methods will be invoked on the instances in the "source"
+ * and "target" lists; otherwise, for speed, hash codes from the objects will be
  * used instead for comparison.
  *
  * <p>The file FileDiff.java shows an example usage of this class, in an
@@ -59,17 +59,17 @@ public class Diff
     /**
      * The source list, AKA the "from" values.
      */
-    protected List a;
+    protected List<Object> source;
 
     /**
      * The target list, AKA the "to" values.
      */
-    protected List b;
+    protected List<Object> target;
 
     /**
      * The list of differences, as <code>Difference</code> instances.
      */
-    protected List diffs = new ArrayList();
+    protected List<Difference> diffs = new ArrayList<Difference>();
 
     /**
      * The pending, uncommitted difference.
@@ -79,17 +79,17 @@ public class Diff
     /**
      * The comparator used, if any.
      */
-    private Comparator comparator;
+    private Comparator<Object> comparator;
 
     /**
      * The thresholds.
      */
-    private TreeMap thresh;
+    private TreeMap<Integer, Integer> thresh;
 
     /**
      * Constructs the Diff object for the two arrays, using the given comparator.
      */
-    public Diff(Object[] a, Object[] b, Comparator comp)
+    public Diff(Object[] a, Object[] b, Comparator<Object> comp)
     {
         this(Arrays.asList(a), Arrays.asList(b), comp);
     }
@@ -107,10 +107,10 @@ public class Diff
     /**
      * Constructs the Diff object for the two lists, using the given comparator.
      */
-    public Diff(List a, List b, Comparator comp)
+    public Diff(List<Object> a, List<Object> b, Comparator<Object> comp)
     {
-        this.a = a;
-        this.b = b;
+        this.source = a;
+        this.target = b;
         this.comparator = comp;
         this.thresh = null;
     }
@@ -120,7 +120,7 @@ public class Diff
      * comparison mechanism between the objects, such as <code>equals</code> and
      * <code>compareTo</code>.
      */
-    public Diff(List a, List b)
+    public Diff(List<Object> a, List<Object> b)
     {
         this(a, b, null);
     }
@@ -149,8 +149,8 @@ public class Diff
     {
         Integer[] matches = getLongestCommonSubsequences();
 
-        int lastA = a.size() - 1;
-        int lastB = b.size() - 1;
+        int lastA = source.size() - 1;
+        int lastB = target.size() - 1;
         int bi = 0;
         int ai;
 
@@ -301,61 +301,61 @@ public class Diff
     public Integer[] getLongestCommonSubsequences()
     {
         int aStart = 0;
-        int aEnd = a.size() - 1;
+        int aEnd = source.size() - 1;
 
         int bStart = 0;
-        int bEnd = b.size() - 1;
+        int bEnd = target.size() - 1;
 
-        TreeMap matches = new TreeMap();
+        TreeMap<Integer, Integer> matches = new TreeMap<Integer, Integer>();
 
-        while (aStart <= aEnd && bStart <= bEnd && equals(a.get(aStart), b.get(bStart))) {
+        while (aStart <= aEnd && bStart <= bEnd && equals(source.get(aStart), target.get(bStart))) {
             matches.put(Integer.valueOf(aStart++), Integer.valueOf(bStart++));
         }
 
-        while (aStart <= aEnd && bStart <= bEnd && equals(a.get(aEnd), b.get(bEnd))) {
+        while (aStart <= aEnd && bStart <= bEnd && equals(source.get(aEnd), target.get(bEnd))) {
             matches.put(Integer.valueOf(aEnd--), Integer.valueOf(bEnd--));
         }
 
-        Map bMatches = null;
+        Map<Object, List<Object>> bMatches = null;
         if (comparator == null) {
-            if (a.size() > 0 && a.get(0) instanceof Comparable) {
+            if (source.size() > 0 && source.get(0) instanceof Comparable) {
                 // this uses the Comparable interface
-                bMatches = new TreeMap();
+                bMatches = new TreeMap<Object, List<Object>>();
             }
             else {
                 // this just uses hashCode()
-                bMatches = new HashMap();
+                bMatches = new HashMap<Object, List<Object>>();
             }
         }
         else {
             // we don't really want them sorted, but this is the only Map
             // implementation (as of JDK 1.4) that takes a comparator.
-            bMatches = new TreeMap(comparator);
+            bMatches = new TreeMap<Object, List<Object>>(comparator);
         }
 
         for (int bi = bStart; bi <= bEnd; ++bi) {
-            Object         element    = b.get(bi);
+            Object         element    = target.get(bi);
             Object          key       = element;
-            List positions = (List) bMatches.get(key);
+            List<Object> positions = bMatches.get(key);
             
             if (positions == null) {
-                positions = new ArrayList();
+                positions = new ArrayList<Object>();
                 bMatches.put(key, positions);
             }
             
             positions.add(Integer.valueOf(bi));
         }
 
-        thresh = new TreeMap();
-        Map links = new HashMap();
+        thresh = new TreeMap<Integer, Integer>();
+        Map<Integer, Object[]> links = new HashMap<Integer, Object[]>();
 
         for (int i = aStart; i <= aEnd; ++i) {
-            Object aElement  = a.get(i);
-            List positions = (List) bMatches.get(aElement);
+            Object aElement  = source.get(i);
+            List<?> positions = (List<?>) bMatches.get(aElement);
 
             if (positions != null) {
                 Integer  k   = Integer.valueOf(0);
-                ListIterator pit = positions.listIterator(positions.size());
+                ListIterator<?> pit = positions.listIterator(positions.size());
                 while (pit.hasPrevious()) {
                     Integer j = (Integer) pit.previous();
 
@@ -385,7 +385,7 @@ public class Diff
 
         int       size = matches.size() == 0 ? 0 : 1 + ((Integer) matches.lastKey()).intValue();
         Integer[] ary  = new Integer[size];
-        for (Iterator it = matches.keySet().iterator(); it.hasNext();) {
+        for (Iterator<Integer> it = matches.keySet().iterator(); it.hasNext();) {
             Integer idx = (Integer) it.next();
             Integer val = (Integer) matches.get(idx);
             ary[idx.intValue()] = val;
@@ -639,12 +639,12 @@ public class Diff
         public final int inserted;
         public final int deleted;
 
-        public static Change fromList(List diffs) {
-            Iterator iter = diffs.iterator();
+        public static Change fromList(List<Difference> diffs) {
+            Iterator<Difference> iter = diffs.iterator();
             return iter.hasNext() ? new Change(iter, 0, 0) : null;
         }
 
-        private Change(Iterator iter, int prev0, int prev1) {
+        private Change(Iterator<Difference> iter, int prev0, int prev1) {
             Difference diff = (Difference) iter.next();
             if (diff.getDeletedEnd() == Difference.NONE) {
                 line0 = prev0 + diff.getAddedStart() - prev1;

@@ -13,7 +13,7 @@ import java.util.Stack;
 
 public class MarkdownProcessor {
 
-    private HashMap links = new HashMap();
+    private HashMap<String, String[]> links = new HashMap<String, String[]>();
     private int state;
     private int i;
     private int length;
@@ -28,16 +28,13 @@ public class MarkdownProcessor {
 
     private String result = null;
 
-    // private Logger log = Logger.getLogger(MarkdownProcessor.class);
-    private int line;
-
     private final int
         // stage 1 states
         NONE = 0, NEWLINE = 1, LINK_ID = 2, LINK_URL = 3,
         // stage 2 states
         HEADER = 4, PARAGRAPH = 5, LIST = 6, HTML_BLOCK = 7, CODE = 8;
 
-    static final Set blockTags = new HashSet();
+    static final Set<String> blockTags = new HashSet<String>();
 
     static {
         blockTags.add("p");
@@ -271,7 +268,6 @@ public class MarkdownProcessor {
         state = NEWLINE;
         stack.add(new BaseElement());
         buffer = new StringBuilder((int) (length * 1.2));
-        line = 1;
         boolean escape = false;
 
         for (i = 0; i < length; ) {
@@ -356,8 +352,6 @@ public class MarkdownProcessor {
             while (i < length && chars[i] == '\n') {
 
                 c = chars[i];
-                line += 1;
-
                 if (state == HTML_BLOCK &&
                         (i >= length - 1 || chars[i + 1] != '\n')) {
                     buffer.append(c);
@@ -453,7 +447,7 @@ public class MarkdownProcessor {
             int found = n;
             boolean isStartTag = j < length  - 1 && !Character.isWhitespace(chars[j]);
             if (isStartTag && (emph[0] == null || emph[1] == null)) {
-                List possibleEndTags = new ArrayList();
+                List<int[]> possibleEndTags = new ArrayList<int[]>();
                 char lastChar = 0;
                 int count = 0;
                 boolean escape = false;
@@ -506,7 +500,7 @@ public class MarkdownProcessor {
         return false;
     }
 
-    private Emphasis checkEmphasisInternal(int length, List possibleEndTags) {
+    private Emphasis checkEmphasisInternal(int length, List<int[]> possibleEndTags) {
         for (int k = 0; k < possibleEndTags.size(); k++) {
             int[] possibleEndTag = (int[]) possibleEndTags.get(k);
             if (possibleEndTag[1] >= length) {
@@ -1117,7 +1111,6 @@ public class MarkdownProcessor {
 
     private synchronized String processLinkText() {
         buffer = new StringBuilder((int) (length * 1.2));
-        line = 1;
         boolean escape = false;
 
         for (i = 0; i < length; ) {
@@ -1180,10 +1173,10 @@ public class MarkdownProcessor {
         return l;
     }
 
-    class ElementStack extends Stack {
+    class ElementStack extends Stack<Object> {
         private static final long serialVersionUID = 8514510754511119691L;
 
-        private Element search(Class clazz) {
+        private Element search(Class<ListElement> clazz) {
             for (int i = size() - 1; i >= 0; i--) {
                 Element elem = (Element) get(i);
                 if (clazz.isInstance(elem)) {
@@ -1222,8 +1215,8 @@ public class MarkdownProcessor {
             return null;
         }
 
-        private Element findNestedElement(Class type, int nesting) {
-            for (Iterator it = iterator(); it.hasNext();) {
+        private Element findNestedElement(Class<?> type, int nesting) {
+            for (Iterator<?> it = iterator(); it.hasNext();) {
                 Element elem = (Element) it.next();
                 if (nesting == elem.nesting && type.isInstance(elem)) {
                     return elem;
@@ -1244,7 +1237,7 @@ public class MarkdownProcessor {
             }
         }
 
-        private void closeElementsUnlessExists(Class type, int nesting) {
+        private void closeElementsUnlessExists(Class<?> type, int nesting) {
             Element elem = this.findNestedElement(type, nesting);
             if (elem == null) {
                 while(stack.size() > 0) {

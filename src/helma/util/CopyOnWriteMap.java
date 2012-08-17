@@ -69,7 +69,7 @@ public class CopyOnWriteMap extends WrappedMap {
 
     public synchronized Object put(Object key, Object value) {
         if (!modified) {
-            wrapped = new HashMap(wrapped);
+            wrapped = new HashMap<Object, Object>(wrapped);
             modified = true;
         }
         return wrapped.put(key, value);
@@ -77,7 +77,7 @@ public class CopyOnWriteMap extends WrappedMap {
 
     public synchronized Object remove(Object key) {
         if (!modified) {
-            wrapped = new HashMap(wrapped);
+            wrapped = new HashMap<Object, Object>(wrapped);
             modified = true;
         }
         return wrapped.remove(key);
@@ -85,7 +85,7 @@ public class CopyOnWriteMap extends WrappedMap {
 
     public synchronized void putAll(Map t) {
         if (!modified) {
-            wrapped = new HashMap(wrapped);
+            wrapped = new HashMap<Object, Object>(wrapped);
             modified = true;
         }
         wrapped.putAll(t);
@@ -93,7 +93,7 @@ public class CopyOnWriteMap extends WrappedMap {
 
     public synchronized void clear() {
         if (!modified) {
-            wrapped = new HashMap(wrapped);
+            wrapped = new HashMap<Object, Object>(wrapped);
             modified = true;
         }
         wrapped.clear();
@@ -101,11 +101,11 @@ public class CopyOnWriteMap extends WrappedMap {
 
     // Views
 
-    public synchronized Set keySet() {
+    public synchronized Set<Object> keySet() {
         return wrapped.keySet();
     }
 
-    public synchronized Collection values() {
+    public synchronized Collection<Object> values() {
         return wrapped.values();
     }
 

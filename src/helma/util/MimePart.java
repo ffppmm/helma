@@ -33,7 +33,11 @@ import org.apache.commons.fileupload.FileItem;
  * This represents a MIME part of a HTTP file upload
  */
 public class MimePart implements Serializable {
-    private final String name;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 7800159441938112415L;
+	private final String name;
     private int contentLength;
     private String contentType;
     private byte[] content;

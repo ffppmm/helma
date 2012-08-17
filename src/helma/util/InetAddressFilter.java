@@ -25,13 +25,13 @@ import java.util.Vector;
  * A class for paranoid servers to filter IP addresses.
  */
 public class InetAddressFilter {
-    private Vector patterns;
+    private Vector<int[]> patterns;
 
     /**
      * Creates a new InetAddressFilter object.
      */
     public InetAddressFilter() {
-        patterns = new Vector();
+        patterns = new Vector<int[]>();
     }
 
     /**

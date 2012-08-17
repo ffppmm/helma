@@ -259,7 +259,9 @@ public class CronJob {
                 return 0;
         }
         
-        public boolean equals (CronJob o1, CronJob o2) {
+        // TODO: check if we need this
+        @SuppressWarnings("unused")
+		public boolean equals (CronJob o1, CronJob o2) {
             if (o1 != null) {
                 return o1.equals (o2);
             } else {

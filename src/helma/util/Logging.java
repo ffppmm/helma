@@ -41,10 +41,10 @@ public class Logging extends LogFactory {
     static Runner runner;
 
     // the list of active loggers
-    static ArrayList loggers = new ArrayList();
+    static ArrayList<Logger> loggers = new ArrayList<Logger>();
 
     // hash map of loggers
-    static HashMap loggerMap = new HashMap();
+    static HashMap<String, Logger> loggerMap = new HashMap<String, Logger>();
 
     // log directory
     String logdir;
@@ -185,7 +185,7 @@ public class Logging extends LogFactory {
      */
     static void rotateLogs() {
         int nloggers = loggers.size();
-        ArrayList files = new ArrayList(nloggers);
+        ArrayList<File> files = new ArrayList<File>(nloggers);
 
         for (int i = nloggers - 1; i >= 0; i--) {
             FileLogger log = (FileLogger) loggers.get(i);

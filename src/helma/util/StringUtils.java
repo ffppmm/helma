@@ -76,8 +76,8 @@ public class StringUtils {
      * @param en an enumeration of strings
      * @return the enumeration values as string array
      */
-    public static String[] collect(Enumeration en) {
-        List list = new ArrayList();
+    public static String[] collect(Enumeration<String> en) {
+        List<String> list = new ArrayList<String>();
         while (en.hasMoreElements()) {
             list.add(en.nextElement());
         }

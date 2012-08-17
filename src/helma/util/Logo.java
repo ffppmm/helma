@@ -165,7 +165,7 @@ public class Logo {
                 }
             }
         }
-
+        fis.close();
         System.out.print("  };\n\n\n");
     }
 }

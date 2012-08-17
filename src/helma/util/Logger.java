@@ -35,7 +35,7 @@ public class Logger implements Log {
 
     // buffer for log items; create a synchronized list for log entries since
     // different threads may attempt to modify the list at the same time
-    List entries = Collections.synchronizedList(new LinkedList());
+    List<Entry> entries = Collections.synchronizedList(new LinkedList<Entry>());
 
     // Writer for log output
     PrintWriter writer;

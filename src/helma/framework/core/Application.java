@@ -208,8 +208,9 @@ public final class Application implements Runnable {
 
     // the list of currently active cron jobs
     Hashtable<String,CronRunner> activeCronJobs = null;
+    
     // the list of custom cron jobs
-    Hashtable<String,CronJob> customCronJobs = null;
+    Map<String, CronJob> customCronJobs = null;
 
     private ResourceComparator resourceComparator;
     private Resource currentCodeResource;

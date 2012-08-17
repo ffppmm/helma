@@ -471,7 +471,7 @@ public final class Prototype {
      */
     class ScriptableSkinMap extends WrappedMap {
 
-        public ScriptableSkinMap(Map<?, ?> wrapped) {
+        public ScriptableSkinMap(Map<Object, Object> wrapped) {
             super(wrapped);
         }
 

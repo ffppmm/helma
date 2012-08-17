@@ -166,7 +166,7 @@ public final class HtmlEncoder {
         "&yuml;"    // 255
     };
 
-    static final HashSet allTags = new HashSet();
+    static final HashSet<String> allTags = new HashSet<String>();
 
     static {
         allTags.add("a");
@@ -276,9 +276,9 @@ public final class HtmlEncoder {
     // conversion around them to look good. However, they differ
     // in how many newlines around them should ignored. These sets
     // help to treat each tag right in newline conversion.
-    static final HashSet internalTags = new HashSet();
-    static final HashSet blockTags = new HashSet();
-    static final HashSet semiBlockTags = new HashSet();
+    static final HashSet<String> internalTags = new HashSet<String>();
+    static final HashSet<String> blockTags = new HashSet<String>();
+    static final HashSet<String> semiBlockTags = new HashSet<String>();
 
     static {
         // actual block level elements
@@ -326,7 +326,7 @@ public final class HtmlEncoder {
     }
 
     // set of tags that are always empty
-    static final HashSet emptyTags = new HashSet();
+    static final HashSet<String> emptyTags = new HashSet<String>();
 
     static {
         emptyTags.add("area");
@@ -401,7 +401,7 @@ public final class HtmlEncoder {
      *                     tags will be escaped
      */
     public final static void encode(String str, StringBuffer ret,
-                                    boolean paragraphs, Set allowedTags) {
+                                    boolean paragraphs, Set<?> allowedTags) {
         if (str == null) {
             return;
         }
@@ -419,7 +419,7 @@ public final class HtmlEncoder {
         byte entering = TEXT;
         byte exiting = TEXT;
 
-        Stack openTags = new Stack();
+        Stack<String> openTags = new Stack<String>();
 
         // are we currently within a < and a > that consitute some kind of tag?
         // we use tag balancing to know whether we are inside a tag (and should

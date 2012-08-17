@@ -187,22 +187,22 @@ public class FileLogger extends Logger implements Log {
      * a Thread class that zips up a file, filename will stay the same.
      */
     static class GZipper extends Thread {
-        List files;
+        List<File> files;
         final static int BUFFER_SIZE = 8192;
 
-        public GZipper(List files) {
+        public GZipper(List<File> files) {
             this.files = files;
             setPriority(MIN_PRIORITY);
         }
 
         public GZipper(File file) {
-            files = new ArrayList(1);
+            files = new ArrayList<File>(1);
             files.add(file);
             setPriority(MIN_PRIORITY);
         }
 
         public void run() {
-            Iterator it = files.iterator();
+            Iterator<File> it = files.iterator();
             File file = null;
 
             while (it.hasNext()) {

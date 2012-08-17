@@ -27,6 +27,7 @@ import helma.objectmodel.INode;
 import helma.objectmodel.db.DbSource;
 import helma.util.CronJob;
 import helma.util.SystemMap;
+import helma.util.WrappedCronJobMap;
 import helma.util.WrappedMap;
 
 import java.io.File;
@@ -394,8 +395,8 @@ public class ApplicationBean implements Serializable {
      *
      * @return a map of cron jobs
      */
-    public Map<Object, Object> getCronJobs() {
-        return new WrappedMap(app.customCronJobs, true);
+    public Map<String, CronJob> getCronJobs() {
+        return new WrappedCronJobMap(app.customCronJobs, true);
     }
 
     /**
