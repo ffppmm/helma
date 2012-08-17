@@ -42,7 +42,7 @@ import java.util.Vector;
 public class XmlWriter extends OutputStreamWriter implements XmlConstants {
     private final static String LINESEPARATOR = System.getProperty("line.separator");
     private static int fileid;
-    private Vector convertedNodes;
+    private Vector<INode> convertedNodes;
     private int maxLevels = 3;
     private String indent = "  ";
     private StringBuffer prefix = new StringBuffer();
@@ -192,7 +192,7 @@ public class XmlWriter extends OutputStreamWriter implements XmlConstants {
      */
     public boolean write(INode node) throws IOException {
         rootState = node.getState();
-        convertedNodes = new Vector();
+        convertedNodes = new Vector<INode>();
 
         if (explicitEncoding == null) {
             writeln("<?xml version=\"1.0\"?>");
@@ -271,12 +271,12 @@ public class XmlWriter extends OutputStreamWriter implements XmlConstants {
      */
     private void writeProperties(INode node, int level)
                           throws IOException {
-        Enumeration e = null;
+        Enumeration<?> e = null;
 
         if (dbmode && node instanceof Node) {
             // a newly constructed db.Node doesn't have a propMap,
             // but returns an enumeration of all it's db-mapped properties
-            Hashtable props = ((Node) node).getPropMap();
+            Hashtable<?, ?> props = ((Node) node).getPropMap();
 
             if (props == null) {
                 return;
@@ -408,7 +408,7 @@ public class XmlWriter extends OutputStreamWriter implements XmlConstants {
             }
         }
 
-        Enumeration e = node.getSubnodes();
+        Enumeration<?> e = node.getSubnodes();
 
         while (e.hasMoreElements()) {
             INode nextNode = (INode) e.nextElement();

@@ -49,7 +49,7 @@ public final class XmlDatabaseReader extends DefaultHandler implements XmlConsta
     private String elementType = null;
     private String elementName = null;
     private StringBuffer charBuffer = null;
-    Hashtable propMap = null;
+    Hashtable<String, Property> propMap = null;
     SubnodeList subnodes = null;
 
     /**
@@ -148,7 +148,7 @@ public final class XmlDatabaseReader extends DefaultHandler implements XmlConsta
                 prop.setNodeHandle(handle);
 
                 if (propMap == null) {
-                    propMap = new Hashtable();
+                    propMap = new Hashtable<String, Property>();
                     currentNode.setPropMap(propMap);
                 }
 
@@ -241,7 +241,7 @@ public final class XmlDatabaseReader extends DefaultHandler implements XmlConsta
             }
 
             if (propMap == null) {
-                propMap = new Hashtable();
+                propMap = new Hashtable<String, Property>();
                 currentNode.setPropMap(propMap);
             }
 

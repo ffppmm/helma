@@ -47,8 +47,8 @@ public final class XmlReader extends DefaultHandler implements XmlConstants {
     static SAXParserFactory factory = SAXParserFactory.newInstance();
     private INode rootNode;
     private INode currentNode;
-    private Stack nodeStack;
-    private HashMap convertedNodes;
+    private Stack<INode> nodeStack;
+    private HashMap<String, INode> convertedNodes;
     private String elementType = null;
     private String elementName = null;
     private StringBuffer charBuffer = null;
@@ -105,8 +105,8 @@ public final class XmlReader extends DefaultHandler implements XmlConstants {
 
         rootNode = helmaNode;
         currentNode = null;
-        convertedNodes = new HashMap();
-        nodeStack = new Stack();
+        convertedNodes = new HashMap<String, INode>();
+        nodeStack = new Stack<INode>();
         parsingHopObject = true;
 
         parser.parse(in, this);

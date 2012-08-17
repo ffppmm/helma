@@ -157,7 +157,7 @@ public class XmlConverter implements XmlConstants {
         Document document = XmlUtil.parse(in);
 
         if ((document != null) && (document.getDocumentElement() != null)) {
-            return convert(document.getDocumentElement(), helmaNode, new HashMap());
+            return convert(document.getDocumentElement(), helmaNode, new HashMap<String, Object>());
         } else {
             return helmaNode;
         }
@@ -178,7 +178,7 @@ public class XmlConverter implements XmlConstants {
         Document document = XmlUtil.parse(new InputSource(new StringReader(xml)));
 
         if ((document != null) && (document.getDocumentElement() != null)) {
-            return convert(document.getDocumentElement(), helmaNode, new HashMap());
+            return convert(document.getDocumentElement(), helmaNode, new HashMap<String, Object>());
         } else {
             return helmaNode;
         }
@@ -193,7 +193,7 @@ public class XmlConverter implements XmlConstants {
      *
      * @return ...
      */
-    public INode convert(Element element, INode helmaNode, Map nodeCache) {
+    public INode convert(Element element, INode helmaNode, Map<String, Object> nodeCache) {
         offset++;
 
         // previousNode is used to cache previous nodes with the same prototype
@@ -240,7 +240,7 @@ public class XmlConverter implements XmlConstants {
      * parse xml children and create hopobject-children
      */
     private INode children(Element element, helma.objectmodel.INode helmaNode,
-                           Map nodeCache) {
+                           Map<String, Object> nodeCache) {
         NodeList list = element.getChildNodes();
         int len = list.getLength();
         boolean nodeIsInitialized = !nodeCache.isEmpty();
@@ -472,7 +472,7 @@ public class XmlConverter implements XmlConstants {
     /**
      * set element's attributes as properties of helmaNode
      */
-    private INode attributes(Element element, INode helmaNode, Map nodeCache) {
+    private INode attributes(Element element, INode helmaNode, Map<String, Object> nodeCache) {
         NamedNodeMap nnm = element.getAttributes();
         int len = nnm.getLength();
 

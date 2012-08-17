@@ -376,8 +376,9 @@ public final class XmlDatabase implements IDatabase {
 
     class XmlTransaction implements ITransaction {
 
-        ArrayList writeFiles = new ArrayList();
-        ArrayList deleteFiles = new ArrayList();
+    	// TODO: Object right Type?
+        ArrayList<Object> writeFiles = new ArrayList<Object>();
+        ArrayList<Object> deleteFiles = new ArrayList<Object>();
 
         /**
          * Complete the transaction by making its changes persistent.

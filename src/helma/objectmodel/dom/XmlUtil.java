@@ -36,7 +36,7 @@ import org.xml.sax.SAXException;
  */
 public class XmlUtil {
     private static final DocumentBuilderFactory domBuilderFactory = javax.xml.parsers.DocumentBuilderFactory.newInstance();
-    private static final WeakHashMap domBuilders = new WeakHashMap();
+    private static final WeakHashMap<Thread, DocumentBuilder> domBuilders = new WeakHashMap<Thread, DocumentBuilder>();
 
     private static synchronized DocumentBuilder getDocumentBuilder() {
         DocumentBuilder domBuilder = (DocumentBuilder) domBuilders.get(Thread.currentThread());
