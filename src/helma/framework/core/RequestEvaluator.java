@@ -113,7 +113,7 @@ public final class RequestEvaluator implements Runnable {
                                                      "helma.scripting.rhino.RhinoEngine");
             try {
                 app.setCurrentRequestEvaluator(this);
-                Class clazz = app.getClassLoader().loadClass(engineClassName);
+                Class<?> clazz = app.getClassLoader().loadClass(engineClassName);
 
                 scriptingEngine = (ScriptingEngine) clazz.newInstance();
                 scriptingEngine.init(app, this);
@@ -360,7 +360,7 @@ public final class RequestEvaluator implements Runnable {
 
                                     // register path objects with their prototype names in
                                     // res.handlers
-                                    Map macroHandlers = res.getMacroHandlers();
+                                    Map<String, Object> macroHandlers = res.getMacroHandlers();
                                     int l = requestPath.size();
                                     Prototype[] protos = new Prototype[l];
 
@@ -416,7 +416,8 @@ public final class RequestEvaluator implements Runnable {
                                         XmlRpcRequestProcessor xreqproc = new XmlRpcRequestProcessor();
                                         XmlRpcServerRequest xreq = xreqproc.decodeRequest(req.getServletRequest()
                                                 .getInputStream());
-                                        Vector args = xreq.getParameters();
+                                        @SuppressWarnings("unchecked")
+										Vector<String> args = xreq.getParameters();
                                         args.add(0, xreq.getMethodName());
                                         result = scriptingEngine.invoke(currentElement,
                                                 actionProcessor,
@@ -1010,7 +1011,7 @@ public final class RequestEvaluator implements Runnable {
      */
     private synchronized void initGlobals(Object root, Object requestPath)
                 throws ScriptingException {
-        HashMap globals = new HashMap();
+        HashMap<String, Object> globals = new HashMap<String, Object>();
 
         globals.put("root", root);
         globals.put("session", new SessionBean(session));

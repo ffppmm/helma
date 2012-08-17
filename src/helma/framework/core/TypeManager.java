@@ -48,14 +48,14 @@ public final class TypeManager {
     private HashMap<String, Prototype> prototypes;
 
     // set of Java archives
-    private HashSet jarfiles;
+    private HashSet<String> jarfiles;
 
     // set of directory names to ignore
-    private HashSet ignoreDirs;
+    private HashSet<String> ignoreDirs;
 
     private long lastCheck = 0;
     private long lastCodeUpdate;
-    private HashMap lastRepoScan;
+    private HashMap<Repository, Long> lastRepoScan;
 
     // app specific class loader, includes jar files in the app directory
     private AppClassLoader loader;
@@ -69,10 +69,10 @@ public final class TypeManager {
      */
     public TypeManager(Application app, String ignore) {
         this.app = app;
-        prototypes = new HashMap();
-        jarfiles = new HashSet();
-        ignoreDirs = new HashSet();
-        lastRepoScan = new HashMap();
+        prototypes = new HashMap<String, Prototype>();
+        jarfiles = new HashSet<String>();
+        ignoreDirs = new HashSet<String>();
+        lastRepoScan = new HashMap<Repository, Long>();
         // split ignore dirs list and add to hash set
         if (ignore != null) {
             String[] arr = StringUtils.split(ignore, ",");
@@ -167,7 +167,7 @@ public final class TypeManager {
             }
         }
 
-        Iterator resources = repository.getResources();
+        Iterator<?> resources = repository.getResources();
         while (resources.hasNext()) {
             // check for jar files to add to class loader
             Resource resource = (Resource) resources.next();
@@ -190,7 +190,7 @@ public final class TypeManager {
      * there are any prototypes to be created.
      */
     private synchronized void checkRepositories() throws IOException {
-        List list = app.getRepositories();
+        List<?> list = app.getRepositories();
 
         // walk through repositories and check if any of them have changed.
         for (int i = 0; i < list.size(); i++) {
@@ -211,7 +211,7 @@ public final class TypeManager {
         // loop through prototypes and check if type.properties needs updates
         // it's important that we do this _after_ potentially new prototypes
         // have been created in the previous loop.
-        for (Iterator i = prototypes.values().iterator(); i.hasNext();) {
+        for (Iterator<Prototype> i = prototypes.values().iterator(); i.hasNext();) {
             Prototype proto = (Prototype) i.next();
 
             if (debug) {
@@ -303,7 +303,7 @@ public final class TypeManager {
      * @param typeProps custom type mapping properties
      * @return the newly created prototype
      */
-    public synchronized Prototype createPrototype(String typename, Repository repository, Map typeProps) {
+    public synchronized Prototype createPrototype(String typename, Repository repository, Map<?, ?> typeProps) {
         if ("true".equalsIgnoreCase(app.getProperty("helma.debugTypeManager"))) {
             System.err.println("CREATE: " + typename + " from " + repository + " in " + Thread.currentThread());
             // Thread.dumpStack();

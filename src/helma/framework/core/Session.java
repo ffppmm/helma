@@ -60,7 +60,7 @@ public class Session implements Serializable {
     protected String message;
     protected StringBuffer debugBuffer;
 
-    protected HashMap uploads = null;
+    protected HashMap<String, UploadStatus> uploads = null;
 
     protected transient boolean modifiedInRequest = false;
     protected transient boolean registered = false;
@@ -389,7 +389,7 @@ public class Session implements Serializable {
 
     protected UploadStatus createUpload(String uploadId) {
         if (uploads == null) {
-            uploads = new HashMap();
+            uploads = new HashMap<String, UploadStatus>();
         }
         UploadStatus status = new UploadStatus();
         uploads.put(uploadId, status);
@@ -407,7 +407,7 @@ public class Session implements Serializable {
     protected void pruneUploads() {
         if (uploads == null || uploads.isEmpty())
             return;
-        for (Iterator it = uploads.values().iterator(); it.hasNext();) {
+        for (Iterator<UploadStatus> it = uploads.values().iterator(); it.hasNext();) {
             UploadStatus status = (UploadStatus) it.next();
             if (status.isDisposable()) {
                 it.remove();

@@ -58,12 +58,12 @@ public final class Prototype {
     // the time at which any of the prototype's files were found updated the last time
     volatile long lastCodeUpdate = 0;
 
-    TreeSet code;
-    TreeSet skins;
+    TreeSet<Resource> code;
+    TreeSet<Resource> skins;
 
-    HashMap trackers;
+    HashMap<String, ResourceTracker> trackers;
 
-    TreeSet repositories;
+    TreeSet<Repository> repositories;
 
     // a map of this prototype's skins as raw strings
     // used for exposing skins to application (script) code (via app.skinfiles).
@@ -83,11 +83,11 @@ public final class Prototype {
      * @param app the application this prototype is a part of
      * @param typeProps custom type mapping properties
      */
-    public Prototype(String name, Repository repository, Application app, Map typeProps) {
+    public Prototype(String name, Repository repository, Application app, Map<?, ?> typeProps) {
         // app.logEvent ("Constructing Prototype "+app.getName()+"/"+name);
         this.app = app;
         this.name = name;
-        repositories = new TreeSet(app.getResourceComparator());
+        repositories = new TreeSet<Repository>(app.getResourceComparator());
         if (repository != null) {
             repositories.add(repository);
         }
@@ -107,10 +107,10 @@ public final class Prototype {
         // dbmappings are checked separately in TypeManager.checkFiles() for
         // each request
 
-        code = new TreeSet(app.getResourceComparator());
-        skins = new TreeSet(app.getResourceComparator());
+        code = new TreeSet<Resource>(app.getResourceComparator());
+        skins = new TreeSet<Resource>(app.getResourceComparator());
 
-        trackers = new HashMap();
+        trackers = new HashMap<String, ResourceTracker>();
 
         skinMap = new SkinMap();
     }
@@ -136,7 +136,7 @@ public final class Prototype {
             if (update) {
                 RequestEvaluator eval = app.getCurrentRequestEvaluator();
                 ScriptingEngine engine = eval == null ? null : eval.scriptingEngine;
-                Iterator it = repository.getAllResources().iterator();
+                Iterator<?> it = repository.getAllResources().iterator();
                 while (it.hasNext()) {
                     checkResource((Resource) it.next(), engine);
                 }
@@ -153,7 +153,7 @@ public final class Prototype {
         boolean updatedResources = false;
 
         // check if any resource the prototype knows about has changed or gone
-        for (Iterator i = trackers.values().iterator(); i.hasNext();) {
+        for (Iterator<ResourceTracker> i = trackers.values().iterator(); i.hasNext();) {
             ResourceTracker tracker = (ResourceTracker) i.next();
 
             try {
@@ -222,12 +222,12 @@ public final class Prototype {
         long checksum = getRepositoryChecksum();
         // reload resources if the repositories checksum has changed
         if (checksum != lastChecksum) {
-            ArrayList list = new ArrayList();
-            Iterator iterator = repositories.iterator();
+            ArrayList<Resource> list = new ArrayList<Resource>();
+            Iterator<Repository> iterator = repositories.iterator();
 
             while (iterator.hasNext()) {
                 try {
-                    list.addAll(((Repository) iterator.next()).getAllResources());
+                    list.addAll((iterator.next()).getAllResources());
                 } catch (IOException iox) {
                     iox.printStackTrace();
                 }
@@ -252,7 +252,7 @@ public final class Prototype {
      */
     long getRepositoryChecksum() {
         long checksum = 0;
-        Iterator iterator = repositories.iterator();
+        Iterator<Repository> iterator = repositories.iterator();
 
         while (iterator.hasNext()) {
             try {
@@ -307,7 +307,7 @@ public final class Prototype {
      * implement direct over indirect prototype precedence and child over parent
      *  precedence.
      */
-    public final void registerParents(Map handlers, Object obj) {
+    public final void registerParents(Map<String, Object> handlers, Object obj) {
 
         Prototype p = parent;
 
@@ -399,7 +399,7 @@ public final class Prototype {
      * Set the custom type properties for this prototype and update the database mapping.
      * @param map the custom type mapping properties.
      */
-    public void setTypeProperties(Map map) {
+    public void setTypeProperties(Map<?, ?> map) {
         props.clear();
         props.putAll(map);
         dbmap.update();
@@ -421,10 +421,10 @@ public final class Prototype {
      *
      *  @return an iterator of this prototype's code resources
      */
-    public synchronized Iterator getCodeResources() {
+    public synchronized Iterator<Resource> getCodeResources() {
         // we copy over to a new list, because the underlying set may grow
         // during compilation through use of app.addRepository()
-        return new ArrayList(code).iterator();
+        return new ArrayList<Resource>(code).iterator();
     }
 
     /**
@@ -434,7 +434,7 @@ public final class Prototype {
      *
      *  @return an iterator over this prototype's skin resources
      */
-    public Iterator getSkinResources() {
+    public Iterator<Resource> getSkinResources() {
         return skins.iterator();
     }
 
@@ -450,7 +450,7 @@ public final class Prototype {
      *
      * @return a scriptable skin map
      */
-    public Map getScriptableSkinMap() {
+    public Map<?, ?> getScriptableSkinMap() {
         return new ScriptableSkinMap(new SkinMap());
     }
 
@@ -460,7 +460,7 @@ public final class Prototype {
      *
      * @return a scriptable skin map
      */
-    public Map getScriptableSkinMap(Object[] skinpath) {
+    public Map<?, ?> getScriptableSkinMap(Object[] skinpath) {
         return new ScriptableSkinMap(new SkinMap(skinpath));
     }
 
@@ -471,7 +471,7 @@ public final class Prototype {
      */
     class ScriptableSkinMap extends WrappedMap {
 
-        public ScriptableSkinMap(Map wrapped) {
+        public ScriptableSkinMap(Map<?, ?> wrapped) {
             super(wrapped);
         }
 
@@ -493,8 +493,12 @@ public final class Prototype {
     /**
      * A Map that dynamically expands to all skins in this prototype.
      */
-    class SkinMap extends HashMap {
-        volatile long lastSkinmapLoad = -1;
+    class SkinMap extends HashMap<Object, Object> {
+        /**
+		 * 
+		 */
+		private static final long serialVersionUID = -8855785541204100909L;
+		volatile long lastSkinmapLoad = -1;
         Object[] skinpath;
 
         SkinMap() {
@@ -515,7 +519,7 @@ public final class Prototype {
             return super.containsValue(value);
         }
 
-        public Set entrySet() {
+        public Set<java.util.Map.Entry<Object, Object>> entrySet() {
             checkForUpdates();
             return super.entrySet();
         }
@@ -554,7 +558,7 @@ public final class Prototype {
             return super.isEmpty();
         }
 
-        public Set keySet() {
+        public Set<Object> keySet() {
             checkForUpdates();
             return super.keySet();
         }
@@ -564,7 +568,7 @@ public final class Prototype {
             return super.put(key, value);
         }
 
-        public void putAll(Map t) {
+        public void putAll(Map<?, ?> t) {
             // checkForUpdates ();
             super.putAll(t);
         }
@@ -579,7 +583,7 @@ public final class Prototype {
             return super.size();
         }
 
-        public Collection values() {
+        public Collection<Object> values() {
             checkForUpdates();
             return super.values();
         }
@@ -602,7 +606,7 @@ public final class Prototype {
             super.clear();
 
             // load Skins
-            for (Iterator i = skins.iterator(); i.hasNext();) {
+            for (Iterator<Resource> i = skins.iterator(); i.hasNext();) {
                 Resource res = (Resource) i.next();
                 Resource prev = (Resource) super.put(res.getBaseName(), res);
                 res.setOverloadedResource(prev);

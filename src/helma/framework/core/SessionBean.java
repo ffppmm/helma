@@ -27,7 +27,11 @@ import java.util.Date;
  * exposes it to the scripting framework.
  */
 public class SessionBean implements Serializable {
-    // the wrapped session object
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 7500231949937123265L;
+	// the wrapped session object
     Session session;
 
     /**

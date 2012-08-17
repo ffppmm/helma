@@ -33,11 +33,11 @@ public class RequestPath {
 
     Application app;
 
-    List objects;
-    List ids;
+    List<Object> objects;
+    List<String> ids;
 
-    Map primaryProtos;
-    Map secondaryProtos;
+    Map<String, Object> primaryProtos;
+    Map<String, Object> secondaryProtos;
 
     /**
      * Creates a new RequestPath object.
@@ -46,10 +46,10 @@ public class RequestPath {
      */
     public RequestPath(Application app) {
         this.app = app;
-        objects = new ArrayList();
-        ids = new ArrayList();
-        primaryProtos = new HashMap();
-        secondaryProtos = new HashMap();
+        objects = new ArrayList<Object>();
+        ids = new ArrayList<String>();
+        primaryProtos = new HashMap<String, Object>();
+        secondaryProtos = new HashMap<String, Object>();
     }
 
     /**

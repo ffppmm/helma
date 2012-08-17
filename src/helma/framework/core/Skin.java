@@ -50,8 +50,8 @@ public final class Skin {
     private Application app;
     private char[] source;
     private int offset, length; // start and end index of skin content
-    private HashSet sandbox;
-    private HashMap subskins;
+    private HashSet<String> sandbox;
+    private HashMap<String, Skin> subskins;
     private Skin parentSkin = this;
     private String extendz = null;
     private boolean hasContent = false;
@@ -94,7 +94,7 @@ public final class Skin {
     /**
      * Create a skin with a sandbox which contains the names of macros allowed to be called
      */
-    public Skin(String content, Application app, HashSet sandbox) {
+    public Skin(String content, Application app, HashSet<String> sandbox) {
         this.app = app;
         this.sandbox = sandbox;
         this.source = content.toCharArray();
@@ -158,7 +158,7 @@ public final class Skin {
      * Parse a skin object from source text
      */
     private void parse() {
-        ArrayList partBuffer = new ArrayList();
+        ArrayList<Macro> partBuffer = new ArrayList<Macro>();
 
         boolean escape = false;
         for (int i = offset; i < (length - 1); i++) {
@@ -190,7 +190,7 @@ public final class Skin {
 
     private void addSubskin(String name, Skin subskin) {
         if (subskins == null) {
-            subskins = new HashMap();
+            subskins = new HashMap<String, Skin>();
         }
         subskins.put(name, subskin);
     }
@@ -286,16 +286,16 @@ public final class Skin {
         }
 
         // register param object, remember previous one to reset afterwards
-        Map handlers = res.getMacroHandlers();
+        Map<String, Object> handlers = res.getMacroHandlers();
         Object previousParam = handlers.put("param", paramObject);
         Skin previousSkin = res.switchActiveSkin(parentSkin);
 
         try {
             int written = offset;
-            Map handlerCache = null;
+            Map<String, Object> handlerCache = null;
 
             if (macros.length > 3) {
-                handlerCache = new HashMap();
+                handlerCache = new HashMap<String, Object>();
             }
             RenderContext cx = new RenderContext(reval, thisObject, handlerCache);
 
@@ -344,7 +344,7 @@ public final class Skin {
      */
     public void allowMacro(String macroname) {
         if (sandbox == null) {
-            sandbox = new HashSet();
+            sandbox = new HashSet<String>();
         }
 
         sandbox.add(macroname);
@@ -371,7 +371,7 @@ public final class Skin {
         // param.prefix/suffix/default
         StandardParams standardParams = new StandardParams();
         Map<String, Object> namedParams = null;
-        List positionalParams = null;
+        List<Object> positionalParams = null;
         // filters defined via <% foo | bar %>
         Macro filterChain;
 
@@ -629,7 +629,7 @@ public final class Skin {
             if (name == null) {
                 // take shortcut for positional parameters
                 if (positionalParams == null) {
-                    positionalParams = new ArrayList();
+                    positionalParams = new ArrayList<Object>();
                 }
                 positionalParams.add(value);
                 return;
@@ -661,7 +661,7 @@ public final class Skin {
 
             // Add parameter to parameter map
             if (namedParams == null) {
-                namedParams = new HashMap();
+                namedParams = new HashMap<String, Object>();
             }
             namedParams.put(name, value);
         }
@@ -702,7 +702,7 @@ public final class Skin {
 
                     Object[] arguments = prepareArguments(0, cx);
                     // get reference to rendered named params for after invocation
-                    Map params = (Map) arguments[0];
+                    Map<?, ?> params = (Map<?, ?>) arguments[0];
                     value = cx.reval.invokeDirectFunction(handler,
                             funcName,
                             arguments);
@@ -1041,7 +1041,7 @@ public final class Skin {
          * Return the list of named parameters
          * @return the list of named parameters
          */
-        public Map getNamedParams() {
+        public Map<String, Object> getNamedParams() {
         	return namedParams;
         }
         
@@ -1049,7 +1049,7 @@ public final class Skin {
          * Return the list of positional parameters
          * @return the list of positional parameters
          */
-        public List getPositionalParams() {
+        public List<Object> getPositionalParams() {
         	return positionalParams;
         }
         
@@ -1067,11 +1067,11 @@ public final class Skin {
 
         StandardParams() {}
 
-        StandardParams(Map map) {
+        StandardParams(Map<?, ?> map) {
             readFrom(map);
         }
 
-        void readFrom(Map map) {
+        void readFrom(Map<?, ?> map) {
             prefix = map.get("prefix");
             suffix = map.get("suffix");
             defaultValue = map.get("default");
@@ -1125,9 +1125,9 @@ public final class Skin {
     class RenderContext {
         final RequestEvaluator reval;
         final Object thisObject;
-        final Map handlerCache;
+        final Map<String, Object> handlerCache;
 
-        RenderContext(RequestEvaluator reval, Object thisObject, Map handlerCache) {
+        RenderContext(RequestEvaluator reval, Object thisObject, Map<String, Object> handlerCache) {
             this.reval = reval;
             this.thisObject = thisObject;
             this.handlerCache = handlerCache;
@@ -1162,7 +1162,7 @@ public final class Skin {
             }
 
             // next look in res.handlers
-            Map macroHandlers = reval.getResponse().getMacroHandlers();
+            Map<?, ?> macroHandlers = reval.getResponse().getMacroHandlers();
             Object obj = macroHandlers.get(handlerName);
             if (obj != null) {
                 return cacheHandler(handlerName, obj);
@@ -1201,7 +1201,12 @@ public final class Skin {
      * Exception type for unhandled, forbidden or failed macros
      */
     class MacroException extends Exception {
-        MacroException(String message) {
+        /**
+		 * 
+		 */
+		private static final long serialVersionUID = 396025641010781784L;
+
+		MacroException(String message) {
             super(message);
         }
     }
