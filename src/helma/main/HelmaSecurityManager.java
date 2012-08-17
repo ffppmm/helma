@@ -35,7 +35,7 @@ public class HelmaSecurityManager extends SecurityManager {
     // The set of actions forbidden to application code.
     // We are pretty permissive, forbidding only System.exit() 
     // and setting the security manager.
-    private final static HashSet forbidden = new HashSet();
+    private final static HashSet<String> forbidden = new HashSet<String>();
 
     static {
         forbidden.add("exitVM");
@@ -47,7 +47,8 @@ public class HelmaSecurityManager extends SecurityManager {
      *
      * @param p ...
      */
-    public void checkPermission(Permission p) {
+    @SuppressWarnings("rawtypes")
+	public void checkPermission(Permission p) {
         if (p instanceof RuntimePermission) {
             if (forbidden.contains(p.getName())) {
                 Class[] classes = getClassContext();
@@ -98,7 +99,8 @@ public class HelmaSecurityManager extends SecurityManager {
      *
      * @param status ...
      */
-    public void checkExit(int status) {
+    @SuppressWarnings("rawtypes")
+	public void checkExit(int status) {
         Class[] classes = getClassContext();
 
         for (int i = 0; i < classes.length; i++) {
@@ -297,7 +299,7 @@ public class HelmaSecurityManager extends SecurityManager {
      * @param clazz ...
      * @param which ...
      */
-    public void checkMemberAccess(Class clazz, int which) {
+    public void checkMemberAccess(Class<?> clazz, int which) {
     }
 
     /**
@@ -313,7 +315,8 @@ public class HelmaSecurityManager extends SecurityManager {
      *  to execute the code in question. Returns null if the current code
      *  does not belong to any application.
      */
-    protected String getApplication() {
+    @SuppressWarnings("rawtypes")
+	protected String getApplication() {
         Class[] classes = getClassContext();
 
         for (int i = 0; i < classes.length; i++) {

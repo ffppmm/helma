@@ -41,9 +41,9 @@ import org.eclipse.jetty.servlet.ServletHolder;
  * This class is responsible for starting and stopping Helma applications.
  */
 public class ApplicationManager implements XmlRpcHandler {
-    private Hashtable descriptors;
-    private Hashtable applications;
-    private Hashtable xmlrpcHandlers;
+    private Hashtable<String, AppDescriptor> descriptors;
+    private Hashtable<String, Application> applications;
+    private Hashtable<String, Application> xmlrpcHandlers;
     private ResourceProperties props;
     private Server server;
     private long lastModified;
@@ -59,9 +59,9 @@ public class ApplicationManager implements XmlRpcHandler {
     public ApplicationManager(ResourceProperties props, Server server) {
         this.props = props;
         this.server = server;
-        descriptors = new Hashtable();
-        applications = new Hashtable();
-        xmlrpcHandlers = new Hashtable();
+        descriptors = new Hashtable<String, AppDescriptor>();
+        applications = new Hashtable<String, Application>();
+        xmlrpcHandlers = new Hashtable<String, Application>();
         lastModified = 0;
         jetty = server.jetty;
     }
@@ -73,7 +73,7 @@ public class ApplicationManager implements XmlRpcHandler {
     protected void checkForChanges() {
         if (props.lastModified() > lastModified && server.getApplicationsOption() == null) {
             try {
-                for (Enumeration e = props.keys(); e.hasMoreElements();) {
+                for (Enumeration<?> e = props.keys(); e.hasMoreElements();) {
                     String appName = (String) e.nextElement();
 
                     if ((appName.indexOf(".") == -1) &&
@@ -85,7 +85,7 @@ public class ApplicationManager implements XmlRpcHandler {
                 }
 
                 // then stop deleted ones
-                for (Enumeration e = descriptors.elements(); e.hasMoreElements();) {
+                for (Enumeration<AppDescriptor> e = descriptors.elements(); e.hasMoreElements();) {
                     AppDescriptor appDesc = (AppDescriptor) e.nextElement();
 
                     // check if application has been removed and should be stopped
@@ -151,7 +151,7 @@ public class ApplicationManager implements XmlRpcHandler {
                     desc.start();
                 }
             } else {
-                for (Enumeration e = props.keys(); e.hasMoreElements();) {
+                for (Enumeration<?> e = props.keys(); e.hasMoreElements();) {
                     String appName = (String) e.nextElement();
 
                     if (appName.indexOf(".") == -1) {
@@ -167,7 +167,7 @@ public class ApplicationManager implements XmlRpcHandler {
                 }
             }
 
-            for (Enumeration e = descriptors.elements(); e.hasMoreElements();) {
+            for (Enumeration<AppDescriptor> e = descriptors.elements(); e.hasMoreElements();) {
                 AppDescriptor appDesc = (AppDescriptor) e.nextElement();
                 appDesc.bind();
             }
@@ -183,7 +183,7 @@ public class ApplicationManager implements XmlRpcHandler {
      *  Stop all running applications.
      */
     public void stopAll() {
-        for (Enumeration en = descriptors.elements(); en.hasMoreElements();) {
+        for (Enumeration<AppDescriptor> en = descriptors.elements(); en.hasMoreElements();) {
             try {
                 AppDescriptor appDesc = (AppDescriptor) en.nextElement();
 
@@ -211,7 +211,9 @@ public class ApplicationManager implements XmlRpcHandler {
     /**
      * Implements org.apache.xmlrpc.XmlRpcHandler.execute()
      */
-    public Object execute(String method, Vector params)
+    // FIXME: Another inherited method with no types 
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+	public Object execute(String method, Vector params)
                    throws Exception {
         int dot = method.indexOf(".");
 
@@ -373,7 +375,8 @@ public class ApplicationManager implements XmlRpcHandler {
 
             // read and configure app repositories
             ArrayList<Repository> repositoryList = new ArrayList<Repository>();
-            Class[] parameters = { String.class };
+            @SuppressWarnings("rawtypes")
+			Class[] parameters = { String.class };
             for (int i = 0; true; i++) {
                 String repositoryArgs = conf.getProperty("repository." + i);
 
@@ -505,10 +508,12 @@ public class ApplicationManager implements XmlRpcHandler {
                     }
 
                     appContext = new ServletContextHandler(context, pathPattern);
-                    Class servletClass = servletClassName == null ?
+                    @SuppressWarnings("rawtypes")
+					Class servletClass = servletClassName == null ?
                             EmbeddedServletClient.class : Class.forName(servletClassName);
 
-                    ServletHolder holder = new ServletHolder(servletClass);
+                    @SuppressWarnings("unchecked")
+					ServletHolder holder = new ServletHolder(servletClass);
                     appContext.addServlet(holder, "/*");
 
                     holder.setInitParameter("application", appName);
