@@ -16,7 +16,7 @@ import org.mozilla.javascript.debug.Debugger;
 
 public class Profiler implements Debugger {
 
-    HashMap frames = new HashMap();
+    HashMap<String, ProfilerFrame> frames = new HashMap<String, ProfilerFrame>();
 
     /**
      * Create a new profiler.
@@ -65,7 +65,7 @@ public class Profiler implements Debugger {
 
     public String getResult() {
         ProfilerFrame[] f = (ProfilerFrame[]) frames.values().toArray(new ProfilerFrame[0]);
-        Arrays.sort(f, new Comparator() {
+        Arrays.sort(f, new Comparator<Object>() {
             public int compare(Object o1, Object o2) {
                 return ((ProfilerFrame)o2).runtime - ((ProfilerFrame)o1).runtime;
             }
@@ -94,7 +94,7 @@ public class Profiler implements Debugger {
 
     class ProfilerFrame implements DebugFrame {
 
-        Stack timer = new Stack();
+        Stack<Long> timer = new Stack<Long>();
         int runtime, invocations, lineNumber;
         String name;
 
@@ -155,7 +155,9 @@ public class Profiler implements Debugger {
                     name.substring(prefixLength)
             };
             formatter.format("%1$7d ms %2$5d ms %3$6d    %4$s%n", args);
-            return formatter.toString();
+            String returnValue = formatter.toString();
+            formatter.close();
+            return returnValue;
         }
     }
 }

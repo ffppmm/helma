@@ -55,8 +55,8 @@ public class HelmaDebugger extends Dim implements TreeSelectionListener {
     JList list;
     DebuggerTreeNode treeRoot;
     DefaultTreeModel treeModel;
-    HashMap treeNodes = new HashMap();
-    HashMap scriptNames = new HashMap();
+    HashMap<String, DebuggerTreeNode> treeNodes = new HashMap<String, DebuggerTreeNode>();
+    HashMap<DebuggerTreeNode, String> scriptNames = new HashMap<DebuggerTreeNode, String>();
 
 
     public HelmaDebugger(String title) {
@@ -138,12 +138,18 @@ public class HelmaDebugger extends Dim implements TreeSelectionListener {
 
     class DebuggerTreeNode extends DefaultMutableTreeNode {
 
-        public DebuggerTreeNode(Object obj) {
+        /**
+		 * 
+		 */
+		private static final long serialVersionUID = -5881442554351749706L;
+
+		public DebuggerTreeNode(Object obj) {
             super(obj);
         }
 
         public DebuggerTreeNode get(String name) {
-            Enumeration children = this.children();
+        	// FIXME: no DATATYPE
+            Enumeration<?> children = this.children();
             while (children.hasMoreElements()) {
                 DebuggerTreeNode node = (DebuggerTreeNode) children.nextElement();
                 if (node != null && name.equals(node.getUserObject()))
@@ -171,7 +177,11 @@ public class HelmaDebugger extends Dim implements TreeSelectionListener {
 
     class DebugGui extends SwingGui {
 
-        String currentSourceUrl;
+        /**
+		 * 
+		 */
+		private static final long serialVersionUID = 8930558796272502640L;
+		String currentSourceUrl;
 
         public DebugGui(Dim dim, String title) {
             super(dim, title);
@@ -263,7 +273,7 @@ public class HelmaDebugger extends Dim implements TreeSelectionListener {
         private void updateFunctionList(String sourceName) {
             // display functions for opened script file
             currentSourceUrl = sourceName;
-            Vector functions = new Vector();
+            Vector<FunctionItem> functions = new Vector<FunctionItem>();
             SourceInfo si = sourceInfo(sourceName);
             String[] lines = si.source().split("\\r\\n|\\r|\\n");
             int length = si.functionSourcesTop();
@@ -278,7 +288,8 @@ public class HelmaDebugger extends Dim implements TreeSelectionListener {
         }
     }
 
-    class FunctionItem implements Comparable {
+    // FIXME: Datatype
+    class FunctionItem implements Comparable<Object> {
 
         FunctionSource src;
         String name;

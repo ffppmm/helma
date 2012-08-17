@@ -71,7 +71,7 @@ public class Tracer implements Debugger {
     class TracerFrame implements DebugFrame {
 
         TracerFrame parent;
-        ArrayList children = new ArrayList();
+        ArrayList<TracerFrame> children = new ArrayList<TracerFrame>();
         DebuggableScript script;
         int currentLine, depth = 0;
         long time;
