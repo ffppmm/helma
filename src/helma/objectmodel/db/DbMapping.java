@@ -31,6 +31,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.StringTokenizer;
 
@@ -78,13 +79,13 @@ public final class DbMapping {
     // Map of db columns to Relations objects.
     // Case insensitive, keys are stored in lower case so
     // lookups must do a toLowerCase().
-    private HashMap db2prop;
+    private HashMap<String, Relation> db2prop;
     
     // list of columns to fetch from db
     private DbColumn[] columns = null;
 
     // Map of db columns by name
-    private HashMap columnMap;
+    private HashMap<String, DbColumn> columnMap;
 
     // Array of aggressively loaded references
     private Relation[] joins;
@@ -129,7 +130,7 @@ public final class DbMapping {
     long lastDataChange = 0;
 
     // Set of mappings that depend on us and should be forwarded last data change events
-    HashSet dependentMappings = new HashSet();
+    HashSet<DbMapping> dependentMappings = new HashSet<DbMapping>();
 
     // does this DbMapping describe a virtual node (collection, mountpoint, groupnode)?
     private boolean isVirtual = false;
@@ -169,9 +170,9 @@ public final class DbMapping {
         // we can compare types just by using == instead of equals.
         this.typename = typename == null ? null : typename.intern();
 
-        prop2db = new HashMap();
-        db2prop = new HashMap();
-        columnMap = new HashMap();
+        prop2db = new HashMap<String, Relation>();
+        db2prop = new HashMap<String, Relation>();
+        columnMap = new HashMap<String, DbColumn>();
         parentInfo = null;
         idField = null;
         this.props = props;
@@ -313,12 +314,12 @@ public final class DbMapping {
         columnMap.clear();
         selectString = insertString = updateString = null;
 
-        HashMap p2d = new HashMap();
-        HashMap d2p = new HashMap();
-        ArrayList joinList = new ArrayList();
+        HashMap<String, Relation> p2d = new HashMap<String, Relation>();
+        HashMap<String, Relation> d2p = new HashMap<String, Relation>();
+        ArrayList<Relation> joinList = new ArrayList<Relation>();
 
-        for (Iterator it = props.entrySet().iterator(); it.hasNext(); ) {
-            Map.Entry entry =  (Map.Entry) it.next();
+        for (Iterator<Entry<Object, Object>> it = props.entrySet().iterator(); it.hasNext(); ) {
+            Map.Entry<Object, Object> entry = it.next();
 
             try {
                 String propName = (String) entry.getKey();
@@ -439,9 +440,10 @@ public final class DbMapping {
      * @return the Set of Prototypes extending this prototype
      */
     public String[] getExtensions() {
-        return extensionMap == null
-                ? new String[] { extensionId }
-                : (String[]) extensionMap.keySet().toArray(new String[0]);
+        if (extensionMap == null)
+			return new String[] { extensionId };
+		else
+			return (String[]) extensionMap.keySet().toArray(new String[0]);
     }
     
     /**
@@ -969,7 +971,7 @@ public final class DbMapping {
 
             // ok, we have the meta data, now loop through mapping...
             int ncols = meta.getColumnCount();
-            ArrayList list = new ArrayList(ncols);
+            ArrayList<DbColumn> list = new ArrayList<DbColumn>(ncols);
 
             for (int i = 0; i < ncols; i++) {
                 String colName = meta.getColumnName(i + 1);
@@ -1315,7 +1317,7 @@ public final class DbMapping {
             lastDataChange += 1;
             // propagate data change timestamp to mappings that depend on us
             if (!dependentMappings.isEmpty()) {
-                Iterator it = dependentMappings.iterator();
+                Iterator<DbMapping> it = dependentMappings.iterator();
                 while(it.hasNext()) {
                     DbMapping dbmap = (DbMapping) it.next();
                     dbmap.setIndirectDataChange();
@@ -1499,10 +1501,10 @@ public final class DbMapping {
         } else {
             Properties subprops = new Properties();
             prefix = prefix + ".";
-            Iterator it = props.entrySet().iterator();
+            Iterator<Entry<Object, Object>> it = props.entrySet().iterator();
             int prefixLength = prefix.length();
             while (it.hasNext()) {
-                Map.Entry entry = (Map.Entry) it.next();
+                Map.Entry<Object, Object> entry = it.next();
                 String key = entry.getKey().toString();
                 if (key.regionMatches(false, 0, prefix, 0, prefixLength)) {
                     subprops.put(key.substring(prefixLength), entry.getValue());
