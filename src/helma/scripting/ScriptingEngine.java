@@ -80,7 +80,7 @@ public interface ScriptingEngine {
      *  @param globals map of global variables
      *  @throws ScriptingException a script related exception occurred
      */
-    public void setGlobals(Map globals) throws ScriptingException;
+    public void setGlobals(Map<String, Object> globals) throws ScriptingException;
 
     /**
      *   This method is called to let the scripting engine know that the current

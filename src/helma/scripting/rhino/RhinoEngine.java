@@ -72,7 +72,7 @@ import org.mozilla.javascript.serialize.ScriptableOutputStream;
  */
 public class RhinoEngine implements ScriptingEngine {
     // map for Application to RhinoCore binding
-    static final Map coreMap = new WeakHashMap();
+    static final Map<Application, WeakReference<RhinoCore>> coreMap = new WeakHashMap<Application, WeakReference<RhinoCore>>();
 
     // the application we're running in
     public Application app;
@@ -90,13 +90,13 @@ public class RhinoEngine implements ScriptingEngine {
     RhinoCore core;
 
     // the global vars set by extensions
-    HashMap extensionGlobals;
+    HashMap<String, Object> extensionGlobals;
 
     // the thread currently running this engine
     volatile Thread thread;
 
     // thread local engine registry
-    static ThreadLocal engines = new ThreadLocal();
+    static ThreadLocal<RhinoEngine> engines = new ThreadLocal<RhinoEngine>();
 
     /**
      *  Zero argument constructor.
@@ -116,16 +116,16 @@ public class RhinoEngine implements ScriptingEngine {
         context = core.contextFactory.enterContext();
 
         try {
-            extensionGlobals = new HashMap();
+            extensionGlobals = new HashMap<String, Object>();
 
             if (Server.getServer() != null) {
-                Vector extVec = Server.getServer().getExtensions();
+                Vector<HelmaExtension> extVec = Server.getServer().getExtensions();
 
                 for (int i = 0; i < extVec.size(); i++) {
                     HelmaExtension ext = (HelmaExtension) extVec.get(i);
 
                     try {
-                        HashMap tmpGlobals = ext.initScripting(app, this);
+                        HashMap<String, Server> tmpGlobals = ext.initScripting(app, this);
 
                         if (tmpGlobals != null) {
                             extensionGlobals.putAll(tmpGlobals);
@@ -165,7 +165,7 @@ public class RhinoEngine implements ScriptingEngine {
      */
     private synchronized void initRhinoCore(Application app) {
         synchronized (coreMap) {
-            WeakReference ref = (WeakReference) coreMap.get(app);
+            WeakReference<?> ref = (WeakReference<?>) coreMap.get(app);
             if (ref != null) {
                 core = (RhinoCore) ref.get();
             }
@@ -173,7 +173,7 @@ public class RhinoEngine implements ScriptingEngine {
             if (core == null) {
                 core = new RhinoCore(app);
                 core.initialize();
-                coreMap.put(app, new WeakReference(core));
+                coreMap.put(app, new WeakReference<RhinoCore>(core));
             }
         }
     }
@@ -208,7 +208,7 @@ public class RhinoEngine implements ScriptingEngine {
      *  evaluation is entered. The globals parameter contains the global values
      *  to be applied during this execution context.
      */
-    public synchronized void setGlobals(Map globals) throws ScriptingException {
+    public synchronized void setGlobals(Map<String, Object> globals) throws ScriptingException {
         // remember the current thread as our thread
         thread = Thread.currentThread();
 
@@ -216,7 +216,7 @@ public class RhinoEngine implements ScriptingEngine {
         // add globals from extensions
         globals.putAll(extensionGlobals);
         // loop through global vars and set them
-        for (Iterator i = globals.keySet().iterator(); i.hasNext();) {
+        for (Iterator<?> i = globals.keySet().iterator(); i.hasNext();) {
             String k = (String) i.next();
             Object v = globals.get(k);
             Scriptable scriptable;
@@ -445,7 +445,7 @@ public class RhinoEngine implements ScriptingEngine {
         if (obj == null || propname == null) {
             return false;
         } else if (obj instanceof Map) {
-            return ((Map) obj).containsKey(propname);
+            return ((Map<?, ?>) obj).containsKey(propname);
         }
 
         String prototypeName = app.getPrototypeName(obj);
@@ -505,7 +505,7 @@ public class RhinoEngine implements ScriptingEngine {
         if (obj == null || propname == null) {
             return null;
         } else if (obj instanceof Map) {
-            Object prop = ((Map) obj).get(propname);
+            Object prop = ((Map<?, ?>) obj).get(propname);
             // Do not return functions as properties as this
             // is a potential security problem
             return (prop instanceof Function) ? null : prop;
