@@ -16,6 +16,8 @@
 
 package helma.objectmodel.db;
 
+import helma.objectmodel.INode;
+
 import java.util.List;
 
 public interface NodeChangeListener {
@@ -24,6 +26,6 @@ public interface NodeChangeListener {
      * Called when a transaction is committed that has created, modified, 
      * deleted or changed the child collection one or more nodes.
      */
-    public void nodesChanged(List inserted, List updated, List deleted, List parents);
+    public void nodesChanged(List<INode> inserted, List<INode> updated, List<INode> deleted, List<INode> parents);
 
 }

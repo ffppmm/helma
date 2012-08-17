@@ -99,8 +99,8 @@ public final class Relation {
     private String additionalTables;
     private boolean additionalTablesJoined = false;
     String queryHints;
-    Vector filterFragments;
-    Vector filterPropertyRefs;
+    Vector<String> filterFragments;
+    Vector<String> filterPropertyRefs;
     int maxSize = 0;
     int offset = 0;
 
@@ -197,7 +197,7 @@ public final class Relation {
 
         // the following options only apply to object and collection relations
         if ((reftype != PRIMITIVE) && (reftype != INVALID)) {
-            Vector newConstraints = new Vector();
+            Vector<Constraint> newConstraints = new Vector<Constraint>();
 
             parseOptions(newConstraints, props);
 
@@ -253,7 +253,7 @@ public final class Relation {
      * @param config the sub-map for this property mapping
      * @return true if the value describes a valid, non-primitive property mapping
      */
-    protected boolean parseDescriptor(Object value, Map config) {
+    protected boolean parseDescriptor(Object value, Properties config) {
         String desc = value instanceof String ? (String) value : null;
 
         if (desc == null || "".equals(desc.trim())) {
@@ -297,7 +297,7 @@ public final class Relation {
 
     }
 
-    protected void parseOptions(Vector cnst, Properties props) {
+    protected void parseOptions(Vector<Constraint> cnst, Properties props) {
         String loading = props.getProperty("loadmode");
 
         if (loading != null) {
@@ -343,8 +343,8 @@ public final class Relation {
                 filterFragments = filterPropertyRefs = null;
             } else {
                 // parenthesise filter
-                Vector fragments = new Vector();
-                Vector propertyRefs = new Vector();
+                Vector<String> fragments = new Vector<String>();
+                Vector<String> propertyRefs = new Vector<String>();
                 parsePropertyString(filter, fragments, propertyRefs);
                 // if no references where found, just use the filter string
                 // otherwise use the filter fragments and proeprty refs instead
@@ -482,7 +482,7 @@ public final class Relation {
     /**
      * Get the configuration properties for this relation.
      */
-    public Map getConfig() {
+    public Map<?, ?> getConfig() {
         return ownType.getSubProperties(propName + '.');
     }
 
@@ -738,7 +738,7 @@ public final class Relation {
      * @param propertyRefs List to add property names to.
      *                     Must not be <code>null</code>.
      */
-    protected void parsePropertyString(String value, Vector fragments, Vector propertyRefs) {
+    protected void parsePropertyString(String value, Vector<String> fragments, Vector<String> propertyRefs) {
         int prev = 0;
         int pos;
         //search for the next instance of $ from the 'prev' position
@@ -1034,8 +1034,8 @@ public final class Relation {
         if (filterFragments == null) {
             q.append(filter);
         } else {
-            Enumeration i = filterFragments.elements();
-            Enumeration j = filterPropertyRefs.elements();
+            Enumeration<String> i = filterFragments.elements();
+            Enumeration<String> j = filterPropertyRefs.elements();
             while (i.hasMoreElements()) {
                 String fragment = (String) i.nextElement();
                 if (fragment == null) {
@@ -1429,8 +1429,8 @@ public final class Relation {
     /**
      *  Returns a map containing the key/value pairs for a specific Node
      */
-    public Map getKeyParts(INode home) {
-        Map map = new HashMap();
+    public Map<String, String> getKeyParts(INode home) {
+        Map<String, String> map = new HashMap<String, String>();
         for (int i=0; i<constraints.length; i++) {
             Constraint cnst = constraints[i];
             if (cnst.localKeyIsPrimary(ownType)) {

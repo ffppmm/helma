@@ -17,7 +17,11 @@ import java.util.List;
 
 public class SegmentedSubnodeList extends SubnodeList {
 
-    transient Segment[] segments = null;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = -4947752577517584610L;
+	transient Segment[] segments = null;
     static int SEGLENGTH = 1000;
 
     transient private int subnodeCount = -1;
@@ -178,13 +182,13 @@ public class SegmentedSubnodeList extends SubnodeList {
         return segments.length - 1;
     }
 
-    private List loadSegment(int seg, boolean deep) {
+    private List<NodeHandle> loadSegment(int seg, boolean deep) {
         Segment segment = segments[seg];
         if (segment != null && !segment.loaded) {
             Relation rel = getSubnodeRelation().getClone();
             rel.offset = segment.startIndex;
             int expectedSize = rel.maxSize = segment.length;
-            List seglist =  deep ?
+            List<NodeHandle> seglist =  deep ?
                     node.nmgr.getNodes(node, rel) :
                     node.nmgr.getNodeIDs(node, rel);
             int actualSize = seglist.size();
@@ -203,7 +207,7 @@ public class SegmentedSubnodeList extends SubnodeList {
             segment.loaded = true;
             return seglist;
         }
-        return Collections.EMPTY_LIST;
+        return Collections.emptyList();
     }
 
     protected synchronized void update() {
@@ -227,7 +231,7 @@ public class SegmentedSubnodeList extends SubnodeList {
                         remainder : SEGLENGTH;
                     segments[s] = new Segment(s * SEGLENGTH, length);
                 }
-                list = new ArrayList((int) size + 5);
+                list = new ArrayList<NodeHandle>((int) size + 5);
                 for (int i = 0; i < size; i++) {
                     list.add(null);
                 }

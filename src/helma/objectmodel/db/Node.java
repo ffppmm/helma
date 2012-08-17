@@ -23,7 +23,6 @@ import helma.objectmodel.ConcurrencyException;
 import helma.objectmodel.INode;
 import helma.objectmodel.IProperty;
 import helma.objectmodel.TransientNode;
-import helma.util.EmptyEnumeration;
 
 import java.util.Date;
 import java.util.Enumeration;
@@ -171,7 +170,7 @@ public final class Node implements INode {
      * Initializer used for nodes being instanced from an embedded or relational database.
      */
     public synchronized void init(DbMapping dbm, String id, String name,
-                                  String prototype, Hashtable propMap) {
+                                  String prototype, Hashtable<String, Property> propMap) {
         this.dbmap = dbm;
         this.prototype = prototype;
         this.id = id;
@@ -194,7 +193,7 @@ public final class Node implements INode {
     /**
      * used by Xml deserialization
      */
-    public synchronized void setPropMap(Hashtable propMap) {
+    public synchronized void setPropMap(Hashtable<String, Property> propMap) {
         this.propMap = propMap;
     }
 
@@ -961,7 +960,7 @@ public final class Node implements INode {
                     // check if any one matches
                     String propname = rel.groupby != null ? "groupname" : rel.accessName;
                     INode node = null;
-                    Enumeration e = getSubnodes();
+                    Enumeration<?> e = getSubnodes();
                     while (e.hasMoreElements()) {
                         Node n = (Node) e.nextElement();
                         if (name.equalsIgnoreCase(n.getString(propname))) {
@@ -1303,7 +1302,7 @@ public final class Node implements INode {
 
         // tell all nodes that are properties of n that they are no longer used as such
         if (propMap != null) {
-            for (Enumeration en = propMap.elements(); en.hasMoreElements();) {
+            for (Enumeration<Property> en = propMap.elements(); en.hasMoreElements();) {
                 Property p = (Property) en.nextElement();
 
                 if ((p != null) && (p.getType() == Property.NODE)) {
@@ -1318,10 +1317,10 @@ public final class Node implements INode {
         // cascading delete of all subnodes. This is never done for relational subnodes, because
         // the parent info is not 100% accurate for them.
         if (subnodes != null) {
-            Vector v = new Vector();
+            Vector<INode> v = new Vector<INode>();
 
             // remove modifies the Vector we are enumerating, so we are extra careful.
-            for (Enumeration en = getSubnodes(); en.hasMoreElements();) {
+            for (Enumeration<INode> en = getSubnodes(); en.hasMoreElements();) {
                 v.add(en.nextElement());
             }
 
@@ -1489,25 +1488,34 @@ public final class Node implements INode {
      * Enumerate through the subnodes of this node.
      * @return an enumeration of this node's subnodes
      */
-    public Enumeration getSubnodes() {
+    public Enumeration<INode> getSubnodes() {
         loadNodes();
         return getLoadedSubnodes();
     }
 
-    private Enumeration<Object> getLoadedSubnodes() {
+    private Enumeration<INode> getLoadedSubnodes() {
         final SubnodeList list = subnodes;
         if (list == null) {
-            return new EmptyEnumeration();
+        	// FIXME: should be solved differently
+            return new Enumeration<INode>() {
+                public boolean hasMoreElements() {
+                    return false;
+                }
+
+                public INode nextElement() {
+                	return null;
+                }
+            };
         }
 
-        return new Enumeration<Object>() {
+        return new Enumeration<INode>() {
             int pos = 0;
 
             public boolean hasMoreElements() {
                 return pos < list.size();
             }
 
-            public Object nextElement() {
+            public INode nextElement() {
                 // prefetch in batches of 100
                 // if (pos % 100 == 0)
                 //     list.prefetch(pos, 100);
@@ -1564,7 +1572,7 @@ public final class Node implements INode {
      *
      * @return ...
      */
-    public Hashtable getPropMap() {
+    public Hashtable<String, Property> getPropMap() {
         return propMap;
     }
 
@@ -1834,7 +1842,7 @@ public final class Node implements INode {
         }
 
         if (propMap == null) {
-            propMap = new Hashtable();
+            propMap = new Hashtable<String, Property>();
         }
 
         propname = propname.trim();
@@ -1946,7 +1954,7 @@ public final class Node implements INode {
         }
 
         if (propMap == null) {
-            propMap = new Hashtable();
+            propMap = new Hashtable<String, Property>();
         }
 
         propname = propname.trim();
@@ -1984,7 +1992,7 @@ public final class Node implements INode {
         }
 
         if (propMap == null) {
-            propMap = new Hashtable();
+            propMap = new Hashtable<String, Property>();
         }
 
         propname = propname.trim();
@@ -2022,7 +2030,7 @@ public final class Node implements INode {
         }
 
         if (propMap == null) {
-            propMap = new Hashtable();
+            propMap = new Hashtable<String, Property>();
         }
 
         propname = propname.trim();
@@ -2060,7 +2068,7 @@ public final class Node implements INode {
         }
 
         if (propMap == null) {
-            propMap = new Hashtable();
+            propMap = new Hashtable<String, Property>();
         }
 
         propname = propname.trim();
@@ -2098,7 +2106,7 @@ public final class Node implements INode {
         }
 
         if (propMap == null) {
-            propMap = new Hashtable();
+            propMap = new Hashtable<String, Property>();
         }
 
         propname = propname.trim();
@@ -2232,7 +2240,7 @@ public final class Node implements INode {
                 !rel.otherType.isRelational()) {
             // the node must be stored as explicit property
             if (propMap == null) {
-                propMap = new Hashtable();
+                propMap = new Hashtable<String, Property>();
             }
 
             propMap.put(p2, prop);
@@ -2419,7 +2427,7 @@ public final class Node implements INode {
      */
     private void makeChildrenPersistable() {
         Relation subrel = dbmap == null ? null : dbmap.getSubnodeRelation();
-        for (Enumeration e = getLoadedSubnodes(); e.hasMoreElements();) {
+        for (Enumeration<?> e = getLoadedSubnodes(); e.hasMoreElements();) {
             Node node = (Node) e.nextElement();
 
             if (node.state == TRANSIENT) {
@@ -2438,7 +2446,7 @@ public final class Node implements INode {
         // no need to make properties of virtual nodes persistable
         if (state == VIRTUAL) return;
 
-        for (Enumeration e = properties(); e.hasMoreElements();) {
+        for (Enumeration<?> e = properties(); e.hasMoreElements();) {
             String propname = (String) e.nextElement();
             IProperty next = get(propname);
 

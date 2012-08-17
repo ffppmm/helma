@@ -536,7 +536,10 @@ public final class Property implements IProperty, Serializable, Cloneable, Compa
             throw new ClassCastException("uncomparable value " + value + "(" + value.getClass() + ")");
         }
         // System.err.println("COMPARING: " + value.getClass() + " TO " + pvalue.getClass());
-        return ((Comparable) value).compareTo(pvalue);
+        // FIXME: Type?
+        @SuppressWarnings("unchecked")
+		Comparable<Object> comparable = (Comparable<Object>) value;
+		return comparable.compareTo(pvalue);
     }
 
     /**

@@ -63,7 +63,7 @@ public final class NodeManager {
     protected IDGenerator idgen;
     private boolean logSql;
     private Log sqlLog = null;
-    private ArrayList listeners = new ArrayList();
+    private ArrayList<NodeChangeListener> listeners = new ArrayList<NodeChangeListener>();
 
     // a wrapper that catches some Exceptions while accessing this NM
     public final WrappedNodeManager safe;
@@ -583,7 +583,7 @@ public final class NodeManager {
         if ((dbm == null) || !dbm.isRelational()) {
             db.updateNode(txn, node.getID(), node);
         } else {
-            Hashtable propMap = node.getPropMap();
+            Hashtable<?, ?> propMap = node.getPropMap();
             Property[] props;
 
             if (propMap == null) {
@@ -1045,13 +1045,13 @@ public final class NodeManager {
         return retval;
     }
     
-    protected List collectMissingKeys(SubnodeList list, int start, int length) {
-        List retval = null;
+    protected List<String> collectMissingKeys(SubnodeList list, int start, int length) {
+        List<String> retval = null;
         for (int i = start; i < start + length; i++) {
             NodeHandle handle = list.get(i);
             if (handle != null && !cache.containsKey(handle.getKey())) {
                 if (retval == null) {
-                    retval = new ArrayList();
+                    retval = new ArrayList<String>();
                 }
                 retval.add(handle.getKey().getID());
             }
@@ -1069,7 +1069,7 @@ public final class NodeManager {
         // this does nothing for objects in the embedded database
         if (dbm != null && dbm.isRelational()) {
             // int missing = cache.containsKeys(keys);
-            List missing = collectMissingKeys(list, start, length);
+            List<String> missing = collectMissingKeys(list, start, length);
 
             if (missing != null) {
                 Connection con = dbm.getConnection();
@@ -1104,11 +1104,11 @@ public final class NodeManager {
                     ResultSet rs = stmt.executeQuery(query);
 
                     String groupbyProp = null;
-                    HashMap groupbySubnodes = null;
+                    HashMap<String, Node> groupbySubnodes = null;
 
                     if (rel.groupby != null) {
                         groupbyProp = dbm.columnNameToProperty(rel.groupby);
-                        groupbySubnodes = new HashMap();
+                        groupbySubnodes = new HashMap<String, Node>();
                     }
 
                     String accessProp = null;
@@ -1473,7 +1473,7 @@ public final class NodeManager {
      */
     public Node createNode(DbMapping dbm, ResultSet rs, DbColumn[] columns, int offset)
                 throws SQLException, IOException, ClassNotFoundException {
-        HashMap propBuffer = new HashMap();
+        HashMap<String, Property> propBuffer = new HashMap<String, Property>();
         String id = null;
         String name = null;
         String protoName = dbm.getTypeName();
@@ -1664,7 +1664,7 @@ public final class NodeManager {
             }
         }
 
-        Hashtable propMap = new Hashtable();
+        Hashtable<String, Property> propMap = new Hashtable<String, Property>();
         DbColumn[] columns2 = dbmap.getColumns();
         for (int i=0; i<columns2.length; i++) {
             Relation rel = columns2[i].getRelation();
@@ -1765,7 +1765,7 @@ public final class NodeManager {
     /**
      * Called by transactors after committing.
      */
-    protected void fireNodeChangeEvent(List inserted, List updated, List deleted, List parents) {
+    protected void fireNodeChangeEvent(List<INode> inserted, List<INode> updated, List<INode> deleted, List<INode> parents) {
         int l = listeners.size();
 
         for (int i=0; i<l; i++) {

@@ -25,8 +25,12 @@ import java.util.List;
  */
 public class SubnodeList implements Serializable {
 
-    protected Node node;
-    protected List list;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 711208015232333566L;
+	protected Node node;
+    protected List<NodeHandle> list;
 
     transient protected long lastSubnodeFetch = 0;
     transient protected long lastSubnodeChange = 0;
@@ -34,8 +38,11 @@ public class SubnodeList implements Serializable {
 
     /**
      * Hide/disable zero argument constructor for subclasses
+     *
+     * FIXME: Should be called somewhere?
      */
-    private SubnodeList()  {}
+    @SuppressWarnings("unused")
+	private SubnodeList()  {}
 
     /**
      * Creates a new subnode list
@@ -43,7 +50,7 @@ public class SubnodeList implements Serializable {
      */
     public SubnodeList(Node node) {
         this.node = node;
-        this.list = new ArrayList();
+        this.list = new ArrayList<NodeHandle>();
     }
 
     /**

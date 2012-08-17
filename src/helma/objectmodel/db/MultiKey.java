@@ -37,7 +37,7 @@ public final class MultiKey implements Key, Serializable {
     private String storageName;
 
     // the id that defines this key's object within the above storage space
-    private Map parts;
+    private Map<String, String> parts;
 
     // lazily initialized hashcode
     private transient int hashcode = 0;
@@ -48,7 +48,7 @@ public final class MultiKey implements Key, Serializable {
     /**
      * Make a key for a persistent Object, describing its datasource and key parts.
      */
-    public MultiKey(DbMapping dbmap, Map parts) {
+    public MultiKey(DbMapping dbmap, Map<String, String> parts) {
         this.parts = parts;
         this.storageName = getStorageNameFromParts(dbmap, parts);
     }
@@ -60,7 +60,7 @@ public final class MultiKey implements Key, Serializable {
      * @param parts the parts map
      * @return the actual dbmapping name
      */
-    private String getStorageNameFromParts(DbMapping dbmap, Map parts) {
+    private String getStorageNameFromParts(DbMapping dbmap, Map<String, String> parts) {
         if (dbmap == null)
             return null;
         String protoName = (String) parts.get("$prototype");
@@ -148,6 +148,8 @@ public final class MultiKey implements Key, Serializable {
         return (storageName == null) ? ("[" + parts + "]") : (storageName + "[" + parts + "]");
     }
 
+    // TODO: check if we need these two functions?
+
     // We implement write/readObject to set storageName
     // to the interned version of the string.
 
@@ -156,10 +158,12 @@ public final class MultiKey implements Key, Serializable {
         stream.writeObject(parts);
     }
 
-    private void readObject(ObjectInputStream stream)
+    // FIXME: Type?
+    @SuppressWarnings("unchecked")
+	private void readObject(ObjectInputStream stream)
                                         throws IOException, ClassNotFoundException {
         storageName = (String) stream.readObject();
-        parts = (Map) stream.readObject();
+        parts = (Map<String, String>) stream.readObject();
         // if storageName is not null, set it to the interned version
         if (storageName != null) {
             storageName = storageName.intern();

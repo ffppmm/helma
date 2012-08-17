@@ -315,18 +315,18 @@ public class Transactor {
         int updated = 0;
         int deleted = 0;
 
-        ArrayList<Node> insertedNodes = null;
-        ArrayList<Node> updatedNodes = null;
-        ArrayList<Node> deletedNodes = null;
-        ArrayList<Node> modifiedParentNodes = null;
+        ArrayList<INode> insertedNodes = null;
+        ArrayList<INode> updatedNodes = null;
+        ArrayList<INode> deletedNodes = null;
+        ArrayList<INode> modifiedParentNodes = null;
         // if nodemanager has listeners collect dirty nodes
         boolean hasListeners = nmgr.hasNodeChangeListeners();
 
         if (hasListeners) {
-            insertedNodes = new ArrayList<Node>();
-            updatedNodes = new ArrayList<Node>();
-            deletedNodes = new ArrayList<Node>();
-            modifiedParentNodes = new ArrayList<Node>();
+            insertedNodes = new ArrayList<INode>();
+            updatedNodes = new ArrayList<INode>();
+            deletedNodes = new ArrayList<INode>();
+            modifiedParentNodes = new ArrayList<INode>();
         }
 
         if (!dirtyNodes.isEmpty()) {
@@ -519,6 +519,7 @@ public class Transactor {
                 if (thread.isAlive()) {
                     // thread is still running, pull emergency break
                     nmgr.app.logEvent("Stopping Thread for Transactor " + this);
+                    // FIXME: deprecated
                     thread.stop();
                 }
             } catch (InterruptedException ir) {

@@ -438,8 +438,11 @@ public final class DbMapping {
     /**
      * Returns the Set of Prototypes extending this prototype
      * @return the Set of Prototypes extending this prototype
+     * 
+     * FIXME: Should be solved by none []
      */
-    public String[] getExtensions() {
+    @SuppressWarnings("unchecked")
+	public String[] getExtensions() {
         if (extensionMap == null)
 			return new String[] { extensionId };
 		else

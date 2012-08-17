@@ -36,13 +36,14 @@ public class DbSource {
     private ResourceProperties props, subProps;
     protected String url;
     private String driver;
+    // FIXME should be solved differently, hibernate?
     private boolean isOracle, isMySQL, isPostgreSQL, isH2;
     private long lastRead = 0L;
-    private Hashtable dbmappings = new Hashtable();
+    private Hashtable<String, DbMapping> dbmappings = new Hashtable<String, DbMapping>();
     // compute hashcode statically because it's expensive and we need it often
     private int hashcode;
     // thread local connection holder for non-transactor threads
-    private ThreadLocal connection;
+    private ThreadLocal<Connection> connection;
 
     /**
      * Creates a new DbSource object.
@@ -102,7 +103,7 @@ public class DbSource {
      */
     private Connection getThreadLocalConnection() {
         if (connection == null) {
-            connection = new ThreadLocal();
+            connection = new ThreadLocal<Connection>();
             return null;
         }
         Connection con = (Connection) connection.get();
@@ -180,7 +181,7 @@ public class DbSource {
         }
 
         // read any remaining extra properties to be passed to the driver
-        for (Enumeration e = subProps.keys(); e.hasMoreElements(); ) {
+        for (Enumeration<?> e = subProps.keys(); e.hasMoreElements(); ) {
             String key = (String) e.nextElement();
 
             // filter out properties we alread have
