@@ -245,8 +245,8 @@ public final class JSAdapter implements Scriptable, Function {
             return false;
         }
     }
-    
-    public Object getDefaultValue(Class hint) {
+    // TODO: check these strange Class things
+    public Object getDefaultValue(Class<?> hint) {
         return ScriptableObject.getDefaultValue(this, hint);
     }
     

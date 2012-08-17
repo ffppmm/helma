@@ -34,7 +34,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashSet;
-import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 
 import org.mozilla.javascript.Context;
@@ -55,13 +55,17 @@ import org.mozilla.javascript.Wrapper;
  */
 public class HopObject extends ScriptableObject implements Wrapper, PropertyRecorder {
 
-    String className;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1329862822101428427L;
+	String className;
     final NodeProxy proxy;
     final RhinoCore core;
 
     // fields to implement PropertyRecorder
     private boolean isRecording = false;
-    private HashSet changedProperties;
+    private HashSet<String> changedProperties;
 
     /**
      * Creates a new HopObject prototype.
@@ -178,7 +182,7 @@ public class HopObject extends ScriptableObject implements Wrapper, PropertyReco
      * @param hint the type hint
      * @return the default value for the object
      */
-    public Object getDefaultValue(Class hint) {
+    public Object getDefaultValue(Class<?> hint) {
         return proxy == null ? toString() : proxy.getNode().toString();
     }
 
@@ -278,7 +282,7 @@ public class HopObject extends ScriptableObject implements Wrapper, PropertyReco
     public Object jsFunction_getResources(String resourceName) {
         RhinoEngine engine = RhinoEngine.getRhinoEngine();
         Prototype prototype = engine.core.app.getPrototypeByName(className);
-        ArrayList a = new ArrayList();
+        ArrayList<Scriptable> a = new ArrayList<Scriptable>();
         while (prototype != null) {
             Resource[] resources = prototype.getResources();
             for (int i = resources.length - 1; i >= 0; i--) {
@@ -328,7 +332,7 @@ public class HopObject extends ScriptableObject implements Wrapper, PropertyReco
         }
 
         String actionName = null;
-        Map queryParams = params instanceof Scriptable ?
+        Properties queryParams = params instanceof Scriptable ?
                 core.scriptableToProperties((Scriptable) params) : null;
         INode node = getNode();
 
@@ -1007,8 +1011,8 @@ public class HopObject extends ScriptableObject implements Wrapper, PropertyReco
 
         INode node = getNode();
 
-        Enumeration en = node.properties();
-        ArrayList list = new ArrayList();
+        Enumeration<String> en = node.properties();
+        ArrayList<Object> list = new ArrayList<Object>();
 
         while (en.hasMoreElements())
             list.add(en.nextElement());
@@ -1091,7 +1095,7 @@ public class HopObject extends ScriptableObject implements Wrapper, PropertyReco
      * Tell this PropertyRecorder to start recording changes to properties
      */
     public void startRecording() {
-        changedProperties = new HashSet();
+        changedProperties = new HashSet<String>();
         isRecording = true;
     }
 
@@ -1108,7 +1112,7 @@ public class HopObject extends ScriptableObject implements Wrapper, PropertyReco
      *
      * @return a Set containing the names of changed properties
      */
-    public Set getChangeSet() {
+    public Set<String> getChangeSet() {
         return changedProperties;
     }
 

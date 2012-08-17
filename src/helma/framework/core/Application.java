@@ -1227,7 +1227,7 @@ public final class Application implements Runnable {
      * @throws UnsupportedEncodingException if the application's charset property
      *         is not a valid encoding name
      */
-    public String getNodeHref(Object elem, String actionName, Map<String, Object> queryParams)
+    public String getNodeHref(Object elem, String actionName, Properties queryParams)
             throws UnsupportedEncodingException {
         StringBuffer buffer = new StringBuffer(baseURI);
 
@@ -1243,13 +1243,11 @@ public final class Application implements Runnable {
         return buffer.toString();
     }
 
-    // FIXME: Type Safety
-	@SuppressWarnings("unchecked")
-	private int appendQueryParams(StringBuffer buffer, Map<String, Object> params,
+	private int appendQueryParams(StringBuffer buffer, Properties params,
                                   String prefix, int count)
             throws UnsupportedEncodingException {
-        for (Iterator<Entry<String, Object>> it = params.entrySet().iterator(); it.hasNext();) {
-            Entry<String, Object> entry = it.next();
+        for (Iterator<Entry<Object, Object>> it = params.entrySet().iterator(); it.hasNext();) {
+            Entry<Object, Object> entry = it.next();
             Object value = entry.getValue();
             if (value == null) {
                 continue;
@@ -1257,7 +1255,7 @@ public final class Application implements Runnable {
             String key = UrlEncoded.encode(entry.getKey().toString(), charset);
             if (prefix != null) key = prefix + '[' + key + ']';
             if (value instanceof Map) {
-                count = appendQueryParams(buffer, (Map<String, Object>) value, key, count);
+                count = appendQueryParams(buffer, (Properties) value, key, count);
             } else {
                 buffer.append(count++ == 0 ? '?' : '&');
                 buffer.append(key);

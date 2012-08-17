@@ -74,7 +74,7 @@ public class HacHspConverter {
     }
 
     static String processHspBody(String content) {
-        ArrayList partBuffer = new ArrayList();
+        ArrayList<HspBodyPart> partBuffer = new ArrayList<HspBodyPart>();
         char[] cnt = content.toCharArray();
         int l = cnt.length;
 

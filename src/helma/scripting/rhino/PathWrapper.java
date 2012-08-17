@@ -21,7 +21,6 @@ import helma.framework.core.RequestPath;
 import java.io.UnsupportedEncodingException;
 
 import org.mozilla.javascript.Context;
-import org.mozilla.javascript.PropertyException;
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.ScriptableObject;
 import org.mozilla.javascript.Undefined;
@@ -45,7 +44,8 @@ public class PathWrapper extends ScriptableObject {
     /**
      * Zero arg constructor for creating the PathWrapper prototype.
      */
-    public PathWrapper (RhinoCore core) throws PropertyException, NoSuchMethodException {
+    // TODO: check alternative
+    public PathWrapper (RhinoCore core) throws NoSuchMethodException {
         this.core = core;
         // create a dummy path object
         this.path = new RequestPath(core.app);
@@ -147,7 +147,7 @@ public class PathWrapper extends ScriptableObject {
     public int contains(Object obj) {
         if (obj instanceof Wrapper)
             obj = ((Wrapper) obj).unwrap();
-        return path.contains(obj);
+        return path.indexOf(obj);
     }
 
     public String getClassName() {
@@ -161,11 +161,12 @@ public class PathWrapper extends ScriptableObject {
     /**
      * Return a primitive representation for this object.
      * FIXME: We always return a string representation.
+     * FIXME: Again Class?
      *
      * @param hint the type hint
      * @return the default value for the object
      */
-    public Object getDefaultValue(Class hint) {
+    public Object getDefaultValue(Class<?> hint) {
         return toString();
     }
 }

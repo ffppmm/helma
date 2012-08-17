@@ -139,7 +139,7 @@ public class RequestPath {
     
     /**
      * Checks if the given object is contained in the request path.
-     * Itreturns the zero-based index position, or -1 if it isn't contained.
+     * It returns the zero-based index position, or -1 if it isn't contained.
      *
      * @param obj the element to check
      * @return the index of the element, or -1 if it isn't contained

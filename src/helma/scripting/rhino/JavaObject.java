@@ -25,7 +25,7 @@ import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Map;
+import java.util.Properties;
 
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.FunctionObject;
@@ -39,14 +39,18 @@ import org.mozilla.javascript.Wrapper;
  */
 public class JavaObject extends NativeJavaObject {
 
-    RhinoCore core;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 6348440950512377606L;
+	RhinoCore core;
     String protoName;
     NativeJavaObject unscriptedJavaObj;
 
-    static HashMap overload;
+    static HashMap<String, Method> overload;
 
     static {
-        overload = new HashMap();
+        overload = new HashMap<String, Method>();
         Method[] m = JavaObject.class.getMethods();
         for (int i=0; i<m.length; i++) {
             if ("href".equals(m[i].getName()) ||
@@ -131,7 +135,7 @@ public class JavaObject extends NativeJavaObject {
         }
 
         String actionName = null;
-        Map queryParams = params instanceof Scriptable ?
+        Properties queryParams = params instanceof Scriptable ?
                 core.scriptableToProperties((Scriptable) params) : null;
 
         if (action != null) {
@@ -228,7 +232,7 @@ public class JavaObject extends NativeJavaObject {
     public Object getResources(String resourceName) {
         RhinoEngine engine = RhinoEngine.getRhinoEngine();
         Prototype prototype = engine.core.app.getPrototypeByName(protoName);
-        ArrayList a = new ArrayList();
+        ArrayList<Scriptable> a = new ArrayList<Scriptable>();
         while (prototype != null) {
             Resource[] resources = prototype.getResources();
             for (int i = resources.length - 1; i >= 0; i--) {

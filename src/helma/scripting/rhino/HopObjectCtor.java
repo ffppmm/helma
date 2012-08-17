@@ -37,7 +37,11 @@ import org.mozilla.javascript.ScriptableObject;
 
 public class HopObjectCtor extends FunctionObject {
 
-    // init flag to trigger prototype compilation on
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 3787907922712636030L;
+	// init flag to trigger prototype compilation on
     // static constructor property access
     boolean initialized;
     RhinoCore core;
@@ -88,13 +92,14 @@ public class HopObjectCtor extends FunctionObject {
         if (core.app.isJavaPrototype(protoname)) {
             String classname = core.app.getJavaClassForPrototype(protoname);
             try {
-                Class clazz = Class.forName(classname);
+            	// TODO: Check type safety
+                Class<?> clazz = Class.forName(classname);
                 // try to get the constructor matching our arguments
-                Class[] argsTypes = new Class[args.length];
+                Class<?>[] argsTypes = new Class<?>[args.length];
                 for (int i=0; i<argsTypes.length; i++) {
                     argsTypes[i] = args[i] == null ? null : args[i].getClass();
                 }
-                Constructor cnst = clazz.getConstructor(argsTypes);
+                Constructor<?> cnst = clazz.getConstructor(argsTypes);
                 // crate a new instance using the constructor
                 Object obj = cnst.newInstance(args);
                 return Context.toObject(obj, core.global);
@@ -152,7 +157,12 @@ public class HopObjectCtor extends FunctionObject {
 
     class GetById extends BaseFunction {
 
-        public GetById(Scriptable scope) {
+        /**
+		 * 
+		 */
+		private static final long serialVersionUID = -8041352998956882647L;
+
+		public GetById(Scriptable scope) {
             ScriptRuntime.setFunctionProtoAndParent(this, scope);
         }
 
@@ -195,7 +205,12 @@ public class HopObjectCtor extends FunctionObject {
 
     class HopCollection extends BaseFunction {
 
-        public HopCollection(Scriptable scope) {
+        /**
+		 * 
+		 */
+		private static final long serialVersionUID = -4046933261468527204L;
+
+		public HopCollection(Scriptable scope) {
             ScriptRuntime.setFunctionProtoAndParent(this, scope);
         }
 

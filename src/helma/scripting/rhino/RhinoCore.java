@@ -50,6 +50,7 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 import java.util.Vector;
@@ -90,7 +91,7 @@ public final class RhinoCore implements ScopeProvider {
     CacheMap wrappercache;
 
     // table containing JavaScript prototypes
-    Hashtable prototypes;
+    Hashtable<String, TypeInfo> prototypes;
 
     // timestamp of last type update
     volatile long lastUpdate = 0;
@@ -132,7 +133,7 @@ public final class RhinoCore implements ScopeProvider {
     public RhinoCore(Application app) {
         this.app = app;
         wrappercache = new WeakCacheMap(500);
-        prototypes = new Hashtable();
+        prototypes = new Hashtable<String, TypeInfo>();
         contextFactory = new HelmaContextFactory();
         contextFactory.initApplicationClassLoader(app.getClassLoader());
     }
@@ -207,8 +208,8 @@ public final class RhinoCore implements ScopeProvider {
             Scriptable numberProto = ScriptableObject.getClassPrototype(global, "Number");
             numberProto.put("format", numberProto, new NumberFormat());
 
-            Collection protos = app.getPrototypes();
-            for (Iterator i = protos.iterator(); i.hasNext();) {
+            Collection<?> protos = app.getPrototypes();
+            for (Iterator<?> i = protos.iterator(); i.hasNext();) {
                 Prototype proto = (Prototype) i.next();
                 initPrototype(proto);
             }
@@ -317,7 +318,7 @@ public final class RhinoCore implements ScopeProvider {
         contextFactory.call(new ContextAction() {
             public Object run(Context cx) {
                 // loop through the prototype's code elements and evaluate them
-                Iterator code = prototype.getCodeResources();
+                Iterator<?> code = prototype.getCodeResources();
                 while (code.hasNext()) {
                     evaluate(cx, type, (Resource) code.next());
                 }
@@ -372,13 +373,13 @@ public final class RhinoCore implements ScopeProvider {
         app.typemgr.checkPrototypes();
 
         // get a collection of all prototypes (code directories)
-        Collection protos = app.getPrototypes();
+        Collection<?> protos = app.getPrototypes();
 
         // in order to respect inter-prototype dependencies, we try to update
         // the global prototype before all other prototypes, and parent
         // prototypes before their descendants.
 
-        HashSet checked = new HashSet(protos.size() * 2);
+        HashSet<Prototype> checked = new HashSet<Prototype>(protos.size() * 2);
 
         TypeInfo type = (TypeInfo) prototypes.get("global");
 
@@ -386,7 +387,7 @@ public final class RhinoCore implements ScopeProvider {
             updatePrototype(type, checked);
         }
 
-        for (Iterator i = protos.iterator(); i.hasNext();) {
+        for (Iterator<?> i = protos.iterator(); i.hasNext();) {
             Prototype proto = (Prototype) i.next();
 
             if (checked.contains(proto)) {
@@ -417,7 +418,7 @@ public final class RhinoCore implements ScopeProvider {
      * @param type the type info to check
      * @param checked a set of prototypes that have already been checked
      */
-    private void updatePrototype(TypeInfo type, HashSet checked) {
+    private void updatePrototype(TypeInfo type, HashSet<Prototype> checked) {
         // first, remember prototype as updated
         checked.add(type.frameworkProto);
 
@@ -538,12 +539,14 @@ public final class RhinoCore implements ScopeProvider {
     /**
      *  Convert an input argument from Java to the scripting runtime
      *  representation.
+     *  
+     *  TODO: these instanceof ifs should be solved different
      */
     public Object processXmlRpcArgument (Object arg) {
         if (arg == null)
             return null;
         if (arg instanceof Vector) {
-            Vector v = (Vector) arg;
+            Vector<String> v = (Vector<String>) arg;
             Object[] a = v.toArray();
             for (int i=0; i<a.length; i++) {
                 a[i] = processXmlRpcArgument(a[i]);
@@ -551,9 +554,9 @@ public final class RhinoCore implements ScopeProvider {
             return Context.getCurrentContext().newArray(global, a);
         }
         if (arg instanceof Hashtable) {
-            Hashtable t = (Hashtable) arg;
-            for (Enumeration e=t.keys(); e.hasMoreElements(); ) {
-                Object key = e.nextElement();
+            Hashtable<String, Object> t = (Hashtable<String, Object>) arg;
+            for (Enumeration<String> e = t.keys(); e.hasMoreElements(); ) {
+                String key = e.nextElement();
                 t.put(key, processXmlRpcArgument(t.get(key)));
             }
             return Context.toObject(new SystemMap(t), global);
@@ -583,7 +586,7 @@ public final class RhinoCore implements ScopeProvider {
         if (arg instanceof NativeObject) {
             NativeObject no = (NativeObject) arg;
             Object[] ids = no.getIds();
-            Hashtable ht = new Hashtable(ids.length*2);
+            Hashtable<String, Object> ht = new Hashtable<String, Object>(ids.length*2);
             for (int i=0; i<ids.length; i++) {
                 if (ids[i] instanceof String) {
                     String key = (String) ids[i];
@@ -598,16 +601,16 @@ public final class RhinoCore implements ScopeProvider {
             NativeArray na = (NativeArray) arg;
             Number n = (Number) na.get("length", na);
             int l = n.intValue();
-            Vector retval = new Vector(l);
+            Vector<Object> retval = new Vector<Object>(l);
             for (int i=0; i<l; i++) {
                 retval.add(i, processXmlRpcResponse(na.get(i, na)));
             }
             return retval;
         } else if (arg instanceof Map) {
-            Map map = (Map) arg;
-            Hashtable ht = new Hashtable(map.size()*2);
-            for (Iterator it=map.entrySet().iterator(); it.hasNext();) {
-                Map.Entry entry = (Map.Entry) it.next();
+            Map<String, Object> map = (Map<String, Object>) arg;
+            Hashtable<Object, Object> ht = new Hashtable<Object, Object>(map.size()*2);
+            for (Iterator<Entry<String, Object>> it=map.entrySet().iterator(); it.hasNext();) {
+                Map.Entry<String, Object> entry = it.next();
                 ht.put(entry.getKey().toString(),
                        processXmlRpcResponse(entry.getValue()));
             }
@@ -622,8 +625,8 @@ public final class RhinoCore implements ScopeProvider {
         } else if (arg instanceof INode) {
             // interpret HopObject as object/dict
             INode n = (INode) arg;
-            Hashtable ht = new Hashtable();
-            Enumeration props = n.properties();
+            Hashtable<String, Object> ht = new Hashtable<String, Object>();
+            Enumeration<String> props = n.properties();
             while (props.hasMoreElements()) {
                 String key = (String) props.nextElement();
                 IProperty prop = n.get(key);
@@ -656,7 +659,7 @@ public final class RhinoCore implements ScopeProvider {
      * to use. Otherwise, a Java-Class-to-Script-Prototype mapping is consulted.
      */
     public Scriptable getElementWrapper(Object e) {
-        WeakReference ref = (WeakReference) wrappercache.get(e);
+        WeakReference<?> ref = (WeakReference<?>) wrappercache.get(e);
         Wrapper wrapper = ref == null ? null : (Wrapper) ref.get();
 
         if (wrapper == null || wrapper.unwrap() != e) {
@@ -671,7 +674,7 @@ public final class RhinoCore implements ScopeProvider {
                 wrapper = new JavaObject(global, e, prototypeName, op, this);
             }
 
-            wrappercache.put(e, new WeakReference(wrapper));
+            wrappercache.put(e, new WeakReference<Wrapper>(wrapper));
         }
 
         return (Scriptable) wrapper;
@@ -981,8 +984,8 @@ public final class RhinoCore implements ScopeProvider {
             frameworkProto = proto;
             objProto = op;
             // remember properties already defined on this object prototype
-            compiledProperties = new HashSet();
-            predefinedProperties = new HashSet();
+            compiledProperties = new HashSet<String>();
+            predefinedProperties = new HashSet<String>();
             Object[] keys = op.getAllIds();
             for (int i = 0; i < keys.length; i++) {
                 predefinedProperties.add(keys[i].toString());
@@ -1015,7 +1018,7 @@ public final class RhinoCore implements ScopeProvider {
                 PropertyRecorder recorder = (PropertyRecorder) objProto;
 
                 recorder.stopRecording();
-                Set changedProperties = recorder.getChangeSet();
+                Set<String> changedProperties = recorder.getChangeSet();
 
                 if (changedProperties != null) {
                     recorder.clearChangeSet();
@@ -1032,7 +1035,7 @@ public final class RhinoCore implements ScopeProvider {
 
                     boolean isGlobal = "global".equals(frameworkProto.getLowerCaseName());
 
-                    Iterator it = compiledProperties.iterator();
+                    Iterator<String> it = compiledProperties.iterator();
                     while (it.hasNext()) {
                         String key = (String) it.next();
                         if (isGlobal && (prototypes.containsKey(key.toLowerCase())
@@ -1045,7 +1048,7 @@ public final class RhinoCore implements ScopeProvider {
                             objProto.setAttributes(key, 0);
                             objProto.delete(key);
                         } catch (Exception px) {
-                            app.logEvent("Error unsetting property "+key+" on "+
+                            app.logEvent("Error unsetting property " + key + " on "+
                                     frameworkProto.getName());
                         }
                     }
@@ -1121,7 +1124,7 @@ public final class RhinoCore implements ScopeProvider {
      */
     class WrapMaker extends WrapFactory {
 
-        public Object wrap(Context cx, Scriptable scope, Object obj, Class staticType) {
+        public Object wrap(Context cx, Scriptable scope, Object obj, Class<?> staticType) {
             // taking a shortcut here on things normally defined by setJavaPrimitivesWrap()
             if (obj == null || obj == Undefined.instance
                     || obj instanceof Scriptable || obj instanceof String
@@ -1138,7 +1141,7 @@ public final class RhinoCore implements ScopeProvider {
 
             // Masquerade SystemMap and WrappedMap as native JavaScript objects
             if (obj instanceof SystemMap || obj instanceof WrappedMap) {
-                return new MapWrapper((Map) obj, RhinoCore.this);
+                return new MapWrapper((Map<String, Object>) obj, RhinoCore.this);
             }
 
             // Convert java.util.Date objects to JavaScript Dates
@@ -1176,14 +1179,24 @@ public final class RhinoCore implements ScopeProvider {
     }
 
     class StringTrim extends BaseFunction {
-        public Object call(Context cx, Scriptable scope, Scriptable thisObj, Object[] args) {
+        /**
+		 * 
+		 */
+		private static final long serialVersionUID = -1515630068911501925L;
+
+		public Object call(Context cx, Scriptable scope, Scriptable thisObj, Object[] args) {
             String str = thisObj.toString();
             return str.trim();
         }
     }
 
     class DateFormat extends BaseFunction {
-        public Object call(Context cx, Scriptable scope, Scriptable thisObj, Object[] args) {
+        /**
+		 * 
+		 */
+		private static final long serialVersionUID = 4694440247686532087L;
+
+		public Object call(Context cx, Scriptable scope, Scriptable thisObj, Object[] args) {
             Date date = new Date((long) ScriptRuntime.toNumber(thisObj));
             SimpleDateFormat df;
 
@@ -1207,7 +1220,12 @@ public final class RhinoCore implements ScopeProvider {
     }
 
     class NumberFormat extends BaseFunction {
-        public Object call(Context cx, Scriptable scope, Scriptable thisObj, Object[] args) {
+        /**
+		 * 
+		 */
+		private static final long serialVersionUID = -6999409297243210875L;
+
+		public Object call(Context cx, Scriptable scope, Scriptable thisObj, Object[] args) {
             DecimalFormat df;
             if (args.length > 0 && args[0] != Undefined.instance) {
                 df = new DecimalFormat(args[0].toString());

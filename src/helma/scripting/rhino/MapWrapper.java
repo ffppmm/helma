@@ -31,7 +31,11 @@ import org.mozilla.javascript.Wrapper;
  *  and helma.util.WrappedMap.
  */
 public class MapWrapper extends ScriptableObject implements Wrapper {
-    Map map;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = -8802538795495729410L;
+	Map<String, Object> map;
     RhinoCore core;
 
     /**
@@ -47,7 +51,7 @@ public class MapWrapper extends ScriptableObject implements Wrapper {
      * @param map the Map
      * @param core the RhinoCore instance
      */
-    public MapWrapper(Map map, RhinoCore core) {
+    public MapWrapper(Map<String, Object> map, RhinoCore core) {
         this.map = map;
         this.core = core;
         setParentScope(core.global);
@@ -63,7 +67,7 @@ public class MapWrapper extends ScriptableObject implements Wrapper {
      */
     public void put(String name, Scriptable start, Object value) {
         if (map == null) {
-            map = new HashMap();
+            map = new HashMap<String, Object>();
         }
 
         if (value == null || value == Undefined.instance) {
@@ -137,7 +141,7 @@ public class MapWrapper extends ScriptableObject implements Wrapper {
      */
     public void put(int idx, Scriptable start, Object value) {
         if (map == null) {
-            map = new HashMap();
+            map = new HashMap<String, Object>();
         }
 
         if (value == null || value == Undefined.instance) {
@@ -214,7 +218,7 @@ public class MapWrapper extends ScriptableObject implements Wrapper {
         return map.keySet().toArray();
     }
 
-    public Object getDefaultValue(Class hint) {
+    public Object getDefaultValue(Class<?> hint) {
         if (hint == null || hint == String.class) {
             return map == null ? "{}" : map.toString();
         }
@@ -226,7 +230,7 @@ public class MapWrapper extends ScriptableObject implements Wrapper {
      */
     public Object unwrap() {
         if (map == null) {
-            map = new HashMap();
+            map = new HashMap<String, Object>();
         }
         return map;
     }

@@ -42,7 +42,7 @@ public interface PropertyRecorder {
      *
      * @return a Set containing the names of changed properties
      */
-    public Set getChangeSet();
+    public Set<String> getChangeSet();
 
     /**
      * Clear the set of changed properties.
