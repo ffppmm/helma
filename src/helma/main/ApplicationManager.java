@@ -212,7 +212,6 @@ public class ApplicationManager implements XmlRpcHandler {
      * Implements org.apache.xmlrpc.XmlRpcHandler.execute()
      */
     // FIXME: Another inherited method with no types 
-    @SuppressWarnings({ "rawtypes", "unchecked" })
 	public Object execute(String method, Vector params)
                    throws Exception {
         int dot = method.indexOf(".");

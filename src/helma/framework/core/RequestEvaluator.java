@@ -416,7 +416,6 @@ public final class RequestEvaluator implements Runnable {
                                         XmlRpcRequestProcessor xreqproc = new XmlRpcRequestProcessor();
                                         XmlRpcServerRequest xreq = xreqproc.decodeRequest(req.getServletRequest()
                                                 .getInputStream());
-                                        @SuppressWarnings("unchecked")
 										Vector<String> args = xreq.getParameters();
                                         args.add(0, xreq.getMethodName());
                                         result = scriptingEngine.invoke(currentElement,

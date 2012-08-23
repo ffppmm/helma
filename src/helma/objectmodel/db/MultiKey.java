@@ -158,8 +158,6 @@ public final class MultiKey implements Key, Serializable {
         stream.writeObject(parts);
     }
 
-    // FIXME: Type?
-    @SuppressWarnings("unchecked")
 	private void readObject(ObjectInputStream stream)
                                         throws IOException, ClassNotFoundException {
         storageName = (String) stream.readObject();

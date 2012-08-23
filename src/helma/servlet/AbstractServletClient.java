@@ -693,7 +693,6 @@ public abstract class AbstractServletClient extends HttpServlet {
             });
         }
 
-        @SuppressWarnings("unchecked")
 		List<FileItem> uploads = upload.parseRequest(reqcx);
         
         Iterator<FileItem> it = uploads.iterator();
