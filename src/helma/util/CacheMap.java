@@ -30,7 +30,7 @@
 package helma.util;
 
 import helma.framework.core.Application;
-import helma.objectmodel.ObjectCache;
+import helma.objectmodel.IObjectCache;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -48,7 +48,7 @@ import java.util.Properties;
 // <P>
 // @see java.util.Hashtable
 
-public class CacheMap implements ObjectCache {
+public class CacheMap implements IObjectCache {
 
     // Load factor.
     private float loadFactor;

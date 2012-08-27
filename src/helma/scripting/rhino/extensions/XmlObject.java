@@ -17,7 +17,7 @@
 package helma.scripting.rhino.extensions;
 
 import helma.objectmodel.INode;
-import helma.objectmodel.db.Node;
+import helma.objectmodel.db.PersistentNode;
 import helma.objectmodel.dom.XmlConverter;
 import helma.objectmodel.dom.XmlReader;
 import helma.objectmodel.dom.XmlWriter;
@@ -159,7 +159,7 @@ public class XmlObject {
 
         if (node == null) {
             // make sure we have a node, even if 2nd arg doesn't exist or is not a node
-            node = new Node(null, null, core.getApplication().getWrappedNodeManager());
+            node = new PersistentNode(null, null, core.getApplication().getWrappedNodeManager());
         }
 
         try {
@@ -201,7 +201,7 @@ public class XmlObject {
 
         if (node == null) {
             // make sure we have a node, even if 2nd arg doesn't exist or is not a node
-            node = new Node(null, null, core.getApplication().getWrappedNodeManager());
+            node = new PersistentNode(null, null, core.getApplication().getWrappedNodeManager());
         }
 
         try {
@@ -251,7 +251,7 @@ public class XmlObject {
                 converter = new XmlConverter();
             }
 
-            INode node = new Node(null, null,
+            INode node = new PersistentNode(null, null,
                     core.getApplication().getWrappedNodeManager());
             INode result = converter.convert(url, node);
 
@@ -295,7 +295,7 @@ public class XmlObject {
                 converter = new XmlConverter();
             }
 
-            INode node = new Node(null, null, core.getApplication().getWrappedNodeManager());
+            INode node = new PersistentNode(null, null, core.getApplication().getWrappedNodeManager());
             INode result = converter.convertFromString(str, node);
 
             return core.getNodeWrapper(result);

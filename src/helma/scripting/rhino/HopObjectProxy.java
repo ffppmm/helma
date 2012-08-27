@@ -1,7 +1,7 @@
 package helma.scripting.rhino;
 
 import helma.objectmodel.INode;
-import helma.objectmodel.db.Node;
+import helma.objectmodel.db.PersistentNode;
 import helma.objectmodel.db.NodeHandle;
 
 import org.mozilla.javascript.Context;
@@ -22,8 +22,8 @@ class HopObjectProxy implements SerializationProxy {
         if (n == null) {
             ref = obj.getClassName();
         } else {
-            if (n instanceof Node) {
-                ref = ((Node) n).getHandle();
+            if (n instanceof PersistentNode) {
+                ref = ((PersistentNode) n).getHandle();
             } else {
                 ref = n;
             }
@@ -31,7 +31,7 @@ class HopObjectProxy implements SerializationProxy {
         wrapped = true;
     }
 
-    HopObjectProxy(Node node) {
+    HopObjectProxy(PersistentNode node) {
         ref = node.getHandle();
     }
 

@@ -16,6 +16,7 @@
 
 package helma.objectmodel.db;
 
+import helma.objectmodel.INode;
 import helma.objectmodel.ObjectNotFoundException;
 
 import java.util.List;
@@ -45,7 +46,7 @@ public final class WrappedNodeManager {
      * @param dbmap
      * @return
      */
-    public Node getNode(String id, DbMapping dbmap) {
+    public INode getNode(String id, DbMapping dbmap) {
         return getNode(new DbKey(dbmap, id));
     }
 
@@ -55,11 +56,11 @@ public final class WrappedNodeManager {
      * @param key
      * @return
      */
-    public Node getNode(Key key) {
+    public INode getNode(Key key) {
         Transactor tx = checkLocalTransactor();
         try {
             beginLocalTransaction(tx, "getNode");
-            Node node = nmgr.getNode(key);
+            INode node = nmgr.getNode(key);
             commitLocalTransaction(tx);
             return node;
         } catch (ObjectNotFoundException x) {
@@ -80,11 +81,11 @@ public final class WrappedNodeManager {
      * @param rel
      * @return
      */
-    public Node getNode(Node home, String id, Relation rel) {
+    public INode getNode(PersistentNode home, String id, Relation rel) {
         Transactor tx = checkLocalTransactor();
         try {
             beginLocalTransaction(tx, "getNode");
-            Node node = nmgr.getNode(home, id, rel);
+            INode node = nmgr.getNode(home, id, rel);
             commitLocalTransaction(tx);
             return node;
         } catch (ObjectNotFoundException x) {
@@ -105,7 +106,7 @@ public final class WrappedNodeManager {
      * @param rel
      * @return
      */
-    public List<NodeHandle> getNodes(Node home, Relation rel) {
+    public List<NodeHandle> getNodes(INode home, Relation rel) {
         Transactor tx = checkLocalTransactor();
         try {
             beginLocalTransaction(tx, "getNodes");
@@ -126,7 +127,7 @@ public final class WrappedNodeManager {
      * @param rel
      * @return
      */
-    public List<NodeHandle> getNodeIDs(Node home, Relation rel) {
+    public List<NodeHandle> getNodeIDs(INode home, Relation rel) {
         try {
             return nmgr.getNodeIDs(home, rel);
         } catch (Exception x) {
@@ -153,7 +154,7 @@ public final class WrappedNodeManager {
      * @param rel
      * @return
      */
-    public int countNodes(Node home, Relation rel) {
+    public int countNodes(INode home, Relation rel) {
         try {
             return nmgr.countNodes(home, rel);
         } catch (Exception x) {
@@ -161,7 +162,7 @@ public final class WrappedNodeManager {
         }
     }
 
-    public void prefetchNodes(Node node, Relation rel, SubnodeList list,
+    public void prefetchNodes(INode node, Relation rel, SubnodeList list,
                               int start, int length) {
         try {
             nmgr.prefetchNodes(node, rel, list, start, length);
@@ -175,7 +176,7 @@ public final class WrappedNodeManager {
      *
      * @param node
      */
-    public void deleteNode(Node node) {
+    public void deleteNode(PersistentNode node) {
         Transactor tx = checkLocalTransactor();
         try {
             beginLocalTransaction(tx, "deleteNode");
@@ -195,7 +196,7 @@ public final class WrappedNodeManager {
      * @param rel
      * @return
      */
-    public Vector<String> getPropertyNames(Node home, Relation rel) {
+    public Vector<String> getPropertyNames(PersistentNode home, Relation rel) {
         try {
             return nmgr.getPropertyNames(home, rel);
         } catch (Exception x) {
@@ -208,7 +209,7 @@ public final class WrappedNodeManager {
      *
      * @param node
      */
-    public void registerNode(Node node) {
+    public void registerNode(PersistentNode node) {
         nmgr.registerNode(node);
     }
 
@@ -217,7 +218,7 @@ public final class WrappedNodeManager {
      *
      * @param node
      */
-    public void registerNode(Node node, Key key) {
+    public void registerNode(INode node, Key key) {
         nmgr.registerNode(node, key);
     }
 
@@ -226,7 +227,7 @@ public final class WrappedNodeManager {
      *
      * @param node
      */
-    public void evictNode(Node node) {
+    public void evictNode(PersistentNode node) {
         nmgr.evictNode(node);
     }
 
@@ -265,11 +266,11 @@ public final class WrappedNodeManager {
     /**
      * Gets the application's root node.
      */
-    public Node getRootNode() {
+    public INode getRootNode() {
         Transactor tx = checkLocalTransactor();
         try {
             beginLocalTransaction(tx, "getRootNode");
-            Node node = nmgr.getRootNode();
+            INode node = nmgr.getRootNode();
             commitLocalTransaction(tx);
             return node;
         } catch (Exception x) {
@@ -281,7 +282,7 @@ public final class WrappedNodeManager {
     /**
      * Checks if the given node is the application's root node.
      */
-    public boolean isRootNode(Node node) {
+    public boolean isRootNode(INode node) {
         return nmgr.isRootNode(node);
     }
 

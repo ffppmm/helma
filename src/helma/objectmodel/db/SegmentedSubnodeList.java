@@ -11,6 +11,8 @@
 
 package helma.objectmodel.db;
 
+import helma.objectmodel.INode;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -30,7 +32,7 @@ public class SegmentedSubnodeList extends SubnodeList {
      * Creates a new subnode list
      * @param node the node we belong to
      */
-    public SegmentedSubnodeList(Node node) {
+    public SegmentedSubnodeList(INode node) {
         super(node);
     }
 
@@ -166,7 +168,7 @@ public class SegmentedSubnodeList extends SubnodeList {
         if (!hasRelationalNodes() || segments == null) {
             return super.toArray();
         }
-        node.nmgr.logEvent("Warning: toArray() called on large segmented collection: " + node);
+        node.getNodeManager().logEvent("Warning: toArray() called on large segmented collection: " + node);
         for (int i = 0; i < segments.length; i++) {
             loadSegment(i, false);
         }
@@ -189,11 +191,11 @@ public class SegmentedSubnodeList extends SubnodeList {
             rel.offset = segment.startIndex;
             int expectedSize = rel.maxSize = segment.length;
             List<NodeHandle> seglist =  deep ?
-                    node.nmgr.getNodes(node, rel) :
-                    node.nmgr.getNodeIDs(node, rel);
+                    node.getNodeManager().getNodes(node, rel) :
+                    node.getNodeManager().getNodeIDs(node, rel);
             int actualSize = seglist.size();
             if (actualSize != expectedSize) {
-                node.nmgr.logEvent("Inconsistent segment size in " + node + ": " + segment);
+                node.getNodeManager().logEvent("Inconsistent segment size in " + node + ": " + segment);
             }
             int listSize = list.size();
             for (int i = 0; i < actualSize; i++) {
@@ -220,7 +222,7 @@ public class SegmentedSubnodeList extends SubnodeList {
         long lastChange = getLastSubnodeChange();
         if (lastChange != lastSubnodeFetch) {
             // count nodes in db without fetching anything
-            subnodeCount = node.nmgr.countNodes(node, getSubnodeRelation());
+            subnodeCount = node.getNodeManager().countNodes(node, getSubnodeRelation());
             if (subnodeCount > SEGLENGTH) {
                 float size = subnodeCount;
                 int nsegments = (int) Math.ceil(size / SEGLENGTH);

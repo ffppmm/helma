@@ -18,10 +18,14 @@ package helma.objectmodel;
 
 import helma.framework.IPathElement;
 import helma.objectmodel.db.DbMapping;
+import helma.objectmodel.db.Key;
+import helma.objectmodel.db.NodeHandle;
+import helma.objectmodel.db.SubnodeList;
 import helma.objectmodel.db.WrappedNodeManager;
 
 import java.util.Date;
 import java.util.Enumeration;
+import java.util.Hashtable;
 
 /**
  * Interface that all Nodes implement. Currently, there are two implementations:
@@ -29,7 +33,8 @@ import java.util.Enumeration;
  * stored in a database (either the internal Object DB or an external relational DB).
  */
 public interface INode extends INodeState, IPathElement {
-    /**
+
+	/**
      * Get the node's ID.
      */
     public String getID();
@@ -81,6 +86,8 @@ public interface INode extends INodeState, IPathElement {
      */
     public boolean isAnonymous();
 
+    public void setAnonymous(boolean anonymous);
+
     /**
      * Return the node's prototype name.
      */
@@ -124,7 +131,7 @@ public interface INode extends INodeState, IPathElement {
     /**
      * Get the number the node's direct child nodes.
      */
-    public int numberOfNodes();
+    public int getNumberOfChildNodes();
 
     /**
      * Add a child node to this node.
@@ -149,12 +156,12 @@ public interface INode extends INodeState, IPathElement {
     /**
      * Get an enumeration of this node's unnamed child nodes
      */
-    public Enumeration<INode> getSubnodes();
+    public Enumeration<INode> getChildNodes();
 
     /**
      * Get a named child node with the given name or id.
      */
-    public INode getSubnode(String name);
+    public INode getChildNode(String name);
 
     /**
      * GEt an unnamed child node at the given position
@@ -265,4 +272,62 @@ public interface INode extends INodeState, IPathElement {
      * Return the node manager of the node
      */
     public WrappedNodeManager getNodeManager();
+
+    /**
+     * 
+     * @return the {@link NodeHandle} of the Node
+     */
+	public NodeHandle getHandle();
+
+	/**
+	 * 
+	 * @return the internal ObjectKey
+	 */
+	public Key getKey();
+
+	public long getLastSubnodeChange();
+
+	public void setLastmodified(long lastmodified);
+
+	public long getLastmodified();
+
+	public void setCreated(long created);
+
+	public long getCreated();
+	
+	public boolean hasNodeManager();
+	
+    public void setParent(INode parent);
+    
+    /**
+     * Directly set a property on this node
+     * 
+     * @param name the name of the property
+     * @param property the Property itself
+     */
+    public void setProperty(String name, IProperty property);
+    
+    /**
+     * Check if the given node is contained in this node's child list. This
+     * is similar to <code>contains(INode)</code> but does not load the
+     * child index for relational nodes.
+     *
+     * @param n a node
+     * @return true if the given node is contained in this node's child list
+     */
+    public boolean isParentOf(INode n);
+    
+    public INode getNonVirtualParent();
+
+	public IProperty getProperty(String propName);
+
+    public void markSubnodesChanged();
+
+	public Hashtable<String, IProperty> getProperties();
+
+	public INode getGroupbySubnode(String kstr, boolean b);
+
+	public SubnodeList getChildren();
+	
+	public SubnodeList getChildren(boolean create);
 }

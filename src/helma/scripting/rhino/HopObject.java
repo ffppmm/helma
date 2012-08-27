@@ -23,7 +23,7 @@ import helma.objectmodel.INode;
 import helma.objectmodel.IProperty;
 import helma.objectmodel.TransientNode;
 import helma.objectmodel.db.DbMapping;
-import helma.objectmodel.db.Node;
+import helma.objectmodel.db.PersistentNode;
 import helma.objectmodel.db.NodeHandle;
 import helma.objectmodel.db.SubnodeList;
 
@@ -392,7 +392,7 @@ public class HopObject extends ScriptableObject implements Wrapper, PropertyReco
         String idString = (id instanceof Double) ?
                           Long.toString(((Double) id).longValue()) :
                           id.toString();
-        Object n = node.getSubnode(idString);
+        Object n = node.getChildNode(idString);
 
         if (n == null) {
             return null;
@@ -445,7 +445,7 @@ public class HopObject extends ScriptableObject implements Wrapper, PropertyReco
             return 0;
         }
         INode node = getNode();
-        return node.numberOfNodes();
+        return node.getNumberOfChildNodes();
     }
 
     /**
@@ -474,9 +474,9 @@ public class HopObject extends ScriptableObject implements Wrapper, PropertyReco
     private void prefetchChildren(int start, int length) {
         if (proxy != null) {
             INode node = getNode();
-            if (node instanceof Node) {
-                Node n = (Node) node;
-                if (n.getState() != Node.TRANSIENT && n.getState() != Node.NEW) {
+            if (node instanceof PersistentNode) {
+                PersistentNode n = (PersistentNode) node;
+                if (n.getState() != INode.TRANSIENT && n.getState() != INode.NEW) {
                     n.prefetchChildren(start, length);
                 }
             }
@@ -500,7 +500,7 @@ public class HopObject extends ScriptableObject implements Wrapper, PropertyReco
      * @return A JavaScript Array containing all child objects
      */
     private Scriptable list() {
-        Node node = (Node) getNode();
+        PersistentNode node = (PersistentNode) getNode();
         node.loadNodes();
         SubnodeList list = node.getSubnodeList();
         if (list == null) {
@@ -530,7 +530,7 @@ public class HopObject extends ScriptableObject implements Wrapper, PropertyReco
             throw new EvaluatorException("Arguments must not be negative in HopObject.list(start, length)");
         }
 
-        Node node = (Node) getNode();
+        PersistentNode node = (PersistentNode) getNode();
         prefetchChildren(start, length);
         SubnodeList list = node.getSubnodeList();
         length = list == null ? 0 : Math.min(list.size() - start, length);
@@ -654,8 +654,8 @@ public class HopObject extends ScriptableObject implements Wrapper, PropertyReco
 
         INode node = getNode();
 
-        if (node instanceof Node) {
-            ((Node) node).persist();
+        if (node instanceof PersistentNode) {
+            ((PersistentNode) node).persist();
             return node.getID();
         }
         return null;
@@ -667,16 +667,16 @@ public class HopObject extends ScriptableObject implements Wrapper, PropertyReco
     public boolean jsFunction_invalidate(Object childId) {
         if (childId != null && proxy != null) {
             INode node = getNode();
-            if (!(node instanceof Node)) {
+            if (!(node instanceof PersistentNode)) {
                 return true;
             }
             if (childId == Undefined.instance) {
                 if (node.getState() == INode.INVALID) {
                     return true;
                 }
-                ((Node) node).invalidate();
+                ((PersistentNode) node).invalidate();
             } else {
-                ((Node) node).invalidateNode(childId.toString());
+                ((PersistentNode) node).invalidateNode(childId.toString());
             }
         }
 
@@ -1032,7 +1032,7 @@ public class HopObject extends ScriptableObject implements Wrapper, PropertyReco
         if (proxy != null) {
             INode node = getNode();
 
-            return (0 <= idx && idx < node.numberOfNodes());
+            return (0 <= idx && idx < node.getNumberOfChildNodes());
         }
 
         return false;
@@ -1129,8 +1129,8 @@ public class HopObject extends ScriptableObject implements Wrapper, PropertyReco
 
         NodeProxy(INode node) {
             this.node = node;
-            if (node instanceof Node) {
-                handle = ((Node) node).getHandle();
+            if (node instanceof PersistentNode) {
+                handle = ((PersistentNode) node).getHandle();
             }
         }
 
@@ -1139,7 +1139,7 @@ public class HopObject extends ScriptableObject implements Wrapper, PropertyReco
         }
 
         synchronized INode getNode() {
-            if (node == null || node.getState() == Node.INVALID) {
+            if (node == null || node.getState() == INode.INVALID) {
                 if (handle != null) {
                     node = handle.getNode(core.app.getWrappedNodeManager());
                     if (node != null) {
@@ -1156,7 +1156,7 @@ public class HopObject extends ScriptableObject implements Wrapper, PropertyReco
                         }
                     }
                 }
-                if (node == null || node.getState() == Node.INVALID) {
+                if (node == null || node.getState() == INode.INVALID) {
                     // We probably have a deleted node.
                     // Replace with empty transient node to avoid throwing an exception.
                     node = new TransientNode(core.app);

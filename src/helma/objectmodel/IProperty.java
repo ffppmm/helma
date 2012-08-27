@@ -16,6 +16,7 @@
 
 package helma.objectmodel;
 
+import java.sql.Timestamp;
 import java.util.Date;
 
 /**
@@ -113,4 +114,6 @@ public interface IProperty {
 	public void setJavaObjectValue(Object value);
 
 	public void setNodeValue(INode value);
+
+	public Timestamp getTimestampValue();
 }

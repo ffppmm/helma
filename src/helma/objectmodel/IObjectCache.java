@@ -24,7 +24,7 @@ import java.util.Properties;
  * Interface Helma object cache classes need to implement.
  *
  */
-public interface ObjectCache {
+public interface IObjectCache {
 
     /**
      * Set the {@link helma.framework.core.Application Application} instance
@@ -57,7 +57,7 @@ public interface ObjectCache {
      * were not found in the Map.
      * Those keys that are contained in the Map are nulled out in the array.
      * @param keys an array of key objects we are looking for
-     * @see ObjectCache#containsKey
+     * @see IObjectCache#containsKey
      */
     int containsKeys(Object[] keys);
 
@@ -67,7 +67,7 @@ public interface ObjectCache {
      * @param key the specified key
      * @return the element for the key or null if the key
      * 		is not defined in the hash table.
-     * @see ObjectCache#put
+     * @see IObjectCache#put
      */
     Object get(Object key);
 
@@ -79,7 +79,7 @@ public interface ObjectCache {
      * @param value the specified element
      * @exception NullPointerException If the value of the element
      * is equal to null.
-     * @see ObjectCache#get
+     * @see IObjectCache#get
      * @return the old value of the key, or null if it did not have one.
      */
     Object put(Object key, Object value);

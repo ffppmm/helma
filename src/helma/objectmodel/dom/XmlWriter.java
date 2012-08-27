@@ -21,7 +21,7 @@ import helma.objectmodel.INode;
 import helma.objectmodel.INodeState;
 import helma.objectmodel.IProperty;
 import helma.objectmodel.db.DbMapping;
-import helma.objectmodel.db.Node;
+import helma.objectmodel.db.PersistentNode;
 import helma.util.HtmlEncoder;
 
 import java.io.File;
@@ -273,10 +273,10 @@ public class XmlWriter extends OutputStreamWriter implements XmlConstants {
                           throws IOException {
         Enumeration<?> e = null;
 
-        if (dbmode && node instanceof Node) {
+        if (dbmode && node instanceof PersistentNode) {
             // a newly constructed db.Node doesn't have a propMap,
             // but returns an enumeration of all it's db-mapped properties
-            Hashtable<?, ?> props = ((Node) node).getPropMap();
+            Hashtable<?, ?> props = ((PersistentNode) node).getProperties();
 
             if (props == null) {
                 return;
@@ -397,8 +397,8 @@ public class XmlWriter extends OutputStreamWriter implements XmlConstants {
      * loop through the children-array and print them as <hop:child>
      */
     private void writeChildren(INode node, int level) throws IOException {
-        if (dbmode && node instanceof Node) {
-            Node dbNode = (Node) node;
+        if (dbmode && node instanceof PersistentNode) {
+            PersistentNode dbNode = (PersistentNode) node;
             DbMapping smap = (dbNode.getDbMapping() == null) ? null
                                                              : dbNode.getDbMapping()
                                                                      .getSubnodeMapping();
@@ -408,7 +408,7 @@ public class XmlWriter extends OutputStreamWriter implements XmlConstants {
             }
         }
 
-        Enumeration<?> e = node.getSubnodes();
+        Enumeration<?> e = node.getChildNodes();
 
         while (e.hasMoreElements()) {
             INode nextNode = (INode) e.nextElement();

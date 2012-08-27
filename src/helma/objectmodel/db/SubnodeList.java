@@ -16,6 +16,8 @@
 
 package helma.objectmodel.db;
 
+import helma.objectmodel.INode;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -29,7 +31,7 @@ public class SubnodeList implements Serializable {
 	 * 
 	 */
 	private static final long serialVersionUID = 711208015232333566L;
-	protected Node node;
+	protected INode node;
     protected List<NodeHandle> list;
 
     transient protected long lastSubnodeFetch = 0;
@@ -48,7 +50,7 @@ public class SubnodeList implements Serializable {
      * Creates a new subnode list
      * @param node the node we belong to
      */
-    public SubnodeList(Node node) {
+    public SubnodeList(INode node) {
         this.node = node;
         this.list = new ArrayList<NodeHandle>();
     }
@@ -78,17 +80,17 @@ public class SubnodeList implements Serializable {
         return (NodeHandle) list.get(index);
     }
 
-    public Node getNode(int index) {
-        Node retval = null;
+    public INode getNode(int index) {
+        INode retval = null;
         NodeHandle handle = get(index);
 
         if (handle != null) {
-            retval = handle.getNode(node.nmgr);
+            retval = handle.getNode(node.getNodeManager());
             // Legacy alarm!
-            if ((retval != null) && (retval.parentHandle == null) &&
-                    !node.nmgr.isRootNode(retval)) {
+            if ((retval != null) && (retval.getParent() == null) &&
+                    !node.getNodeManager().isRootNode(retval)) {
                 retval.setParent(node);
-                retval.anonymous = true;
+                retval.setAnonymous(true);
             }
         }
 
@@ -137,9 +139,9 @@ public class SubnodeList implements Serializable {
         if (lastChange != lastSubnodeFetch) {
             Relation rel = getSubnodeRelation();
             if (rel != null && rel.aggressiveLoading && rel.groupby == null) {
-                list = node.nmgr.getNodes(node, rel);
+                list = node.getNodeManager().getNodes(node, rel);
             } else {
-                list = node.nmgr.getNodeIDs(node, rel);
+                list = node.getNodeManager().getNodeIDs(node, rel);
             }
             lastSubnodeFetch = lastChange;
         }
@@ -159,7 +161,7 @@ public class SubnodeList implements Serializable {
 
         if (dbmap.isRelational()) {
             Relation rel = getSubnodeRelation();
-            node.nmgr.prefetchNodes(node, rel, this, start, length);
+            node.getNodeManager().prefetchNodes(node, rel, this, start, length);
         }
     }
 
@@ -169,7 +171,7 @@ public class SubnodeList implements Serializable {
      */
     protected long getLastSubnodeChange() {
         // include dbmap.getLastTypeChange to also reload if the type mapping has changed.
-        long checkSum = lastSubnodeChange + node.dbmap.getLastTypeChange();
+        long checkSum = lastSubnodeChange + node.getDbMapping().getLastTypeChange();
         Relation rel = getSubnodeRelation();
         return rel == null || rel.aggressiveCaching ?
                 checkSum : checkSum + rel.otherType.getLastDataChange();
@@ -182,15 +184,15 @@ public class SubnodeList implements Serializable {
     protected boolean hasRelationalNodes() {
         DbMapping dbmap = getSubnodeMapping();
         return (dbmap != null && dbmap.isRelational()
-                && ((node.getState() != Node.TRANSIENT &&  node.getState() != Node.NEW)
+                && ((node.getState() != INode.TRANSIENT &&  node.getState() != INode.NEW)
                     || node.getSubnodeRelation() != null));
     }
 
     protected DbMapping getSubnodeMapping() {
-        return node.dbmap == null ? null : node.dbmap.getSubnodeMapping();
+        return node.getDbMapping() == null ? null : node.getDbMapping().getSubnodeMapping();
     }
 
     protected Relation getSubnodeRelation() {
-        return node.dbmap == null ? null : node.dbmap.getSubnodeRelation();
+        return node.getDbMapping() == null ? null : node.getDbMapping().getSubnodeRelation();
     }
 }

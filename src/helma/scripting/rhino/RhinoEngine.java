@@ -35,7 +35,7 @@ import helma.main.Server;
 import helma.objectmodel.ConcurrencyException;
 import helma.objectmodel.INode;
 import helma.objectmodel.db.DbMapping;
-import helma.objectmodel.db.Node;
+import helma.objectmodel.db.PersistentNode;
 import helma.objectmodel.db.Relation;
 import helma.scripting.ScriptingEngine;
 import helma.scripting.ScriptingException;
@@ -591,8 +591,8 @@ public class RhinoEngine implements ScriptingEngine {
                 protected Object replaceObject(Object obj) throws IOException {
                     if (obj instanceof HopObject)
                         return new HopObjectProxy((HopObject) obj);
-                    if (obj instanceof Node)
-                        return new HopObjectProxy((Node) obj);
+                    if (obj instanceof PersistentNode)
+                        return new HopObjectProxy((PersistentNode) obj);
                     if (obj instanceof GlobalObject)
                         return new GlobalProxy((GlobalObject) obj);
                     if (obj instanceof ApplicationBean)

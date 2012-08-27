@@ -56,7 +56,7 @@ public final class Property implements IProperty, Serializable, Cloneable, Compa
      *
      * @param node ...
      */
-    public Property(Node node) {
+    public Property(INode node) {
         this.node = node;
         dirty = true;
     }
@@ -67,7 +67,7 @@ public final class Property implements IProperty, Serializable, Cloneable, Compa
      * @param propname ...
      * @param node ...
      */
-    public Property(String propname, Node node) {
+    public Property(String propname, INode node) {
         this.propname = propname;
         this.node = node;
         dirty = true;
@@ -80,7 +80,7 @@ public final class Property implements IProperty, Serializable, Cloneable, Compa
      * @param node ...
      * @param valueNode ...
      */
-    public Property(String propname, Node node, Node valueNode) {
+    public Property(String propname, INode node, INode valueNode) {
         this(propname, node);
         type = NODE;
         value = (valueNode == null) ? null : valueNode.getHandle();
@@ -90,7 +90,7 @@ public final class Property implements IProperty, Serializable, Cloneable, Compa
     private void readObject(ObjectInputStream in) throws IOException {
         try {
             propname = in.readUTF();
-            node = (Node) in.readObject();
+            node = (PersistentNode) in.readObject();
             type = in.readInt();
 
             switch (type) {
@@ -288,17 +288,6 @@ public final class Property implements IProperty, Serializable, Cloneable, Compa
     /**
      *
      *
-     * @param node ...
-     */
-    public void setNodeValue(Node node) {
-        type = NODE;
-        value = (node == null) ? null : node.getHandle();
-        dirty = true;
-    }
-
-    /**
-     *
-     *
      * @param handle ...
      */
     public void setNodeHandle(NodeHandle handle) {
@@ -455,7 +444,7 @@ public final class Property implements IProperty, Serializable, Cloneable, Compa
      */
     public Timestamp getTimestampValue() {
         if ((type == DATE) && (value != null)) {
-            return new Timestamp(((Date) value).getTime());
+            return new Timestamp(getDateValue().getTime());
         }
 
         return null;
@@ -560,14 +549,16 @@ public final class Property implements IProperty, Serializable, Cloneable, Compa
         return value == null ? p.value == null : value.equals(p.value);
     }
 
-	public void setNodeValue(INode value) {
+	public void setNodeValue(INode nodeValue) {
         if (type == JAVAOBJECT) {
-            this.value = null;
+            value = null;
+        } else {
+        	value = (nodeValue == null) ? null : nodeValue.getHandle();
         }
 
         type = NODE;
-        this.node = value;
-		
+        node = nodeValue;
+        dirty = true;		
 	}
 
 }

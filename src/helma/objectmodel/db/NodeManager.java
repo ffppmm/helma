@@ -21,8 +21,9 @@ import helma.framework.core.RequestEvaluator;
 import helma.objectmodel.DatabaseException;
 import helma.objectmodel.IDatabase;
 import helma.objectmodel.INode;
+import helma.objectmodel.IProperty;
 import helma.objectmodel.ITransaction;
-import helma.objectmodel.ObjectCache;
+import helma.objectmodel.IObjectCache;
 import helma.objectmodel.dom.XmlDatabase;
 
 import java.io.ByteArrayInputStream;
@@ -58,7 +59,7 @@ import org.apache.commons.logging.LogFactory;
 public final class NodeManager {
 
     protected Application app;
-    private ObjectCache cache;
+    private IObjectCache cache;
     protected IDatabase db;
     protected IDGenerator idgen;
     private boolean logSql;
@@ -67,9 +68,11 @@ public final class NodeManager {
 
     // a wrapper that catches some Exceptions while accessing this NM
     public final WrappedNodeManager safe;
-
+    
     /**
      *  Create a new NodeManager for Application app.
+     * 
+     * @param app the {@link Application} this NodeManager belongs to
      */
     public NodeManager(Application app) {
         this.app = app;
@@ -80,23 +83,30 @@ public final class NodeManager {
      * Initialize the NodeManager for the given dbHome and 
      * application properties. An embedded database will be
      * created in dbHome if one doesn't already exist.
+	 *
+     * @param dbHome path to directory where the embedded database files will be stored
+     * @param applicationProps the application Properties
+     * @throws DatabaseException
+     * @throws ClassNotFoundException
+     * @throws IllegalAccessException
+     * @throws InstantiationException
      */
-    public void init(File dbHome, Properties props)
+    public void init(File dbHome, Properties applicationProps)
             throws DatabaseException, ClassNotFoundException,
                    IllegalAccessException, InstantiationException {
-        String cacheImpl = props.getProperty("cacheimpl", "helma.util.CacheMap");
+        String cacheImpl = applicationProps.getProperty("cacheimpl", "helma.util.CacheMap");
 
-        cache = (ObjectCache) Class.forName(cacheImpl).newInstance();
+        cache = (IObjectCache) Class.forName(cacheImpl).newInstance();
         cache.init(app);
 
-        String idgenImpl = props.getProperty("idGeneratorImpl");
+        String idgenImpl = applicationProps.getProperty("idGeneratorImpl");
 
         if (idgenImpl != null) {
             idgen = (IDGenerator) Class.forName(idgenImpl).newInstance();
             idgen.init(app);
         }
 
-        logSql = "true".equalsIgnoreCase(props.getProperty("logsql"));
+        logSql = "true".equalsIgnoreCase(applicationProps.getProperty("logsql"));
 
         db = new XmlDatabase();
         db.init(dbHome, app);
@@ -104,22 +114,28 @@ public final class NodeManager {
 
     /**
      * Gets the application's root node.
+     * 
+     * @return the root Node of the app
+     * @throws Exception
      */
-    public Node getRootNode() throws Exception {
+    public INode getRootNode() throws Exception {
         DbMapping rootMapping = app.getRootMapping();
         DbKey key = new DbKey(rootMapping, app.getRootId());
-        Node node = getNode(key);
+        INode node = getNode(key);
         if (node != null && rootMapping != null) {
             node.setDbMapping(rootMapping);
             node.setPrototype(rootMapping.getTypeName());
         }
         return node;
     }
+    
     /**
      * Checks if the given node is the application's root node.
+     * 
+     * TODO: this should be a node function
      */
-    public boolean isRootNode(Node node) {
-        return node.getState() != Node.TRANSIENT && app.getRootId().equals(node.getID()) &&
+    public boolean isRootNode(INode node) {
+        return node.getState() != INode.TRANSIENT && app.getRootId().equals(node.getID()) &&
                DbMapping.areStorageCompatible(app.getRootMapping(), node.getDbMapping());
     }
 
@@ -152,12 +168,12 @@ public final class NodeManager {
     /**
      *  Delete a node from the database.
      */
-    public void deleteNode(Node node) throws Exception {
+    public void deleteNode(INode node) throws Exception {
         if (node != null) {
             synchronized (this) {
                 Transactor tx = Transactor.getInstanceOrFail();
 
-                node.setState(Node.INVALID);
+                node.setState(INode.INVALID);
                 deleteNode(db, tx.txn, node);
             }
         }
@@ -167,24 +183,24 @@ public final class NodeManager {
      *  Get a node by key. This is called from a node that already holds
      *  a reference to another node via a NodeHandle/Key.
      */
-    public Node getNode(Key key) throws Exception {
+    public INode getNode(Key key) throws Exception {
         Transactor tx = Transactor.getInstanceOrFail();
 
         // See if Transactor has already come across this node
-        Node node = tx.getCleanNode(key);
+        INode node = tx.getCleanNode(key);
 
-        if ((node != null) && (node.getState() != Node.INVALID)) {
+        if ((node != null) && (node.getState() != INode.INVALID)) {
             return node;
         }
 
         // try to get the node from the shared cache
-        node = (Node) cache.get(key);
+        node = (INode) cache.get(key);
 
-        if ((node == null) || (node.getState() == Node.INVALID)) {
+        if ((node == null) || (node.getState() == INode.INVALID)) {
             // The requested node isn't in the shared cache.
             if (key instanceof SyntheticKey) {
-                Node parent = getNode(key.getParentKey());
-                Relation rel = parent.dbmap.getPropertyRelation(key.getID());
+                INode parent = getNode(key.getParentKey());
+                Relation rel = parent.getDbMapping().getPropertyRelation(key.getID());
 
                 if (rel != null) {
                     return getNode(parent, key.getID(), rel);
@@ -212,7 +228,7 @@ public final class NodeManager {
      *  In contrast to getNode (Key key), this is usually called when we don't yet know
      *  whether such a node exists.
      */
-    public Node getNode(Node home, String kstr, Relation rel)
+    public INode getNode(INode home, String kstr, Relation rel)
                  throws Exception {
         if (kstr == null) {
             return null;
@@ -238,9 +254,9 @@ public final class NodeManager {
         }
 
         // See if Transactor has already come across this node
-        Node node = tx.getCleanNode(key);
+        INode node = tx.getCleanNode(key);
 
-        if (node != null && node.getState() != Node.INVALID) {
+        if (node != null && node.getState() != INode.INVALID) {
             // we used to refresh the node in the main cache here to avoid the primary key
             // entry being flushed from cache before the secondary one
             // (risking duplicate nodes in cache) but we don't need to since we fetched
@@ -250,15 +266,15 @@ public final class NodeManager {
         }
 
         // try to get the node from the shared cache
-        node = (Node) cache.get(key);
+        node = (INode) cache.get(key);
 
         // check if we can use the cached node without further checks.
         // we need further checks for subnodes fetched by name if the subnodes were changed.
-        if (node != null && node.getState() != Node.INVALID) {
+        if (node != null && node.getState() != INode.INVALID) {
             // check if node is null node (cached null)
-            if (node.isNullNode()) {
+            if (node.getNodeManager() == null) {
                 // do not check reference nodes against child collection
-                if (rel.isComplexReference() || node.created != home.getLastSubnodeChange()) {
+                if (rel.isComplexReference() || node.created() != home.getLastSubnodeChange()) {
                     node = null; //  cached null not valid anymore
                 }
             } else if (!rel.virtual) {
@@ -278,14 +294,14 @@ public final class NodeManager {
             }
         }
 
-        if (node == null || node.getState() == Node.INVALID) {
+        if (node == null || node.getState() == INode.INVALID) {
             // The requested node isn't in the shared cache.
             // Synchronize with key to make sure only one version is fetched
             // from the database.
             node = getNodeByRelation(tx.txn, home, kstr, rel, otherDbm);
 
-            if (node != null && node.getState() != Node.DELETED) {
-                Node newNode = node;
+            if (node != null && node.getState() != INode.DELETED) {
+                INode newNode = node;
                 if (key.equals(node.getKey())) {
                     node = registerNewNode(node, null);
                 } else {
@@ -294,30 +310,30 @@ public final class NodeManager {
                 // reset create time of old node, otherwise Relation.checkConstraints
                 // will reject it under certain circumstances.
                 if (node != newNode) {
-                    node.created = node.lastmodified;
+                    node.setCreated(node.getLastmodified());
                 }
             } else {
                 // node fetched from db is null, cache result using nullNode
                 synchronized (cache) {
                     // do not use child collection timestamp as cache guard for object references
                     long lastchange = rel.isComplexReference() ? 0 : home.getLastSubnodeChange();
-                    cache.put(key, new Node(lastchange));
+                    cache.put(key, new PersistentNode(lastchange));
 
                     // we ignore the case that onother thread has created the node in the meantime
                     return null;
                 }
             }
-        } else if (node.isNullNode()) {
+        } else if (node.getNodeManager() == null) {
             // the nullNode caches a null value, i.e. an object that doesn't exist
             return null;
         } else {
             // update primary key in cache to keep it from being flushed, see above
-            if (!rel.usesPrimaryKey() && node.getState() != Node.TRANSIENT) {
+            if (!rel.usesPrimaryKey() && node.getState() != INode.TRANSIENT) {
                 synchronized (cache) {
-                    Node old = (Node) cache.put(node.getKey(), node);
+                    INode old = (INode) cache.put(node.getKey(), node);
 
-                    if (old != node && old != null && !old.isNullNode() && 
-                            old.getState() != Node.INVALID) {
+                    if (old != node && old != null && !old.hasNodeManager() && 
+                            old.getState() != INode.INVALID) {
                         cache.put(node.getKey(), old);
                         cache.put(key, old);
                         node = old;
@@ -340,23 +356,23 @@ public final class NodeManager {
      * @param node the node to register
      * @return the newly registered node, or the one that was already registered with the node's key
      */
-    private Node registerNewNode(Node node, Key secondaryKey) {
+    private INode registerNewNode(INode node, Key secondaryKey) {
         Key key = node.getKey();
         RequestEvaluator reval = app.getCurrentRequestEvaluator();
         // if no request evaluator is associated with current thread, do not cache node
         // as we cannot invoke onInit() on it.
         if (reval == null) {
-            Node old = (Node) cache.get(key);
-            if (old != null && !old.isNullNode() && old.getState() != INode.INVALID) {
+            INode old = (INode) cache.get(key);
+            if (old != null && !old.hasNodeManager() && old.getState() != INode.INVALID) {
                 return old;
             }
             return node;
         }
 
         synchronized(cache) {
-            Node old = (Node) cache.put(key, node);
+            INode old = (INode) cache.put(key, node);
 
-            if (old != null && !old.isNullNode() && old.getState() != INode.INVALID) {
+            if (old != null && !old.hasNodeManager() && old.getState() != INode.INVALID) {
                 cache.put(key, old);
                 if (secondaryKey != null) {
                     cache.put(secondaryKey, old);
@@ -381,14 +397,14 @@ public final class NodeManager {
     /**
      * Register a node in the node cache.
      */
-    public void registerNode(Node node) {
+    public void registerNode(INode node) {
         cache.put(node.getKey(), node);
     }
 
     /**
      * Register a node in the node cache using the key argument.
      */
-    protected void registerNode(Node node, Key key) {
+    protected void registerNode(INode node, Key key) {
         cache.put(key, node);
     }
 
@@ -396,7 +412,7 @@ public final class NodeManager {
      * Remove a node from the node cache. If at a later time it is accessed again,
      * it will be refetched from the database.
      */
-    public void evictNode(Node node) {
+    public void evictNode(INode node) {
         node.setState(INode.INVALID);
         cache.remove(node.getKey());
     }
@@ -406,7 +422,7 @@ public final class NodeManager {
      * it will be refetched from the database.
      */
     public void evictNodeByKey(Key key) {
-        Node n = (Node) cache.remove(key);
+        INode n = (INode) cache.remove(key);
 
         if (n != null) {
             n.setState(INode.INVALID);
@@ -438,7 +454,7 @@ public final class NodeManager {
      *  Insert a new node in the embedded database or a relational database table,
      *  depending on its db mapping.
      */
-    public void insertNode(IDatabase db, ITransaction txn, Node node)
+    public void insertNode(IDatabase db, ITransaction txn, INode node)
                     throws IOException, SQLException, ClassNotFoundException {
         invokeOnPersist(node);
         DbMapping dbm = node.getDbMapping();
@@ -453,7 +469,7 @@ public final class NodeManager {
     /**
      *  Insert a node into a different (relational) database than its default one.
      */
-    public void exportNode(Node node, DbSource dbs) 
+    public void exportNode(INode node, DbSource dbs) 
                     throws SQLException, ClassNotFoundException {
         if (node == null) {
             throw new IllegalArgumentException("Node can't be null in exportNode");
@@ -473,7 +489,7 @@ public final class NodeManager {
     /**
      *  Insert a node into a different (relational) database than its default one.
      */
-    public void exportNode(Node node, DbMapping dbm)
+    public void exportNode(INode node, DbMapping dbm)
                     throws SQLException, ClassNotFoundException {
         if (node == null) {
             throw new IllegalArgumentException("Node can't be null in exportNode");
@@ -491,7 +507,7 @@ public final class NodeManager {
     /**
      * Insert a node into a relational database.
      */
-    protected void insertRelationalNode(Node node, DbMapping dbm, Connection con)
+    protected void insertRelationalNode(INode node, DbMapping dbm, Connection con)
                 throws ClassNotFoundException, SQLException {
 
         if (con == null) {
@@ -522,7 +538,7 @@ public final class NodeManager {
                     setStatementValue(stmt, columnNumber, dbm.getExtensionId(), col);
                 } else {
                     Relation rel = col.getRelation();
-                    Property p = rel == null ? null : node.getProperty(rel.getPropName());
+                    IProperty p = rel == null ? null : node.getProperty(rel.getPropName());
  
                     if (p != null) {
                         setStatementValue(stmt, columnNumber, p, col.getType());
@@ -553,7 +569,7 @@ public final class NodeManager {
     /**
      *  calls onPersist function for the HopObject
      */
-    private void invokeOnPersist(Node node) {
+    private void invokeOnPersist(INode node) {
         try {
             // We need to reach deap into helma.framework.core to invoke onPersist(),
             // but the functionality is really worth it.
@@ -573,7 +589,7 @@ public final class NodeManager {
      * @return true if the DbMapping of the updated Node is to be marked as updated via
      *              DbMapping.setLastDataChange
      */
-    public boolean updateNode(IDatabase db, ITransaction txn, Node node)
+    public boolean updateNode(IDatabase db, ITransaction txn, INode node)
                     throws IOException, SQLException, ClassNotFoundException {
         
         invokeOnPersist(node);
@@ -583,7 +599,7 @@ public final class NodeManager {
         if ((dbm == null) || !dbm.isRelational()) {
             db.updateNode(txn, node.getID(), node);
         } else {
-            Hashtable<?, ?> propMap = node.getPropMap();
+            Hashtable<?, ?> propMap = node.getProperties();
             Property[] props;
 
             if (propMap == null) {
@@ -686,7 +702,7 @@ public final class NodeManager {
         // update may cause changes in the node's parent subnode array
         // TODO: is this really needed anymore?
         if (markMappingAsUpdated && node.isAnonymous()) {
-            Node parent = node.getCachedParent();
+            INode parent = node.getParent();
 
             if (parent != null) {
                 parent.markSubnodesChanged();
@@ -700,7 +716,7 @@ public final class NodeManager {
      *  Performs the actual deletion of a node from either the embedded or an external
      *  SQL database.
      */
-    public void deleteNode(IDatabase db, ITransaction txn, Node node)
+    public void deleteNode(IDatabase db, ITransaction txn, INode node)
                     throws Exception {
         DbMapping dbm = node.getDbMapping();
 
@@ -741,7 +757,7 @@ public final class NodeManager {
         }
 
         // node may still be cached via non-primary keys. mark as invalid
-        node.setState(Node.INVALID);
+        node.setState(INode.INVALID);
     }
 
 
@@ -885,7 +901,7 @@ public final class NodeManager {
      *  Loades subnodes via subnode relation. Only the ID index is loaded, the nodes are
      *  loaded later on demand.
      */
-    public List<NodeHandle> getNodeIDs(Node home, Relation rel) throws Exception {
+    public List<NodeHandle> getNodeIDs(INode home, Relation rel) throws Exception {
         DbMapping type = rel == null ? null : rel.otherType;
         if (type == null || !type.isRelational()) {
             // this should never be called for embedded nodes
@@ -943,9 +959,9 @@ public final class NodeManager {
 
                 // if these are groupby nodes, evict nullNode keys
                 if (rel.groupby != null) {
-                    Node n = (Node) cache.get(key);
+                    INode n = (INode) cache.get(key);
 
-                    if ((n != null) && n.isNullNode()) {
+                    if ((n != null) && n.hasNodeManager()) {
                         evictKey(key);
                     }
                 }
@@ -972,7 +988,7 @@ public final class NodeManager {
      *  actually loades all nodes in one go, which is better for small node collections.
      *  This method is used when xxx.loadmode=aggressive is specified.
      */
-    public List<NodeHandle> getNodes(Node home, Relation rel) throws Exception {
+    public List<NodeHandle> getNodes(INode home, Relation rel) throws Exception {
         // This does not apply for groupby nodes - use getNodeIDs instead
         assert rel.groupby == null;
 
@@ -1015,7 +1031,7 @@ public final class NodeManager {
 
             while (rs.next()) {
                 // create new Nodes.
-                Node node = createNode(rel.otherType, rs, columns, 0);
+                INode node = createNode(rel.otherType, rs, columns, 0);
                 if (node == null) {
                     continue;
                 }
@@ -1062,7 +1078,7 @@ public final class NodeManager {
     /**
      *
      */
-    public void prefetchNodes(Node home, Relation rel, SubnodeList list, int start, int length)
+    public void prefetchNodes(INode home, Relation rel, SubnodeList list, int start, int length)
                        throws Exception {
         DbMapping dbm = rel.otherType;
 
@@ -1104,11 +1120,11 @@ public final class NodeManager {
                     ResultSet rs = stmt.executeQuery(query);
 
                     String groupbyProp = null;
-                    HashMap<String, Node> groupbySubnodes = null;
+                    HashMap<String, INode> groupbySubnodes = null;
 
                     if (rel.groupby != null) {
                         groupbyProp = dbm.columnNameToProperty(rel.groupby);
-                        groupbySubnodes = new HashMap<String, Node>();
+                        groupbySubnodes = new HashMap<String, INode>();
                     }
 
                     String accessProp = null;
@@ -1119,7 +1135,7 @@ public final class NodeManager {
 
                     while (rs.next()) {
                         // create new Nodes.
-                        Node node = createNode(dbm, rs, columns, 0);
+                        INode node = createNode(dbm, rs, columns, 0);
                         if (node == null) {
                             continue;
                         }
@@ -1133,16 +1149,16 @@ public final class NodeManager {
                         if (groupbyProp != null) {
                             groupName = node.getString(groupbyProp);
                             if (groupName != null) {
-                                Node groupNode = (Node) groupbySubnodes.get(groupName);
+                                INode groupNode = groupbySubnodes.get(groupName);
 
                                 if (groupNode == null) {
                                     groupNode = home.getGroupbySubnode(groupName, true);
                                     groupbySubnodes.put(groupName, groupNode);
                                 }
 
-                                SubnodeList subnodes = groupNode.getSubnodeList();
+                                SubnodeList subnodes = groupNode.getChildren();
                                 if (subnodes == null) {
-                                    subnodes = groupNode.createSubnodeList();
+                                    subnodes = groupNode.getChildren(true);
                                     // mark subnodes as up-to-date
                                     subnodes.lastSubnodeFetch = subnodes.getLastSubnodeChange();
                                 }
@@ -1193,7 +1209,7 @@ public final class NodeManager {
      * Count the nodes contained in the child collection of the home node
      * which is defined by Relation rel.
      */
-    public int countNodes(Node home, Relation rel) throws Exception {
+    public int countNodes(INode home, Relation rel) throws Exception {
         DbMapping type = rel == null ? null : rel.otherType;
         if (type == null || !type.isRelational()) {
             // this should never be called for embedded nodes
@@ -1248,7 +1264,7 @@ public final class NodeManager {
     /**
      *  Similar to getNodeIDs, but returns a List that contains the nodes property names instead of IDs
      */
-    public Vector<String> getPropertyNames(Node home, Relation rel)
+    public Vector<String> getPropertyNames(INode home, Relation rel)
                             throws Exception {
         DbMapping type = rel == null ? null : rel.otherType;
         if (type == null || !type.isRelational()) {
@@ -1311,15 +1327,15 @@ public final class NodeManager {
     ///////////////////////////////////////////////////////////////////////////////////////
     // private getNode methods
     ///////////////////////////////////////////////////////////////////////////////////////
-    private Node getNodeByKey(ITransaction txn, DbKey key)
+    private INode getNodeByKey(ITransaction txn, DbKey key)
                        throws Exception {
         // Note: Key must be a DbKey, otherwise will not work for relational objects
-        Node node = null;
+        INode node = null;
         DbMapping dbm = app.getDbMapping(key.getStorageName());
         String kstr = key.getID();
 
         if ((dbm == null) || !dbm.isRelational()) {
-            node = (Node) db.getNode(txn, kstr);
+            node = db.getNode(txn, kstr);
             if ((node != null) && (dbm != null)) {
                 node.setDbMapping(dbm);
             }
@@ -1376,15 +1392,15 @@ public final class NodeManager {
         return node;
     }
 
-    private Node getNodeByRelation(ITransaction txn, Node home, String kstr, Relation rel, DbMapping dbm)
+    private INode getNodeByRelation(ITransaction txn, INode home, String kstr, Relation rel, DbMapping dbm)
                             throws Exception {
-        Node node = null;
+        INode node = null;
 
         if (rel != null && rel.virtual) {
             if (rel.needsPersistence()) {
-                node = (Node) home.createNode(kstr);
+                node = home.createNode(kstr);
             } else {
-                node = new Node(home, kstr, safe, rel.prototype);
+                node = new PersistentNode(home, kstr, safe, rel.prototype);
             }
 
             // set prototype and dbmapping on the newly created virtual/collection node
@@ -1394,11 +1410,11 @@ public final class NodeManager {
             node = home.getGroupbySubnode(kstr, false);
 
             if (node == null && (dbm == null || !dbm.isRelational())) {
-                node = (Node) db.getNode(txn, kstr);
+                node = db.getNode(txn, kstr);
             }
             return node;
         } else if (rel == null || dbm == null || !dbm.isRelational()) {
-            node = (Node) db.getNode(txn, kstr);
+            node = db.getNode(txn, kstr);
             node.setDbMapping(dbm);
             return node;
         } else {
@@ -1471,7 +1487,7 @@ public final class NodeManager {
     /**
      *  Create a new Node from a ResultSet.
      */
-    public Node createNode(DbMapping dbm, ResultSet rs, DbColumn[] columns, int offset)
+    public INode createNode(DbMapping dbm, ResultSet rs, DbColumn[] columns, int offset)
                 throws SQLException, IOException, ClassNotFoundException {
         HashMap<String, Property> propBuffer = new HashMap<String, Property>();
         String id = null;
@@ -1479,7 +1495,8 @@ public final class NodeManager {
         String protoName = dbm.getTypeName();
         DbMapping dbmap = dbm;
 
-        Node node = new Node(safe);
+        // we need a non interface, because we call init at end of function :( 
+        PersistentNode node = new PersistentNode(safe);
 
         for (int i = 0; i < columns.length; i++) {
 
@@ -1657,14 +1674,14 @@ public final class NodeManager {
                 // it may be in the process of being DELETED, but do return the
                 // new node if the old one has been marked as INVALID.
                 DbKey key = new DbKey(dbmap, id);
-                Node dirtyNode = tx.getDirtyNode(key);
-                if (dirtyNode != null && dirtyNode.getState() != Node.INVALID) {
+                INode dirtyNode = tx.getDirtyNode(key);
+                if (dirtyNode != null && dirtyNode.getState() != INode.INVALID) {
                     return dirtyNode;
                 }
             }
         }
 
-        Hashtable<String, Property> propMap = new Hashtable<String, Property>();
+        Hashtable<String, IProperty> propMap = new Hashtable<String, IProperty>();
         DbColumn[] columns2 = dbmap.getColumns();
         for (int i=0; i<columns2.length; i++) {
             Relation rel = columns2[i].getRelation();
@@ -1699,7 +1716,7 @@ public final class NodeManager {
         // create joined objects
         for (int i = 0; i < joins.length; i++) {
             DbMapping jdbm = joins[i].otherType;
-            Node node = createNode(jdbm, rs, jdbm.getColumns(), resultSetOffset);
+            INode node = createNode(jdbm, rs, jdbm.getColumns(), resultSetOffset);
             if (node != null) {
                 registerNewNode(node, null);
             }
@@ -1790,7 +1807,7 @@ public final class NodeManager {
         }
     }
 
-    private void setStatementValue(PreparedStatement stmt, int stmtNumber, Property p, int columnType)
+    private void setStatementValue(PreparedStatement stmt, int stmtNumber, IProperty p, int columnType)
             throws SQLException {
         if (p.getValue() == null) {
             stmt.setNull(stmtNumber, columnType);
@@ -1867,6 +1884,7 @@ public final class NodeManager {
                 case Types.DATE:
                 case Types.TIME:
                 case Types.TIMESTAMP:
+                	// TODO: check if we should use p.getDateValue()
                     stmt.setTimestamp(stmtNumber, p.getTimestampValue());
 
                     break;

@@ -956,7 +956,7 @@ public final class Relation {
      *  Build the second half of an SQL select statement according to this relation
      *  and a local object.
      */
-    public void buildQuery(StringBuffer q, Node home, boolean useOrder, boolean isCount)
+    public void buildQuery(StringBuffer q, INode home, boolean useOrder, boolean isCount)
             throws SQLException, ClassNotFoundException {
         buildQuery(q, home, otherType, null, useOrder, isCount);
     }
@@ -965,11 +965,11 @@ public final class Relation {
      *  Build the second half of an SQL select statement according to this relation
      *  and a local object.
      */
-    public void buildQuery(StringBuffer q, Node home, DbMapping otherDbm, String kstr,
+    public void buildQuery(StringBuffer q, INode home, DbMapping otherDbm, String kstr,
                            boolean useOrder, boolean isCount)
             throws SQLException, ClassNotFoundException {
         String prefix = " WHERE ";
-        Node nonvirtual = home.getNonVirtualParent();
+        INode nonvirtual = home.getNonVirtualParent();
 
         if (kstr != null && !isComplexReference()) {
             q.append(prefix);
@@ -1085,7 +1085,7 @@ public final class Relation {
      * @throws SQLException sql related exception
      * @throws ClassNotFoundException driver class not found
      */
-    public void renderConstraints(StringBuffer q, Node home, String prefix)
+    public void renderConstraints(StringBuffer q, INode home, String prefix)
                              throws SQLException, ClassNotFoundException {
         renderConstraints(q, home, home.getNonVirtualParent(), otherType, prefix);
     }
@@ -1102,7 +1102,7 @@ public final class Relation {
      * @throws SQLException sql related exception
      * @throws ClassNotFoundException driver class not found
      */
-    public void renderConstraints(StringBuffer q, Node home, Node nonvirtual,
+    public void renderConstraints(StringBuffer q, INode home, INode nonvirtual,
                                   DbMapping otherDbm, String prefix)
                              throws SQLException, ClassNotFoundException {
 
@@ -1223,7 +1223,7 @@ public final class Relation {
      * @param child the child object
      * @return true if all constraints are met
      */
-    public boolean checkConstraints(Node parent, Node child) {
+    public boolean checkConstraints(INode parent, INode child) {
         // problem: if a filter property is defined for this relation,
         // i.e. a piece of static SQL-where clause, we'd have to evaluate it
         // in order to check the constraints. Because of this, if a filter
@@ -1285,7 +1285,7 @@ public final class Relation {
      * Make sure that the child node fullfills the constraints defined by this relation by setting the
      * appropriate properties
      */
-    public void setConstraints(Node parent, Node child) {
+    public void setConstraints(INode parent, INode child) {
 
         // if logical operator is OR or XOR we just return because we
         // wouldn't know what to do anyway
@@ -1293,7 +1293,7 @@ public final class Relation {
             return;
         }
 
-        Node home = parent.getNonVirtualParent();
+        INode home = parent.getNonVirtualParent();
 
         for (int i = 0; i < constraints.length; i++) {
             Constraint cnst = constraints[i];
@@ -1312,7 +1312,7 @@ public final class Relation {
                     throw new RuntimeException("Error: column " + cnst.localKey +
                        " must be mapped in order to be used as constraint in " +
                        Relation.this);
-                } else if (foreignIsPrimary && child.getState() == Node.TRANSIENT) {
+                } else if (foreignIsPrimary && child.getState() == INode.TRANSIENT) {
                     throw new RuntimeException(propName + " set to transient object, " +
                        "can't derive persistent ID for " + localProp);
                 } else {
@@ -1343,15 +1343,15 @@ public final class Relation {
                         // which would most probably not be what we want.
                         if ((currentValue == null) ||
                                 ((currentValue != home) &&
-                                ((currentValue.getState() == Node.TRANSIENT) ||
-                                (home.getState() != Node.TRANSIENT)))) try {
+                                ((currentValue.getState() == INode.TRANSIENT) ||
+                                (home.getState() != INode.TRANSIENT)))) try {
                             child.setNode(crel.propName, home);
                         } catch (Exception ignore) {
                             // in some cases, getNonVirtualParent() doesn't work
                             // correctly for transient nodes, so this may fail.
                         }
                     } else if (crel.reftype == PRIMITIVE) {
-                        if (home.getState() == Node.TRANSIENT) {
+                        if (home.getState() == INode.TRANSIENT) {
                             throw new RuntimeException("Object is transient, can't derive persistent ID for " + crel);
                         }
                         child.setString(crel.propName, home.getID());
@@ -1360,13 +1360,13 @@ public final class Relation {
                     if (cnst.localKeyIsPrototype()) {
                         child.setString(crel.propName, home.getDbMapping().getStorageTypeName());
                     } else {
-                        Property prop = home.getProperty(cnst.localProperty());
+                        IProperty prop = home.getProperty(cnst.localProperty());
                         if (prop != null) {
-                            child.set(crel.propName, prop.getValue(), prop.getType());
+                            child.setProperty(crel.propName, prop);
                         } else {
                             prop = child.getProperty(cnst.foreignProperty(child.getDbMapping()));
                             if (prop != null) {
-                                home.set(cnst.localProperty(), prop.getValue(), prop.getType());
+                                home.setProperty(cnst.localProperty(), prop);
                             }
                         }
                     }
@@ -1378,8 +1378,8 @@ public final class Relation {
     /**
      * Unset the constraints that link two objects together.
      */
-    public void unsetConstraints(Node parent, INode child) {
-        Node home = parent.getNonVirtualParent();
+    public void unsetConstraints(INode parent, INode child) {
+        INode home = parent.getNonVirtualParent();
 
         for (int i = 0; i < constraints.length; i++) {
             Constraint cnst = constraints[i];

@@ -16,9 +16,10 @@
 
 package helma.objectmodel.dom;
 
+import helma.objectmodel.IProperty;
 import helma.objectmodel.db.DbKey;
 import helma.objectmodel.db.DbMapping;
-import helma.objectmodel.db.Node;
+import helma.objectmodel.db.PersistentNode;
 import helma.objectmodel.db.NodeHandle;
 import helma.objectmodel.db.NodeManager;
 import helma.objectmodel.db.Property;
@@ -45,11 +46,11 @@ import org.xml.sax.helpers.DefaultHandler;
 public final class XmlDatabaseReader extends DefaultHandler implements XmlConstants {
     static SAXParserFactory factory = SAXParserFactory.newInstance();
     private NodeManager nmgr = null;
-    private Node currentNode;
+    private PersistentNode currentNode;
     private String elementType = null;
     private String elementName = null;
     private StringBuffer charBuffer = null;
-    Hashtable<String, Property> propMap = null;
+    Hashtable<String, IProperty> propMap = null;
     SubnodeList subnodes = null;
 
     /**
@@ -64,7 +65,7 @@ public final class XmlDatabaseReader extends DefaultHandler implements XmlConsta
     /**
      * read an InputSource with xml-content.
      */
-    public Node read(File file)
+    public PersistentNode read(File file)
               throws ParserConfigurationException, SAXException, IOException {
         if (nmgr == null) {
             throw new RuntimeException("can't create a new Node without a NodeManager");
@@ -109,10 +110,10 @@ public final class XmlDatabaseReader extends DefaultHandler implements XmlConsta
                 long created = Long.parseLong(atts.getValue("created"));
                 long lastmodified = Long.parseLong(atts.getValue("lastModified"));
 
-                currentNode = new Node(name, id, prototype, nmgr.safe, created,
+                currentNode = new PersistentNode(name, id, prototype, nmgr.safe, created,
                                        lastmodified);
             } catch (NumberFormatException e) {
-                currentNode = new Node(name, id, prototype, nmgr.safe);
+                currentNode = new PersistentNode(name, id, prototype, nmgr.safe);
             }
 
             return;
@@ -148,7 +149,7 @@ public final class XmlDatabaseReader extends DefaultHandler implements XmlConsta
                 prop.setNodeHandle(handle);
 
                 if (propMap == null) {
-                    propMap = new Hashtable<String, Property>();
+                    propMap = new Hashtable<String, IProperty>();
                     currentNode.setPropMap(propMap);
                 }
 
@@ -241,7 +242,7 @@ public final class XmlDatabaseReader extends DefaultHandler implements XmlConsta
             }
 
             if (propMap == null) {
-                propMap = new Hashtable<String, Property>();
+                propMap = new Hashtable<String, IProperty>();
                 currentNode.setPropMap(propMap);
             }
 

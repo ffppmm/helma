@@ -99,7 +99,7 @@ public class Transactor {
      * @return the transactor associated with the current thread
      */
     public static Transactor getInstance() {
-        return (Transactor) txtor.get();
+        return txtor.get();
     }
 
     /**
@@ -108,7 +108,7 @@ public class Transactor {
      * @throws IllegalStateException if no transactor is associated with the current thread
      */
     public static Transactor getInstanceOrFail() throws IllegalStateException {
-        Transactor tx = (Transactor) txtor.get();
+        Transactor tx = txtor.get();
         if (tx == null)
             throw new IllegalStateException("Operation requires a Transactor, " +
                 "but current thread does not have one.");
@@ -121,7 +121,7 @@ public class Transactor {
      * @return the transactor associated with the current thread
      */
     public static Transactor getInstance(NodeManager nmgr) {
-        Transactor t = (Transactor) txtor.get();
+        Transactor t = txtor.get();
         if (t == null) {
             t = new Transactor(nmgr);
             txtor.set(t);
@@ -134,7 +134,7 @@ public class Transactor {
      *
      * @param node ...
      */
-    public void visitDirtyNode(Node node) {
+    public void visitDirtyNode(PersistentNode node) {
         if (node != null) {
             Key key = node.getKey();
 
@@ -147,7 +147,7 @@ public class Transactor {
      *
      * @param node ...
      */
-    public void dropDirtyNode(Node node) {
+    public void dropDirtyNode(PersistentNode node) {
         if (node != null) {
             Key key = node.getKey();
 
@@ -160,8 +160,8 @@ public class Transactor {
      * @param key the key
      * @return the dirty node associated with the key, or null
      */
-    public Node getDirtyNode(Key key) {
-        return (Node) dirtyNodes.get(key);
+    public INode getDirtyNode(Key key) {
+        return dirtyNodes.get(key);
     }
 
     /**
@@ -169,7 +169,7 @@ public class Transactor {
      *
      * @param node the node to register
      */
-    public void visitCleanNode(Node node) {
+    public void visitCleanNode(PersistentNode node) {
         if (node != null) {
             Key key = node.getKey();
 
@@ -185,7 +185,7 @@ public class Transactor {
      * @param key the key to register with
      * @param node the node to register
      */
-    public void visitCleanNode(Key key, Node node) {
+    public void visitCleanNode(Key key, INode node) {
         if (node != null) {
             if (!cleanNodes.containsKey(key)) {
                 cleanNodes.put(key, node);
@@ -208,8 +208,8 @@ public class Transactor {
      *
      * @return ...
      */
-    public Node getCleanNode(Object key) {
-        return (key == null) ? null : (Node) cleanNodes.get(key);
+    public INode getCleanNode(Object key) {
+        return (key == null) ? null : cleanNodes.get(key);
     }
 
     /**
@@ -217,7 +217,7 @@ public class Transactor {
      *
      * @param node ...
      */
-    public void visitParentNode(Node node) {
+    public void visitParentNode(PersistentNode node) {
         parentNodes.add(node);
     }
 
@@ -337,15 +337,15 @@ public class Transactor {
             Log eventLog = nmgr.app.getEventLog();
 
             for (int i = 0; i < dirty.length; i++) {
-                Node node = (Node) dirty[i];
+                PersistentNode node = (PersistentNode) dirty[i];
 
                 // update nodes in db
                 int nstate = node.getState();
 
-                if (nstate == Node.NEW) {
+                if (nstate == INode.NEW) {
                     nmgr.insertNode(nmgr.db, txn, node);
                     dirtyDbMappings.add(node.getDbMapping());
-                    node.setState(Node.CLEAN);
+                    node.setState(INode.CLEAN);
 
                     // register node with nodemanager cache
                     nmgr.registerNode(node);
@@ -359,12 +359,12 @@ public class Transactor {
                         eventLog.debug("inserted node: " + node.getPrototype() + "/" +
                                 node.getID());
                     }
-                } else if (nstate == Node.MODIFIED) {
+                } else if (nstate == INode.MODIFIED) {
                     // only mark DbMapping as dirty if updateNode returns true
                     if (nmgr.updateNode(nmgr.db, txn, node)) {
                         dirtyDbMappings.add(node.getDbMapping());
                     }
-                    node.setState(Node.CLEAN);
+                    node.setState(INode.CLEAN);
 
                     // update node with nodemanager cache
                     nmgr.registerNode(node);
@@ -378,7 +378,7 @@ public class Transactor {
                         eventLog.debug("updated node: " + node.getPrototype() + "/" +
                                 node.getID());
                     }
-                } else if (nstate == Node.DELETED) {
+                } else if (nstate == INode.DELETED) {
                     nmgr.deleteNode(nmgr.db, txn, node);
                     dirtyDbMappings.add(node.getDbMapping());
 
@@ -414,7 +414,7 @@ public class Transactor {
         if (!parentNodes.isEmpty()) {
             // set last subnode change times in parent nodes
             for (Iterator<INode> i = parentNodes.iterator(); i.hasNext(); ) {
-                Node node = (Node) i.next();
+                PersistentNode node = (PersistentNode) i.next();
                 node.markSubnodesChanged();
                 if (hasListeners) {
                     modifiedParentNodes.add(node);
@@ -458,7 +458,7 @@ public class Transactor {
 
         // evict dirty nodes from cache
         for (int i = 0; i < dirty.length; i++) {
-            Node node = (Node) dirty[i];
+            PersistentNode node = (PersistentNode) dirty[i];
 
             // Declare node as invalid, so it won't be used by other threads
             // that want to write on it and remove it from cache
@@ -468,7 +468,7 @@ public class Transactor {
 
         // set last subnode change times in parent nodes
         for (Iterator<INode> i = parentNodes.iterator(); i.hasNext(); ) {
-            Node node = (Node) i.next();
+            PersistentNode node = (PersistentNode) i.next();
             node.markSubnodesChanged();
         }
 

@@ -17,6 +17,7 @@
 package helma.objectmodel;
 
 import java.io.Serializable;
+import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -347,4 +348,8 @@ public final class TransientProperty implements IProperty, Serializable {
     public int getType() {
         return type;
     }
+
+	public Timestamp getTimestampValue() {
+		return new Timestamp(getDateValue().getTime());
+	}
 }

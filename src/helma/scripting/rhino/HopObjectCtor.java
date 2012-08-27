@@ -18,7 +18,7 @@ package helma.scripting.rhino;
 import helma.objectmodel.INode;
 import helma.objectmodel.db.DbKey;
 import helma.objectmodel.db.DbMapping;
-import helma.objectmodel.db.Node;
+import helma.objectmodel.db.PersistentNode;
 import helma.objectmodel.db.WrappedNodeManager;
 
 import java.lang.reflect.Constructor;
@@ -108,7 +108,7 @@ public class HopObjectCtor extends FunctionObject {
                 throw new EvaluatorException(x.toString());
             }
         } else {
-            INode node = new Node(protoname, protoname,
+            INode node = new PersistentNode(protoname, protoname,
                     core.app.getWrappedNodeManager());
             Scriptable proto = core.getPrototype(protoname);
             HopObject hobj = new HopObject(protoname, core, node, proto);
@@ -235,9 +235,9 @@ public class HopObjectCtor extends FunctionObject {
             dbmap.update();
 
             WrappedNodeManager nmgr = core.app.getWrappedNodeManager();
-            Node node = new Node("HopQuery", Long.toString(collectionId++), null, nmgr);
+            PersistentNode node = new PersistentNode("HopQuery", Long.toString(collectionId++), null, nmgr);
             node.setDbMapping(dbmap);
-            node.setState(Node.VIRTUAL);
+            node.setState(INode.VIRTUAL);
             return new HopObject("HopQuery", core, node, core.hopObjectProto);
         }
 

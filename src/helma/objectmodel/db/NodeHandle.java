@@ -16,6 +16,7 @@
 
 package helma.objectmodel.db;
 
+import helma.objectmodel.INode;
 import helma.objectmodel.INodeState;
 
 import java.io.Serializable;
@@ -43,18 +44,18 @@ public final class NodeHandle implements INodeState, Serializable {
     static final long serialVersionUID = 3067763116576910931L;
 
     // direct reference to the node
-    private Node node;
+    private INode node;
 
     // the node's key
     private Key key;
 
     /**
      * Builds a handle for a node. This constructor is package private in order to make
-     * sure only one NodeHandle exists per transient node. Use {@link Node#getHandle()}
+     * sure only one NodeHandle exists per transient node. Use {@link INode#getHandle()}
      * to get a Node's handle.
      * @param node the node
      */
-    NodeHandle(Node node) {
+    NodeHandle(INode node) {
         int state = node.getState();
 
         if (state == TRANSIENT) {
@@ -80,7 +81,7 @@ public final class NodeHandle implements INodeState, Serializable {
     /**
      *  Get the node described by this node handle
      */
-    public Node getNode(WrappedNodeManager nodemgr) {
+    public INode getNode(WrappedNodeManager nodemgr) {
         if (node != null) {
             return node;
         }

@@ -33,19 +33,11 @@ import java.util.Vector;
  * An implementation of INode that can be stored in the internal database or
  * an external relational database.
  */
-public final class Node implements INode {
+public final class PersistentNode extends AbstractNode {
 
     // The handle to the node's parent
     protected NodeHandle parentHandle;
 
-    // Ordered list of subnodes of this node
-    private SubnodeList subnodes;
-
-    // Named subnodes (properties) of this node
-    private Hashtable<String, Property> propMap;
-
-    protected long created;
-    protected long lastmodified;
     private String id;
     private String name;
 
@@ -73,7 +65,7 @@ public final class Node implements INode {
      * This is used for null-node references in the node cache.
      * @param timestamp
      */
-    protected Node(long timestamp) {
+    protected PersistentNode(long timestamp) {
         created = lastmodified = timestamp;
         this.nmgr = null;
     }
@@ -82,7 +74,7 @@ public final class Node implements INode {
      * Creates an empty, uninitialized Node. The init() method must be called on the
      * Node before it can do anything useful.
      */
-    protected Node(WrappedNodeManager nmgr) {
+    protected PersistentNode(WrappedNodeManager nmgr) {
         if (nmgr == null) {
             throw new NullPointerException("nmgr");
         }
@@ -95,7 +87,7 @@ public final class Node implements INode {
      * outside of a Transaction context, which is why we can immediately mark it as CLEAN.
      * Also used by embedded database to re-create an existing Node.
      */
-    public Node(String name, String id, String prototype, WrappedNodeManager nmgr) {
+    public PersistentNode(String name, String id, String prototype, WrappedNodeManager nmgr) {
         if (nmgr == null) {
             throw new NullPointerException("nmgr");
         }
@@ -109,7 +101,7 @@ public final class Node implements INode {
     /**
      * Constructor used to create a Node with a given name from a embedded database.
      */
-    public Node(String name, String id, String prototype, WrappedNodeManager nmgr,
+    public PersistentNode(String name, String id, String prototype, WrappedNodeManager nmgr,
                 long created, long lastmodified) {
         this(name, id, prototype, nmgr);
         this.created = created;
@@ -119,7 +111,7 @@ public final class Node implements INode {
     /**
      * Constructor used for virtual nodes.
      */
-    public Node(Node home, String propname, WrappedNodeManager nmgr, String prototype) {
+    public PersistentNode(INode home, String propname, WrappedNodeManager nmgr, String prototype) {
         if (nmgr == null) {
             throw new NullPointerException("nmgr");
         }
@@ -133,7 +125,7 @@ public final class Node implements INode {
         this.anonymous = false;
 
         // set the collection's state according to the home node's state
-        if (home.state == NEW || home.state == TRANSIENT) {
+        if (home.getState() == NEW || home.getState() == TRANSIENT) {
             this.state = TRANSIENT;
         } else {
             this.state = VIRTUAL;
@@ -143,7 +135,7 @@ public final class Node implements INode {
     /**
      * Creates a new Node with the given name. This is used for ordinary transient nodes.
      */
-    public Node(String name, String prototype, WrappedNodeManager nmgr) {
+    public PersistentNode(String name, String prototype, WrappedNodeManager nmgr) {
         if (nmgr == null) {
             throw new NullPointerException("nmgr");
         }
@@ -170,7 +162,7 @@ public final class Node implements INode {
      * Initializer used for nodes being instanced from an embedded or relational database.
      */
     public synchronized void init(DbMapping dbm, String id, String name,
-                                  String prototype, Hashtable<String, Property> propMap) {
+                                  String prototype, Hashtable<String, IProperty> propMap) {
         this.dbmap = dbm;
         this.prototype = prototype;
         this.id = id;
@@ -180,7 +172,7 @@ public final class Node implements INode {
             this.name = prototype + " " + id;
         }
 
-        this.propMap = propMap;
+        this.properties = propMap;
 
         // set lastmodified and created timestamps and mark as clean
         created = lastmodified = System.currentTimeMillis();
@@ -193,8 +185,8 @@ public final class Node implements INode {
     /**
      * used by Xml deserialization
      */
-    public synchronized void setPropMap(Hashtable<String, Property> propMap) {
-        this.propMap = propMap;
+    public synchronized void setPropMap(Hashtable<String, IProperty> propMap) {
+        this.properties = propMap;
     }
 
     /**
@@ -286,7 +278,7 @@ public final class Node implements INode {
      * @param propname the name of the property being changed
      */
     void notifyPropertyChange(String propname) {
-        Node parent = (parentHandle == null) ? null : (Node) getParent();
+        PersistentNode parent = (parentHandle == null) ? null : (PersistentNode) getParent();
 
         if ((parent != null) && (parent.getDbMapping() != null)) {
             // check if this node is already registered with the old name; if so, remove it.
@@ -300,16 +292,6 @@ public final class Node implements INode {
             if (subrel.order != null && subrel.order.indexOf(dbcolumn) > -1) {
                 parent.registerSubnodeChange();
             }
-        }
-    }
-
-    /**
-     * Called by the transactor on registered parent nodes to mark the
-     * child index as changed
-     */
-    public void markSubnodesChanged() {
-        if (subnodes != null) {
-            subnodes.markAsChanged();
         }
     }
 
@@ -406,7 +388,7 @@ public final class Node implements INode {
 
         if ((parentHandle != null) && (lastNameCheck <= lastmod)) {
             try {
-                Node p = parentHandle.getNode(nmgr);
+                INode p = parentHandle.getNode(nmgr);
                 DbMapping parentmap = p.getDbMapping();
                 Relation prel = parentmap.getSubnodeRelation();
 
@@ -550,8 +532,8 @@ public final class Node implements INode {
 
         DbMapping smap = (dbmap == null) ? null : dbmap.getSubnodeMapping();
 
-        if (subnodes != null && smap != null && smap.isRelational()) {
-            subnodes = null;
+        if (children != null && smap != null && smap.isRelational()) {
+            children = null;
         }
     }
 
@@ -580,7 +562,7 @@ public final class Node implements INode {
     /**
      * Set this node's parent node.
      */
-    public void setParent(Node parent) {
+    public void setParent(INode parent) {
         parentHandle = (parent == null) ? null : parent.getHandle();
     }
 
@@ -610,18 +592,18 @@ public final class Node implements INode {
             return null;
         } else if (parentInfo != null) {
 
-            Node parentFallback = null;
+            INode parentFallback = null;
 
             for (int i = 0; i < parentInfo.length; i++) {
 
                 ParentInfo pinfo = parentInfo[i];
-                Node parentNode = null;
+                INode parentNode = null;
 
                 // see if there is an explicit relation defined for this parent info
                 // we only try to fetch a node if an explicit relation is specified for the prop name
                 Relation rel = dbmap.propertyToRelation(pinfo.propname);
                 if ((rel != null) && (rel.isReference() || rel.isComplexReference())) {
-                    parentNode = (Node) getNode(pinfo.propname);
+                    parentNode = getNode(pinfo.propname);
                 }
 
                 // the parent of this node is the app's root node...
@@ -633,12 +615,12 @@ public final class Node implements INode {
                 if (parentNode != null) {
                     // see if dbmapping specifies anonymity for this node
                     if (pinfo.virtualname != null) {
-                        Node pn2 = (Node) parentNode.getNode(pinfo.virtualname);
+                        PersistentNode pn2 = (PersistentNode) parentNode.getNode(pinfo.virtualname);
                         if (pn2 == null) {
                             getApp().logError("Error: Can't retrieve parent node " +
                                                    pinfo + " for " + this);
                         } else if (pinfo.collectionname != null) {
-                            pn2 = (Node) pn2.getNode(pinfo.collectionname);
+                            pn2 = (PersistentNode) pn2.getNode(pinfo.collectionname);
                         } else if (pn2.equals(this)) {
                             // a special case we want to support: virtualname is actually
                             // a reference to this node, not a collection containing this node.
@@ -657,7 +639,7 @@ public final class Node implements INode {
                         if ((dbm != null) && (dbm.getSubnodeGroupby() != null)) {
                             // check for groupby
                             rel = dbmap.columnNameToRelation(dbm.getSubnodeGroupby());
-                            parentNode = (Node) parentNode.getChildElement(getString(rel.propName));
+                            parentNode = (PersistentNode) parentNode.getChildElement(getString(rel.propName));
                         }
 
                         // check if parent actually contains this node. If it does,
@@ -700,7 +682,7 @@ public final class Node implements INode {
     /**
      * Get parent, using cached info if it exists.
      */
-    public Node getCachedParent() {
+    public INode getCachedParent() {
         if (parentHandle == null) {
             return null;
         }
@@ -725,10 +707,10 @@ public final class Node implements INode {
      * @return the added node itselve
      */
     public INode addNode(INode elem, int where) {
-        Node node = null;
+        PersistentNode node = null;
 
-        if (elem instanceof Node) {
-            node = (Node) elem;
+        if (elem instanceof PersistentNode) {
+            node = (PersistentNode) elem;
         } else {
             throw new RuntimeException("Can't add fixed-transient node to a persistent node");
         }
@@ -769,7 +751,7 @@ public final class Node implements INode {
 
         if (subrel != null && subrel.groupby != null) {
             // check if this node has a group-by subnode-relation
-            Node groupbyNode = getGroupbySubnode(node, true);
+            PersistentNode groupbyNode = getGroupbySubnode(node, true);
             if (groupbyNode != null) {
                 groupbyNode.addNode(node);
                 return node;
@@ -778,21 +760,21 @@ public final class Node implements INode {
 
         NodeHandle nhandle = node.getHandle();
 
-        if (subnodes != null && subnodes.contains(nhandle)) {
+        if (children != null && children.contains(nhandle)) {
             // Node is already subnode of this - just move to new position
-            synchronized (subnodes) {
-                subnodes.remove(nhandle);
+            synchronized (children) {
+                children.remove(nhandle);
                 // check if index is out of bounds when adding
-                if (where < 0 || where > subnodes.size()) {
-                    subnodes.add(nhandle);
+                if (where < 0 || where > children.size()) {
+                    children.add(nhandle);
                 } else {
-                    subnodes.add(where, nhandle);
+                    children.add(where, nhandle);
                 }
             }
         } else {
             // create subnode list if necessary
-            if (subnodes == null) {
-                subnodes = createSubnodeList();
+            if (children == null) {
+                children = createSubnodeList();
             }
 
             // check if subnode accessname is set. If so, check if another node
@@ -830,19 +812,19 @@ public final class Node implements INode {
             }
 
             // actually add the new child to the subnode list
-            synchronized (subnodes) {
+            synchronized (children) {
                 // check if index is out of bounds when adding
-                if (where < 0 || where > subnodes.size()) {
-                    subnodes.add(nhandle);
+                if (where < 0 || where > children.size()) {
+                    children.add(nhandle);
                 } else {
-                    subnodes.add(where, nhandle);
+                    children.add(where, nhandle);
                 }
             }
 
             if (node != this && !nmgr.isRootNode(node)) {
                 // avoid calling getParent() because it would return bogus results
                 // for the not-anymore transient node
-                Node nparent = (node.parentHandle == null) ? null
+                INode nparent = (node.parentHandle == null) ? null
                                                            : node.parentHandle.getNode(nmgr);
 
                 // if the node doesn't have a parent yet, or it has one but it's
@@ -925,7 +907,7 @@ public final class Node implements INode {
             }
         }
 
-        Node n = new Node(nm, proto, nmgr);
+        PersistentNode n = new PersistentNode(nm, proto, nmgr);
 
         if (anon) {
             addNode(n, where);
@@ -960,9 +942,9 @@ public final class Node implements INode {
                     // check if any one matches
                     String propname = rel.groupby != null ? "groupname" : rel.accessName;
                     INode node = null;
-                    Enumeration<?> e = getSubnodes();
+                    Enumeration<?> e = getChildNodes();
                     while (e.hasMoreElements()) {
-                        Node n = (Node) e.nextElement();
+                        PersistentNode n = (PersistentNode) e.nextElement();
                         if (name.equalsIgnoreCase(n.getString(propname))) {
                             node = n;
                             break;
@@ -976,10 +958,10 @@ public final class Node implements INode {
                 }
             }
 
-            return getSubnode(name);
+            return getChildNode(name);
         } else {
             // no dbmapping - just try child collection first, then named property.
-            INode child = getSubnode(name);
+            INode child = getChildNode(name);
 
             if (child == null) {
                 child = getNode(name);
@@ -999,23 +981,23 @@ public final class Node implements INode {
     /**
      * Get a named child node with the given id.
      */
-    public INode getSubnode(String subid) {
+    public INode getChildNode(String subid) {
         if (subid == null || subid.length() == 0) {
             return null;
         }
 
-        Node retval = null;
+        INode retval = null;
         loadNodes();
-        if (subnodes == null || subnodes.size() == 0) {
+        if (children == null || children.size() == 0) {
             return null;
         }
 
         NodeHandle nhandle = null;
-        int l = subnodes.size();
+        int l = children.size();
 
         for (int i = 0; i < l; i++) {
             try {
-                NodeHandle shandle = subnodes.get(i);
+                NodeHandle shandle = children.get(i);
                 if (subid.equals(shandle.getID())) {
                     nhandle = shandle;
                     break;
@@ -1034,9 +1016,9 @@ public final class Node implements INode {
         //    if (dbmap != null && dbmap.getSubnodeRelation () != null)
         //         retval = nmgr.getNode (this, subid, dbmap.getSubnodeRelation ());
 
-        if (retval != null && retval.parentHandle == null && !nmgr.isRootNode(retval)) {
+        if (retval != null && retval.getParent() == null && !nmgr.isRootNode(retval)) {
             retval.setParent(this);
-            retval.anonymous = true;
+            retval.setAnonymous(true);
         }
 
         return retval;
@@ -1050,21 +1032,21 @@ public final class Node implements INode {
      */
     public INode getSubnodeAt(int index) {
         loadNodes();
-        if (subnodes == null) {
+        if (children == null) {
             return null;
         }
-        return subnodes.getNode(index);
+        return children.getNode(index);
     }
 
     /**
-     * Get or create a group name for a given content node.
+     * Get or create a group Node for a given content node.
      *
      * @param node the content node
      * @param create whether the node should be created if it doesn't exist
      * @return the group node, or null
      */
-    protected Node getGroupbySubnode(Node node, boolean create) {
-        if (node.dbmap != null && node.dbmap.isGroup()) {
+    protected PersistentNode getGroupbySubnode(INode node, boolean create) {
+        if (node.getDbMapping() != null && node.getDbMapping().isGroup()) {
             return null;
         }
         
@@ -1074,12 +1056,12 @@ public final class Node implements INode {
             if (subrel != null && subrel.groupby != null) {
                 // use actual child mapping to resolve group property name,
                 // otherwise the subnode mapping defined for the collection.
-                DbMapping childmap = node.dbmap == null ? subrel.otherType : node.dbmap;
+                DbMapping childmap = node.getDbMapping() == null ? subrel.otherType : node.getDbMapping();
                 Relation grouprel = childmap.columnNameToRelation(subrel.groupby);
                 // If group name can't be resolved to a property name use the group name itself
                 String groupprop = (grouprel != null) ? grouprel.propName : subrel.groupby;
                 String groupname = node.getString(groupprop);
-                Node groupbyNode = (Node) getChildElement(groupname);
+                PersistentNode groupbyNode = (PersistentNode) getChildElement(groupname);
 
                 // if group-by node doesn't exist, we'll create it
                 if (groupbyNode == null) {
@@ -1105,7 +1087,7 @@ public final class Node implements INode {
      * @param create whether the node should be created if it doesn't exist
      * @return the group node, or null
      */
-    protected Node getGroupbySubnode(String groupname, boolean create) {
+    public PersistentNode getGroupbySubnode(String groupname, boolean create) {
         if (groupname == null) {
             throw new IllegalArgumentException("Can't create group by null");
         }
@@ -1114,21 +1096,21 @@ public final class Node implements INode {
 
         loadNodes();
 
-        if (subnodes == null) {
-            subnodes = new SubnodeList(this);
+        if (children == null) {
+            children = new SubnodeList(this);
         }
 
-        if (create || subnodes.contains(new NodeHandle(new SyntheticKey(getKey(), groupname)))) {
+        if (create || children.contains(new NodeHandle(new SyntheticKey(getKey(), groupname)))) {
             try {
                 DbMapping groupbyMapping = dbmap.getGroupbyMapping();
                 boolean relational = groupbyMapping.getSubnodeMapping().isRelational();
 
                 if (relational || create) {
-                    Node node;
+                    PersistentNode node;
                     if (relational && persistent) {
-                        node = new Node(this, groupname, nmgr, null);
+                        node = new PersistentNode(this, groupname, nmgr, null);
                     } else {
-                        node = new Node(groupname, null, nmgr);
+                        node = new PersistentNode(groupname, null, nmgr);
                         node.setParent(this);
                     }
 
@@ -1147,8 +1129,8 @@ public final class Node implements INode {
                     // if we created a new node, check if we need to add it to subnodes
                     if (create) {
                         NodeHandle handle = node.getHandle();
-                        if (!subnodes.contains(handle))
-                            subnodes.add(handle);
+                        if (!children.contains(handle))
+                            children.add(handle);
                     }
 
                     // If we created the group node, we register it with the
@@ -1199,7 +1181,7 @@ public final class Node implements INode {
      * @param node ...
      */
     public void removeNode(INode node) {
-        Node n = (Node) node;
+        PersistentNode n = (PersistentNode) node;
         releaseNode(n);
     }
 
@@ -1208,9 +1190,9 @@ public final class Node implements INode {
      * The logical stuff necessary for keeping data consistent is done in
      * {@link #removeNode(INode)}.
      */
-    protected void releaseNode(Node node) {
+    protected void releaseNode(PersistentNode node) {
 
-        Node groupNode = getGroupbySubnode(node, false);
+        PersistentNode groupNode = getGroupbySubnode(node, false);
         if (groupNode != null) {
             groupNode.releaseNode(node);
             return;
@@ -1226,12 +1208,12 @@ public final class Node implements INode {
         // index which would potentially still contain the removed child
         loadNodes();
 
-        if (subnodes != null) {
+        if (children != null) {
             boolean removed = false;
-            synchronized (subnodes) {
-                removed = subnodes.remove(node.getHandle());
+            synchronized (children) {
+                removed = children.remove(node.getHandle());
             }
-            if (dbmap != null && dbmap.isGroup() && subnodes.size() == 0) {
+            if (dbmap != null && dbmap.isGroup() && children.size() == 0) {
                 // clean up ourself if we're an empty group node
                 remove();
             } else if (removed) {
@@ -1301,12 +1283,12 @@ public final class Node implements INode {
     protected void deepRemoveNode() {
 
         // tell all nodes that are properties of n that they are no longer used as such
-        if (propMap != null) {
-            for (Enumeration<Property> en = propMap.elements(); en.hasMoreElements();) {
-                Property p = (Property) en.nextElement();
+        if (properties != null) {
+            for (Enumeration<IProperty> en = properties.elements(); en.hasMoreElements();) {
+                IProperty p = (IProperty) en.nextElement();
 
                 if ((p != null) && (p.getType() == Property.NODE)) {
-                    Node n = (Node) p.getNodeValue();
+                    PersistentNode n = (PersistentNode) p.getNodeValue();
                     if (n != null && !n.isRelational() && n.getParent() == this) {
                         n.deepRemoveNode();
                     }
@@ -1316,11 +1298,11 @@ public final class Node implements INode {
 
         // cascading delete of all subnodes. This is never done for relational subnodes, because
         // the parent info is not 100% accurate for them.
-        if (subnodes != null) {
+        if (children != null) {
             Vector<INode> v = new Vector<INode>();
 
             // remove modifies the Vector we are enumerating, so we are extra careful.
-            for (Enumeration<INode> en = getSubnodes(); en.hasMoreElements();) {
+            for (Enumeration<INode> en = getChildNodes(); en.hasMoreElements();) {
                 v.add(en.nextElement());
             }
 
@@ -1329,7 +1311,7 @@ public final class Node implements INode {
             for (int i = 0; i < m; i++) {
                 // getParent() is heuristical/implicit for relational nodes, so we don't base
                 // a cascading delete on that criterium for relational nodes.
-                Node n = (Node) v.get(i);
+                PersistentNode n = (PersistentNode) v.get(i);
 
                 if (!n.isRelational() && n.getParent() == this) {
                     n.deepRemoveNode();
@@ -1360,59 +1342,29 @@ public final class Node implements INode {
 
         loadNodes();
 
-        if (subnodes == null) {
+        if (children == null) {
             return -1;
         }
 
         // if the node contains relational groupby subnodes, the subnodes vector
         // contains the names instead of ids.
-        if (!(n instanceof Node)) {
+        if (!(n instanceof PersistentNode)) {
             return -1;
         }
 
-        Node node = (Node) n;
+        PersistentNode node = (PersistentNode) n;
 
-        return subnodes.indexOf(node.getHandle());
+        return children.indexOf(node.getHandle());
     }
 
-    /**
-     * Check if the given node is contained in this node's child list. This
-     * is similar to <code>contains(INode)</code> but does not load the
-     * child index for relational nodes.
-     *
-     * @param n a node
-     * @return true if the given node is contained in this node's child list
-     */
-    public boolean isParentOf(Node n) {
-        if (dbmap != null) {
-            Relation subrel = dbmap.getSubnodeRelation();
-            // if we're dealing with relational child nodes use
-            // Relation.checkConstraints to avoid loading the child index.
-            // Note that we only do that if no filter is set, since
-            // Relation.checkConstraints() would always return false
-            // if there was a filter property.
-            if (subrel != null && subrel.otherType != null
-                               && subrel.otherType.isRelational()
-                               && subrel.filter == null) {
-                // first check if types are stored in same table
-                if (!subrel.otherType.isStorageCompatible(n.getDbMapping())) {
-                    return false;
-                }
-                // if they are, check if constraints are met
-                return subrel.checkConstraints(this, n);
-            }
-        }
-        // just fall back to contains() for non-relational nodes
-        return contains(n) > -1;
-    }
 
     /**
      * Count the subnodes of this node. If they're stored in a relational data source, we
      * may actually load their IDs in order to do this.
      */
-    public int numberOfNodes() {
+    public int getNumberOfChildNodes() {
         loadNodes();
-        return (subnodes == null) ? 0 : subnodes.size();
+        return (children == null) ? 0 : children.size();
     }
 
     /**
@@ -1431,10 +1383,10 @@ public final class Node implements INode {
         if (subMap != null && subMap.isRelational()) {
             // check if subnodes need to be reloaded
             synchronized (this) {
-                if (subnodes == null) {
+                if (children == null) {
                     createSubnodeList();
                 }
-                subnodes.update();
+                children.update();
             }
         }
     }
@@ -1445,21 +1397,21 @@ public final class Node implements INode {
      */
     public SubnodeList createSubnodeList() {
         Relation subrel = dbmap == null ? null : dbmap.getSubnodeRelation();
-        subnodes = subrel == null || !subrel.lazyLoading ?
+        children = subrel == null || !subrel.lazyLoading ?
                 new SubnodeList(this) : new SegmentedSubnodeList(this);
-        return subnodes;
+        return children;
     }
 
     /**
      * Compute a serial number indicating the last change in subnode collection
      * @return a serial number that increases with each subnode change
      */
-    long getLastSubnodeChange() {
+    public long getLastSubnodeChange() {
         // TODO check if we should compute this on demand
-        if (subnodes == null) {
+        if (children == null) {
             createSubnodeList();
         }
-        return subnodes.getLastSubnodeChange();
+        return children.getLastSubnodeChange();
     }
 
     /**
@@ -1477,24 +1429,24 @@ public final class Node implements INode {
 
         loadNodes();
 
-        if (subnodes == null || startIndex >= subnodes.size()) {
+        if (children == null || startIndex >= children.size()) {
             return;
         }
 
-        subnodes.prefetch(startIndex, length);
+        children.prefetch(startIndex, length);
     }
 
     /**
      * Enumerate through the subnodes of this node.
      * @return an enumeration of this node's subnodes
      */
-    public Enumeration<INode> getSubnodes() {
+    public Enumeration<INode> getChildNodes() {
         loadNodes();
         return getLoadedSubnodes();
     }
 
     private Enumeration<INode> getLoadedSubnodes() {
-        final SubnodeList list = subnodes;
+        final SubnodeList list = children;
         if (list == null) {
         	// FIXME: should be solved differently
             return new Enumeration<INode>() {
@@ -1530,7 +1482,7 @@ public final class Node implements INode {
      * @return the subnode list
      */
     public SubnodeList getSubnodeList() {
-        return subnodes;
+        return children;
     }
 
    /**
@@ -1558,22 +1510,13 @@ public final class Node implements INode {
                 prel.otherType != null && prel.otherType.isRelational()) {
             // return names of objects from a relational db table
             return nmgr.getPropertyNames(this, prel).elements();
-        } else if (propMap != null) {
+        } else if (properties != null) {
             // return the actually explicitly stored properties
-            return propMap.keys();
+            return properties.keys();
         }
 
         // sorry, no properties for this Node
         return (new Vector<String>()).elements();
-    }
-
-    /**
-     *
-     *
-     * @return ...
-     */
-    public Hashtable<String, Property> getPropMap() {
-        return propMap;
     }
 
     /**
@@ -1604,7 +1547,7 @@ public final class Node implements INode {
      *
      * @return ...
      */
-    protected Property getProperty(String propname) {
+    public IProperty getProperty(String propname) {
         if (propname == null) {
             return null;
         }
@@ -1613,8 +1556,8 @@ public final class Node implements INode {
                 null : dbmap.getExactPropertyRelation(propname);
 
         // 1) check if the property is contained in the propMap
-        Property prop = propMap == null ? null : 
-            (Property) propMap.get(correctPropertyName(propname));
+        Property prop = properties == null ? null : 
+            (Property) properties.get(correctPropertyName(propname));
 
         if (prop != null) {
             if (rel != null) {
@@ -1626,7 +1569,7 @@ public final class Node implements INode {
                     // property was found in propMap and is a collection - this is
                     // a collection holding non-relational objects. set DbMapping and
                     // NodeManager
-                    Node n = (Node) prop.getNodeValue();
+                    PersistentNode n = (PersistentNode) prop.getNodeValue();
                     if (n != null) {
                         // do set DbMapping for embedded db collection nodes
                         n.setDbMapping(rel.getVirtualMapping());
@@ -1639,24 +1582,24 @@ public final class Node implements INode {
             // we get a collection whose content objects are stored in the embedded
             // XML data storage, we just want to create and set a generic node without
             // consulting the NodeManager about it.
-            Node n = new Node(propname, rel.getPrototype(), nmgr);
+            PersistentNode n = new PersistentNode(propname, rel.getPrototype(), nmgr);
             n.setDbMapping(rel.getVirtualMapping());
             n.setParent(this);
             setNode(propname, n);
-            return (Property) propMap.get(correctPropertyName(propname));
+            return (Property) properties.get(correctPropertyName(propname));
         }
 
         // 2) check if this is a create-on-demand node property
         if (rel != null && (rel.isVirtual() || rel.isComplexReference())) {
             if (state != TRANSIENT) {
-                Node n = nmgr.getNode(this, propname, rel);
+                INode n = nmgr.getNode(this, propname, rel);
 
                 if (n != null) {
-                    if ((n.parentHandle == null) &&
+                    if ((n.getParent() == null) &&
                             !nmgr.isRootNode(n)) {
                         n.setParent(this);
-                        n.name = propname;
-                        n.anonymous = false;
+                        n.setName(propname);
+                        n.setAnonymous(false);
                     }
                     return new Property(propname, this, n);
                 }
@@ -1675,7 +1618,7 @@ public final class Node implements INode {
      * @return ...
      */
     public String getString(String propname) {
-        Property prop = getProperty(propname);
+        IProperty prop = getProperty(propname);
 
         try {
             return prop.getStringValue();
@@ -1693,7 +1636,7 @@ public final class Node implements INode {
      * @return ...
      */
     public long getInteger(String propname) {
-        Property prop = getProperty(propname);
+        IProperty prop = getProperty(propname);
 
         try {
             return prop.getIntegerValue();
@@ -1711,7 +1654,7 @@ public final class Node implements INode {
      * @return ...
      */
     public double getFloat(String propname) {
-        Property prop = getProperty(propname);
+        IProperty prop = getProperty(propname);
 
         try {
             return prop.getFloatValue();
@@ -1729,7 +1672,7 @@ public final class Node implements INode {
      * @return ...
      */
     public Date getDate(String propname) {
-        Property prop = getProperty(propname);
+        IProperty prop = getProperty(propname);
 
         try {
             return prop.getDateValue();
@@ -1747,7 +1690,7 @@ public final class Node implements INode {
      * @return ...
      */
     public boolean getBoolean(String propname) {
-        Property prop = getProperty(propname);
+        IProperty prop = getProperty(propname);
 
         try {
             return prop.getBooleanValue();
@@ -1765,7 +1708,7 @@ public final class Node implements INode {
      * @return ...
      */
     public INode getNode(String propname) {
-        Property prop = getProperty(propname);
+        IProperty prop = getProperty(propname);
 
         try {
             return prop.getNodeValue();
@@ -1783,7 +1726,7 @@ public final class Node implements INode {
      * @return ...
      */
     public Object getJavaObject(String propname) {
-        Property prop = getProperty(propname);
+        IProperty prop = getProperty(propname);
 
         try {
             return prop.getJavaObjectValue();
@@ -1793,32 +1736,28 @@ public final class Node implements INode {
         return null;
     }
 
-    /**
-     * Directly set a property on this node
-     *
-     * @param propname ...
-     * @param value ...
-     */
-    protected void set(String propname, Object value, int type) {
-        boolean isPersistable = state != TRANSIENT && isPersistableProperty(propname);
+    public void setProperty(String name, IProperty property) {
+    	Object value = property.getValue();
+    	int type = property.getType();
+        boolean isPersistable = state != TRANSIENT && isPersistableProperty(name);
         if (isPersistable) {
             checkWriteLock();
         }
 
-        if (propMap == null) {
-            propMap = new Hashtable<String, Property>();
+        if (properties == null) {
+            properties = new Hashtable<String, IProperty>();
         }
 
-        propname = propname.trim();
-        String p2 = correctPropertyName(propname);
-        Property prop = (Property) propMap.get(p2);
+        name = name.trim();
+        String p2 = correctPropertyName(name);
+        Property prop = (Property) properties.get(p2);
 
         if (prop != null) {
             prop.setValue(value, type);
         } else {
-            prop = new Property(propname, this);
+            prop = new Property(name, this);
             prop.setValue(value, type);
-            propMap.put(p2, prop);
+            properties.put(p2, prop);
         }
 
         lastmodified = System.currentTimeMillis();
@@ -1841,13 +1780,13 @@ public final class Node implements INode {
             checkWriteLock();
         }
 
-        if (propMap == null) {
-            propMap = new Hashtable<String, Property>();
+        if (properties == null) {
+            properties = new Hashtable<String, IProperty>();
         }
 
         propname = propname.trim();
         String p2 = correctPropertyName(propname);
-        Property prop = (Property) propMap.get(p2);
+        IProperty prop = properties.get(p2);
         String oldvalue = null;
 
         if (prop != null) {
@@ -1862,14 +1801,14 @@ public final class Node implements INode {
         } else {
             prop = new Property(propname, this);
             prop.setStringValue(value);
-            propMap.put(p2, prop);
+            properties.put(p2, prop);
         }
 
         if (dbmap != null) {
 
             // check if this may have an effect on the node's parerent's child collection
             // in combination with the accessname or order field.
-            Node parent = (parentHandle == null) ? null : (Node) getParent();
+            PersistentNode parent = (parentHandle == null) ? null : (PersistentNode) getParent();
 
             if ((parent != null) && (parent.getDbMapping() != null)) {
                 DbMapping parentmap = parent.getDbMapping();
@@ -1953,20 +1892,20 @@ public final class Node implements INode {
             checkWriteLock();
         }
 
-        if (propMap == null) {
-            propMap = new Hashtable<String, Property>();
+        if (properties == null) {
+            properties = new Hashtable<String, IProperty>();
         }
 
         propname = propname.trim();
         String p2 = correctPropertyName(propname);
-        Property prop = (Property) propMap.get(p2);
+        IProperty prop = properties.get(p2);
 
         if (prop != null) {
             prop.setIntegerValue(value);
         } else {
             prop = new Property(propname, this);
             prop.setIntegerValue(value);
-            propMap.put(p2, prop);
+            properties.put(p2, prop);
         }
 
         notifyPropertyChange(propname);
@@ -1991,20 +1930,20 @@ public final class Node implements INode {
             checkWriteLock();
         }
 
-        if (propMap == null) {
-            propMap = new Hashtable<String, Property>();
+        if (properties == null) {
+            properties = new Hashtable<String, IProperty>();
         }
 
         propname = propname.trim();
         String p2 = correctPropertyName(propname);
-        Property prop = (Property) propMap.get(p2);
+        IProperty prop = properties.get(p2);
 
         if (prop != null) {
             prop.setFloatValue(value);
         } else {
             prop = new Property(propname, this);
             prop.setFloatValue(value);
-            propMap.put(p2, prop);
+            properties.put(p2, prop);
         }
 
         notifyPropertyChange(propname);
@@ -2029,20 +1968,20 @@ public final class Node implements INode {
             checkWriteLock();
         }
 
-        if (propMap == null) {
-            propMap = new Hashtable<String, Property>();
+        if (properties == null) {
+            properties = new Hashtable<String, IProperty>();
         }
 
         propname = propname.trim();
         String p2 = correctPropertyName(propname);
-        Property prop = (Property) propMap.get(p2);
+        IProperty prop = properties.get(p2);
 
         if (prop != null) {
             prop.setBooleanValue(value);
         } else {
             prop = new Property(propname, this);
             prop.setBooleanValue(value);
-            propMap.put(p2, prop);
+            properties.put(p2, prop);
         }
 
         notifyPropertyChange(propname);
@@ -2067,20 +2006,20 @@ public final class Node implements INode {
             checkWriteLock();
         }
 
-        if (propMap == null) {
-            propMap = new Hashtable<String, Property>();
+        if (properties == null) {
+            properties = new Hashtable<String, IProperty>();
         }
 
         propname = propname.trim();
         String p2 = correctPropertyName(propname);
-        Property prop = (Property) propMap.get(p2);
+        IProperty prop = properties.get(p2);
 
         if (prop != null) {
             prop.setDateValue(value);
         } else {
             prop = new Property(propname, this);
             prop.setDateValue(value);
-            propMap.put(p2, prop);
+            properties.put(p2, prop);
         }
 
         notifyPropertyChange(propname);
@@ -2105,20 +2044,20 @@ public final class Node implements INode {
             checkWriteLock();
         }
 
-        if (propMap == null) {
-            propMap = new Hashtable<String, Property>();
+        if (properties == null) {
+            properties = new Hashtable<String, IProperty>();
         }
 
         propname = propname.trim();
         String p2 = correctPropertyName(propname);
-        Property prop = (Property) propMap.get(p2);
+        IProperty prop = properties.get(p2);
 
         if (prop != null) {
             prop.setJavaObjectValue(value);
         } else {
             prop = new Property(propname, this);
             prop.setJavaObjectValue(value);
-            propMap.put(p2, prop);
+            properties.put(p2, prop);
         }
 
         notifyPropertyChange(propname);
@@ -2159,17 +2098,17 @@ public final class Node implements INode {
             checkWriteLock();
         }
 
-        Node n = null;
+        PersistentNode n = null;
 
-        if (value instanceof Node) {
-            n = (Node) value;
+        if (value instanceof PersistentNode) {
+            n = (PersistentNode) value;
         } else {
             throw new RuntimeException("Can't add fixed-transient node to a persistent node");
         }
 
         boolean isPersistable = isPersistableProperty(propname);
         // if the new node is marked as TRANSIENT and this node is not, mark new node as NEW
-        if (state != TRANSIENT && n.state == TRANSIENT && isPersistable) {
+        if (state != TRANSIENT && n.getState() == TRANSIENT && isPersistable) {
             n.makePersistable();
         }
 
@@ -2182,16 +2121,16 @@ public final class Node implements INode {
         if (n != this && !nmgr.isRootNode(n) && isPersistable) {
             // avoid calling getParent() because it would return bogus results
             // for the not-anymore transient node
-            Node nparent = (n.parentHandle == null) ? null
-                                                    : n.parentHandle.getNode(nmgr);
+            INode nparent = (n.getParent() == null) ? null
+                                                    : n.getParent().getHandle().getNode(nmgr);
 
             // if the node doesn't have a parent yet, or it has one but it's
             // transient while we are persistent, make this the nodes new parent.
             if ((nparent == null) ||
                ((state != TRANSIENT) && (nparent.getState() == TRANSIENT))) {
                 n.setParent(this);
-                n.name = propname;
-                n.anonymous = false;
+                n.setName(propname);
+                n.setAnonymous(false);
             }
         }
 
@@ -2211,7 +2150,7 @@ public final class Node implements INode {
             }
         }
 
-        Property prop = (propMap == null) ? null : (Property) propMap.get(p2);
+        Property prop = (properties == null) ? null : (Property) properties.get(p2);
 
         if (prop != null) {
             if ((prop.getType() == IProperty.NODE) &&
@@ -2221,7 +2160,7 @@ public final class Node implements INode {
                     clearWriteLock();
                 }
 
-                if (n.state == CLEAN) {
+                if (n.getState() == CLEAN) {
                     n.clearWriteLock();
                 }
 
@@ -2239,11 +2178,11 @@ public final class Node implements INode {
                 rel.otherType == null ||
                 !rel.otherType.isRelational()) {
             // the node must be stored as explicit property
-            if (propMap == null) {
-                propMap = new Hashtable<String, Property>();
+            if (properties == null) {
+                properties = new Hashtable<String, IProperty>();
             }
 
-            propMap.put(p2, prop);
+            properties.put(p2, prop);
 
             if (state == CLEAN && isPersistable) {
                 markAs(MODIFIED);
@@ -2252,7 +2191,7 @@ public final class Node implements INode {
 
         // don't check node in transactor cache if node is transient -
         // this is done anyway when the node becomes persistent.
-        if (n.state != TRANSIENT) {
+        if (n.getState() != TRANSIENT) {
             // check node in with transactor cache
             Transactor tx = Transactor.getInstanceOrFail();
 
@@ -2270,8 +2209,8 @@ public final class Node implements INode {
 
         lastmodified = System.currentTimeMillis();
 
-        if (n.state == DELETED) {
-            n.markAs(MODIFIED);
+        if (n.getState() == DELETED) {
+            n.setState(MODIFIED);
         }
     }
 
@@ -2288,14 +2227,14 @@ public final class Node implements INode {
         try {
             // if node is relational, leave a null property so that it is
             // updated in the DB. Otherwise, remove the property.
-            Property p = null;
+            IProperty p = null;
             boolean relational = (dbmap != null) && dbmap.isRelational();
 
-            if (propMap != null) {
+            if (properties != null) {
                 if (relational) {
-                    p = (Property) propMap.get(correctPropertyName(propname));
+                    p = properties.get(correctPropertyName(propname));
                 } else {
-                    p = (Property) propMap.remove(correctPropertyName(propname));
+                    p = properties.remove(correctPropertyName(propname));
                 }
             }
 
@@ -2428,7 +2367,7 @@ public final class Node implements INode {
     private void makeChildrenPersistable() {
         Relation subrel = dbmap == null ? null : dbmap.getSubnodeRelation();
         for (Enumeration<?> e = getLoadedSubnodes(); e.hasMoreElements();) {
-            Node node = (Node) e.nextElement();
+            PersistentNode node = (PersistentNode) e.nextElement();
 
             if (node.state == TRANSIENT) {
                 DbMapping submap = node.getDbMapping();
@@ -2455,7 +2394,7 @@ public final class Node implements INode {
             }
 
             // check if this property actually needs to be persisted.
-            Node node = (Node) next.getNodeValue();
+            PersistentNode node = (PersistentNode) next.getNodeValue();
             Relation rel = null;
 
             if (node == null || node == this) {
@@ -2482,7 +2421,7 @@ public final class Node implements INode {
      * call makeChildrenPersistable() on it.
      * @param node a previously transient node to be converted to a virtual node.
      */
-    private void convertToVirtual(Node node) {
+    private void convertToVirtual(PersistentNode node) {
         // Make node a virtual node with this as parent node. what we do is
         // basically to replay the things done in the constructor for virtual nodes.
         node.setState(VIRTUAL);
@@ -2514,23 +2453,23 @@ public final class Node implements INode {
      * This method walks down node path to the first non-virtual node and return it.
      *  limit max depth to 5, since there shouldn't be more then 2 layers of virtual nodes.
      */
-    public Node getNonVirtualParent() {
-        Node node = this;
+    public INode getNonVirtualParent() {
+        INode node = this;
 
         for (int i = 0; i < 5; i++) {
             if (node == null) {
                 break;
             }
 
-            if (node.getState() == Node.TRANSIENT) {
+            if (node.getState() == INode.TRANSIENT) {
                 DbMapping map = node.getDbMapping();
                 if (map == null || !map.isVirtual())
                     return node;
-            } else if (node.getState() != Node.VIRTUAL) {
+            } else if (node.getState() != INode.VIRTUAL) {
                 return node;
             }
 
-            node = (Node) node.getParent();
+            node = node.getParent();
         }
 
         return null;
@@ -2540,7 +2479,7 @@ public final class Node implements INode {
      *  Instances of this class may be used to mark an entry in the object cache as null.
      *  This method tells the caller whether this is the case.
      */
-    public boolean isNullNode() {
+    public boolean hasNodeManager() {
         return nmgr == null;
     }
 
@@ -2567,8 +2506,8 @@ public final class Node implements INode {
      *
      */
     public void dump() {
-        System.err.println("subnodes: " + subnodes);
-        System.err.println("properties: " + propMap);
+        System.err.println("subnodes: " + children);
+        System.err.println("properties: " + properties);
     }
 
     /**
@@ -2586,4 +2525,34 @@ public final class Node implements INode {
 	public WrappedNodeManager getNodeManager() {
 		return nmgr;
 	}
+    /**
+     * Check if the given node is contained in this node's child list. This
+     * is similar to <code>contains(INode)</code> but does not load the
+     * child index for relational nodes.
+     *
+     * @param n a node
+     * @return true if the given node is contained in this node's child list
+     */
+    public boolean isParentOf(INode n) {
+        if (dbmap != null) {
+            Relation subrel = dbmap.getSubnodeRelation();
+            // if we're dealing with relational child nodes use
+            // Relation.checkConstraints to avoid loading the child index.
+            // Note that we only do that if no filter is set, since
+            // Relation.checkConstraints() would always return false
+            // if there was a filter property.
+            if (subrel != null && subrel.otherType != null
+                               && subrel.otherType.isRelational()
+                               && subrel.filter == null) {
+                // first check if types are stored in same table
+                if (!subrel.otherType.isStorageCompatible(n.getDbMapping())) {
+                    return false;
+                }
+                // if they are, check if constraints are met
+                return subrel.checkConstraints(this, n);
+            }
+        }
+        return super.isParentOf(n);
+    }
+
 }

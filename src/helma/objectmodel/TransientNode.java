@@ -18,8 +18,11 @@ package helma.objectmodel;
 
 import helma.framework.IPathElement;
 import helma.framework.core.Application;
+import helma.objectmodel.db.AbstractNode;
 import helma.objectmodel.db.DbMapping;
-import helma.objectmodel.db.Node;
+import helma.objectmodel.db.Key;
+import helma.objectmodel.db.PersistentNode;
+import helma.objectmodel.db.NodeHandle;
 import helma.objectmodel.db.Relation;
 import helma.objectmodel.db.WrappedNodeManager;
 
@@ -35,7 +38,7 @@ import java.util.Vector;
  * made persistent by reachability from a persistent node. To make a persistent-capable
  * object, class helma.objectmodel.db.Node has to be used.
  */
-public class TransientNode implements INode, Serializable {
+public class TransientNode extends AbstractNode implements Serializable {
     /**
 	 * 
 	 */
@@ -44,16 +47,12 @@ public class TransientNode implements INode, Serializable {
     protected Hashtable<String, IProperty> propMap;
     protected Hashtable<String, INode> nodeMap;
     protected Vector<INode> nodes;
-    protected TransientNode parent;
+    protected INode parent;
     transient String prototype;
-    protected long created;
-    protected long lastmodified;
     protected String id;
     protected String name;
     private final Application app;
 
-    // is the main identity a named property or an anonymous node in a collection?
-    protected boolean anonymous = false;
     transient DbMapping dbmap;
     INode cacheNode;
 
@@ -124,9 +123,9 @@ public class TransientNode implements INode, Serializable {
     public String getFullName(INode root) {
         String divider = null;
         StringBuffer b = new StringBuffer();
-        TransientNode p = this;
+        INode p = this;
 
-        while ((p != null) && (p.parent != null) && (p != root)) {
+        while ((p != null) && (p.getParent() != null) && (p != root)) {
             if (divider != null) {
                 b.insert(0, divider);
             } else {
@@ -134,7 +133,7 @@ public class TransientNode implements INode, Serializable {
             }
 
             b.insert(0, p.getElementName());
-            p = p.parent;
+            p = p.getParent();
         }
 
         return b.toString();
@@ -175,17 +174,17 @@ public class TransientNode implements INode, Serializable {
         return null;
     }
 
-    public int numberOfNodes() {
+    public int getNumberOfChildNodes() {
         return (nodes == null) ? 0 : nodes.size();
     }
 
     public INode addNode(INode elem) {
-        return addNode(elem, numberOfNodes());
+        return addNode(elem, getNumberOfChildNodes());
     }
 
     public INode addNode(INode elem, int where) {
-        if ((where < 0) || (where > numberOfNodes())) {
-            where = numberOfNodes();
+        if ((where < 0) || (where > getNumberOfChildNodes())) {
+            where = getNumberOfChildNodes();
         }
 
         String n = elem.getName();
@@ -196,7 +195,7 @@ public class TransientNode implements INode, Serializable {
 
         if ((nodeMap != null) && (nodeMap.get(elem.getID()) != null)) {
             nodes.removeElement(elem);
-            where = Math.min(where, numberOfNodes());
+            where = Math.min(where, getNumberOfChildNodes());
             nodes.insertElementAt(elem, where);
 
             return elem;
@@ -235,7 +234,7 @@ public class TransientNode implements INode, Serializable {
     }
 
     public INode createNode(String nm) {
-        return createNode(nm, numberOfNodes()); // where is usually ignored (if nm != null)
+        return createNode(nm, getNumberOfChildNodes()); // where is usually ignored (if nm != null)
     }
 
     public INode createNode(String nm, int where) {
@@ -265,7 +264,7 @@ public class TransientNode implements INode, Serializable {
         return getNode(name);
     }
 
-    public INode getSubnode(String name) {
+    public INode getChildNode(String name) {
         StringTokenizer st = new StringTokenizer(name, "/");
         TransientNode retval = this;
         TransientNode runner;
@@ -321,7 +320,7 @@ public class TransientNode implements INode, Serializable {
             // remove all subnodes, giving them a chance to destroy themselves.
             Vector<INode> v = new Vector<INode>(); // removeElement modifies the Vector we are enumerating, so we are extra careful.
 
-            for (Enumeration<INode> e3 = node.getSubnodes(); e3.hasMoreElements();) {
+            for (Enumeration<INode> e3 = node.getChildNodes(); e3.hasMoreElements();) {
                 v.addElement(e3.nextElement());
             }
 
@@ -362,7 +361,7 @@ public class TransientNode implements INode, Serializable {
      *
      * @return ...
      */
-    public Enumeration<INode> getSubnodes() {
+    public Enumeration<INode> getChildNodes() {
         return (nodes == null) ? new Vector<INode>().elements() : nodes.elements();
     }
 
@@ -373,7 +372,7 @@ public class TransientNode implements INode, Serializable {
         return (propMap == null) ? new Vector<String>().elements() : propMap.keys();
     }
 
-    private IProperty getProperty(String propname) {
+    public IProperty getProperty(String propname) {
     	IProperty prop = (propMap == null) ? null 
                 : propMap.get(correctPropertyName(propname));
 
@@ -390,7 +389,7 @@ public class TransientNode implements INode, Serializable {
     }
 
     private IProperty makeVirtualNode(String propname, Relation rel) {
-        INode node = new Node(rel.getPropName(), rel.getPrototype(),
+        INode node = new PersistentNode(rel.getPropName(), rel.getPrototype(),
                                                    dbmap.getWrappedNodeManager());
 
         node.setDbMapping(rel.getVirtualMapping());
@@ -603,6 +602,41 @@ public class TransientNode implements INode, Serializable {
     }
 
 	public WrappedNodeManager getNodeManager() {
+		return null;
+	}
+
+	public NodeHandle getHandle() {
+		return null;
+	}
+
+	public Key getKey() {
+		return null;
+	}
+
+	public long getLastSubnodeChange() {
+		return 0;
+	}
+
+	public boolean hasNodeManager() {
+		return false;
+	}
+
+	public void setParent(INode parent) {
+		this.setParent(parent);
+	}
+
+	public INode getNonVirtualParent() {
+		return null;
+	}
+
+	// TODO: check should do nothing?
+	public void setProperty(String name, IProperty property) {
+		IProperty prop = initProperty(name);
+		prop.setJavaObjectValue(property.getValue());
+	}
+
+	public INode getGroupbySubnode(String kstr, boolean b) {
+		// TODO Auto-generated method stub
 		return null;
 	}
 }

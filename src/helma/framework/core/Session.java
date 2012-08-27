@@ -20,7 +20,7 @@ import helma.framework.ResponseTrans;
 import helma.framework.UploadStatus;
 import helma.objectmodel.INode;
 import helma.objectmodel.TransientNode;
-import helma.objectmodel.db.Node;
+import helma.objectmodel.db.PersistentNode;
 import helma.objectmodel.db.NodeHandle;
 
 import java.io.Serializable;
@@ -92,7 +92,7 @@ public class Session implements Serializable {
             userHandle = null;
             uid = null;
         } else {
-            userHandle = ((Node) usernode).getHandle();
+            userHandle = ((PersistentNode) usernode).getHandle();
             uid = usernode.getElementName();
         }
 
@@ -128,7 +128,7 @@ public class Session implements Serializable {
                 // care of calling User.onLogout().
                 RequestEvaluator reval = app.getCurrentRequestEvaluator();
                 if (reval != null) {
-                    Node userNode = userHandle.getNode(app.nmgr.safe);
+                    INode userNode = userHandle.getNode(app.nmgr.safe);
                     if (userNode != null)
                         reval.invokeDirectFunction(userNode, "onLogout", new Object[] {sessionId});
                 }

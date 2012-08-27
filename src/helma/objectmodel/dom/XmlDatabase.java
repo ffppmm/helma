@@ -22,7 +22,7 @@ import helma.objectmodel.IDatabase;
 import helma.objectmodel.INode;
 import helma.objectmodel.ITransaction;
 import helma.objectmodel.ObjectNotFoundException;
-import helma.objectmodel.db.Node;
+import helma.objectmodel.db.PersistentNode;
 import helma.objectmodel.db.NodeManager;
 
 import java.io.File;
@@ -102,12 +102,12 @@ public final class XmlDatabase implements IDatabase {
             }
 
             // check if we need to set the id generator to a base value
-            Node node = null;
+            PersistentNode node = null;
 
             try {
                 getNode(txn, "0");
             } catch (ObjectNotFoundException notfound) {
-                node = new Node("root", "0", "Root", nmgr.safe);
+                node = new PersistentNode("root", "0", "Root", nmgr.safe);
                 node.setDbMapping(app.getDbMapping("root"));
                 insertNode(txn, node.getID(), node);
                 // register node with nodemanager cache
@@ -117,7 +117,7 @@ public final class XmlDatabase implements IDatabase {
             try {
                 getNode(txn, "1");
             } catch (ObjectNotFoundException notfound) {
-                node = new Node("users", "1", null, nmgr.safe);
+                node = new PersistentNode("users", "1", null, nmgr.safe);
                 node.setDbMapping(app.getDbMapping("__userroot__"));
                 insertNode(txn, node.getID(), node);
                 // register node with nodemanager cache
@@ -279,7 +279,7 @@ public final class XmlDatabase implements IDatabase {
 
        try {
             XmlDatabaseReader reader = new XmlDatabaseReader(nmgr);
-            Node node = reader.read(f);
+            PersistentNode node = reader.read(f);
 
             return node;
         } catch (ParserConfigurationException x) {

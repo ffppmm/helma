@@ -34,7 +34,7 @@ import helma.objectmodel.INode;
 import helma.objectmodel.TransientNode;
 import helma.objectmodel.db.DbMapping;
 import helma.objectmodel.db.DbSource;
-import helma.objectmodel.db.Node;
+import helma.objectmodel.db.PersistentNode;
 import helma.objectmodel.db.NodeManager;
 import helma.objectmodel.db.WrappedNodeManager;
 import helma.scripting.ScriptingEngine;
@@ -1058,7 +1058,7 @@ public final class Application implements Runnable {
         INode users = getUserRoot();
 
         // add all child nodes to the list
-        for (Enumeration<INode> e = users.getSubnodes(); e.hasMoreElements();) {
+        for (Enumeration<INode> e = users.getChildNodes(); e.hasMoreElements();) {
             list.add(e.nextElement());
         }
 
@@ -1126,7 +1126,7 @@ public final class Application implements Runnable {
                 return null;
             }
 
-            unode = new Node(uname, "user", nmgr.safe);
+            unode = new PersistentNode(uname, "user", nmgr.safe);
 
             String usernameField = (userMapping != null) ? userMapping.getNameField() : null;
             String usernameProp = null;
@@ -1169,7 +1169,7 @@ public final class Application implements Runnable {
 
         try {
             INode users = getUserRoot();
-            Node unode = (Node) users.getChildElement(uname);
+            PersistentNode unode = (PersistentNode) users.getChildElement(uname);
             if (unode == null)
                 return false;
 
