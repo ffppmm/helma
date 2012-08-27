@@ -417,22 +417,16 @@ public class GlobalObject extends ImporterTopLevel implements PropertyRecorder {
      * @param obj a map
      * @return a wrapper that makes the map look like a JS object
      * 
-     * TODO: check if this change makes Problems because we do not
-     * throw a Ecma Exception
      */
-    public Object wrapJavaMap(Wrapper obj) {
-        return obj.unwrap();
+    public Object wrapJavaMap(Object obj) {
+    	if (obj instanceof Wrapper) {
+    		return ((Wrapper) obj).unwrap();
+    	}
+    	if (!(obj instanceof Map)) {
+    		throw ScriptRuntime.constructError("TypeError", "Invalid argument to wrapMap(): " + obj);
+    	}
+    	return new MapWrapper((Map<String, Object>) obj, core);
     }
-
-    /**
-     * Wrap a java.util.Map so that it looks and behaves like a native JS object
-     * @param obj a map
-     * @return a wrapper that makes the map look like a JS object
-     */
-    public Object wrapJavaMap(Map<String, Object> obj) {
-        return new MapWrapper(obj, core);
-    }
-
     
     /**
      * Unwrap a map previously wrapped using {@link #wrapJavaMap(Object)}.
