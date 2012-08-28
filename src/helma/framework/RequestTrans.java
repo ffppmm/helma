@@ -696,8 +696,9 @@ public class RequestTrans implements Serializable {
                 } else if (name.endsWith("_cookie") && value == null) {
                     value = super.get(name.substring(0, name.length() - 7));
                     return value instanceof Cookie ? value : null;
-                } else if (value instanceof Object[]) {
-                    Object[] values = ((Object[]) value);
+                // fix this should be Collection
+                } else if (value instanceof Collection) {
+                	Object[] values = ((Collection) value).toArray();
                     return values.length > 0 ? values[0] : null;
                 } else if (value instanceof Cookie) {
                     Cookie cookie = (Cookie) value;
