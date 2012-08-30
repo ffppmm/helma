@@ -698,7 +698,7 @@ public class RequestTrans implements Serializable {
                     return value instanceof Cookie ? value : null;
                 // fix this should be Collection
                 } else if (value instanceof Collection) {
-                	Object[] values = ((Collection) value).toArray();
+                	Object[] values = ((Collection<?>) value).toArray();
                     return values.length > 0 ? values[0] : null;
                 } else if (value instanceof Cookie) {
                     Cookie cookie = (Cookie) value;

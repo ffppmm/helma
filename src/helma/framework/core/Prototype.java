@@ -450,7 +450,7 @@ public final class Prototype {
      *
      * @return a scriptable skin map
      */
-    public Map<?, ?> getScriptableSkinMap() {
+    public Map<String, Object> getScriptableSkinMap() {
         return new ScriptableSkinMap(new SkinMap());
     }
 
@@ -460,7 +460,7 @@ public final class Prototype {
      *
      * @return a scriptable skin map
      */
-    public Map<?, ?> getScriptableSkinMap(Object[] skinpath) {
+    public Map<String, Object> getScriptableSkinMap(Object[] skinpath) {
         return new ScriptableSkinMap(new SkinMap(skinpath));
     }
 
@@ -471,7 +471,7 @@ public final class Prototype {
      */
     class ScriptableSkinMap extends WrappedMap {
 
-        public ScriptableSkinMap(Map<Object, Object> wrapped) {
+        public ScriptableSkinMap(Map<String, Object> wrapped) {
             super(wrapped);
         }
 
@@ -493,7 +493,7 @@ public final class Prototype {
     /**
      * A Map that dynamically expands to all skins in this prototype.
      */
-    class SkinMap extends HashMap<Object, Object> {
+    class SkinMap extends HashMap<String, Object> {
         /**
 		 * 
 		 */
@@ -519,7 +519,7 @@ public final class Prototype {
             return super.containsValue(value);
         }
 
-        public Set<java.util.Map.Entry<Object, Object>> entrySet() {
+        public Set<java.util.Map.Entry<String, Object>> entrySet() {
             checkForUpdates();
             return super.entrySet();
         }
@@ -558,17 +558,17 @@ public final class Prototype {
             return super.isEmpty();
         }
 
-        public Set<Object> keySet() {
+        public Set<String> keySet() {
             checkForUpdates();
             return super.keySet();
         }
 
-        public Object put(Object key, Object value) {
+        public Object put(String key, Object value) {
             // checkForUpdates ();
             return super.put(key, value);
         }
 
-        public void putAll(Map<?, ?> t) {
+        public void putAll(Map<? extends String, ? extends Object> t) {
             // checkForUpdates ();
             super.putAll(t);
         }

@@ -17,6 +17,8 @@
 package helma.util;
 
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
@@ -28,10 +30,10 @@ import java.util.Set;
  *  so that the original map can't be modified.
  */
 // FIXME: Typesafety
-public class WrappedMap implements Map<Object, Object> {
+public class WrappedMap implements Map<String, Object> {
 
     // the wrapped map
-    protected Map<Object, Object> wrapped = null;
+    protected Map<String, Object> wrapped = null;
 
     // is this map readonly?
     protected boolean readonly = false;
@@ -39,14 +41,14 @@ public class WrappedMap implements Map<Object, Object> {
     /**
      *  Constructor
      */
-    public WrappedMap(Map<Object, Object> map) {
+    public WrappedMap(Map<String, Object> map) {
         this(map, false);
     }
 
     /**
      *  Constructor
      */
-    public WrappedMap(Map<Object, Object> map, boolean readonly) {
+    public WrappedMap(Map<String, Object> map, boolean readonly) {
         if (map == null) {
             throw new NullPointerException(
                 "null Map passed to WrappedMap constructor");
@@ -57,6 +59,27 @@ public class WrappedMap implements Map<Object, Object> {
 
     public WrappedMap() {
     	this.readonly = true;
+	}
+
+	public WrappedMap(ResourceProperties map, boolean readonly) {
+        if (map == null) {
+            throw new NullPointerException(
+                "null Map passed to WrappedMap constructor");
+        }
+        wrapped = new HashMap<String, Object>();
+        Set<Entry<Object, Object>> setMap = map.entrySet();
+        for (Iterator<Entry<Object, Object>> i = setMap.iterator(); i.hasNext();) {
+        	Entry<Object, Object> entry = i.next();
+        	if (entry.getKey() instanceof String) {
+        		wrapped.put((String) entry.getKey(), entry.getValue());
+        	} else {
+        		// TODO: check something? Do something?
+        		// we should check if this is ever used
+        		helma.main.Server.getServer().getLogger().debug("[WrappedMap] getKey on ResourceProperties: " + entry.getKey());
+        		helma.main.Server.getServer().getLogger().debug("[WrappedMap] getValue on ResourceProperties: " + entry.getValue());
+        	}
+        }
+        this.readonly = readonly;
 	}
 
 	/**
@@ -99,7 +122,7 @@ public class WrappedMap implements Map<Object, Object> {
 
     // Modification Operations - check for readonly
 
-    public Object put(Object key, Object value) {
+    public Object put(String key, Object value) {
         if (readonly) {
             throw new RuntimeException("Attempt to modify readonly map");
         }
@@ -113,7 +136,7 @@ public class WrappedMap implements Map<Object, Object> {
         return wrapped.remove(key);
     }
 
-    public void putAll(Map<?, ?> t) {
+    public void putAll(Map<? extends String,? extends Object> t) {
         if (readonly) {
             throw new RuntimeException("Attempt to modify readonly map");
         }
@@ -130,7 +153,7 @@ public class WrappedMap implements Map<Object, Object> {
 
     // Views
 
-    public Set<Object> keySet() {
+    public Set<String> keySet() {
         return wrapped.keySet();
     }
 
@@ -138,7 +161,7 @@ public class WrappedMap implements Map<Object, Object> {
         return wrapped.values();
     }
 
-    public Set<java.util.Map.Entry<Object, Object>> entrySet() {
+    public Set<java.util.Map.Entry<String, Object>> entrySet() {
         return wrapped.entrySet();
     }
 

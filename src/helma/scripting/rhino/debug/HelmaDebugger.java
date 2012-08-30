@@ -52,7 +52,8 @@ public class HelmaDebugger extends Dim implements TreeSelectionListener {
 
     DebugGui gui;
     JTree tree;
-    JList list;
+    // TODO: ?
+	JList<Object> list;
     DebuggerTreeNode treeRoot;
     DefaultTreeModel treeModel;
     HashMap<String, DebuggerTreeNode> treeNodes = new HashMap<String, DebuggerTreeNode>();
@@ -212,7 +213,7 @@ public class HelmaDebugger extends Dim implements TreeSelectionListener {
             JScrollPane treeScroller = new JScrollPane(tree);
             treeScroller.setPreferredSize(new Dimension(180, 300));
 
-            list = new JList();
+            list = new JList<Object>();
             // no bold font lists for me, thanks
             list.setFont(list.getFont().deriveFont(Font.PLAIN));
             list.addMouseListener(new MouseAdapter() {

@@ -546,7 +546,9 @@ public final class RhinoCore implements ScopeProvider {
         if (arg == null)
             return null;
         if (arg instanceof Vector) {
-            Vector<String> v = (Vector<String>) arg;
+        	// TODO: ?
+            @SuppressWarnings("unchecked")
+			Vector<String> v = (Vector<String>) arg;
             Object[] a = v.toArray();
             for (int i=0; i<a.length; i++) {
                 a[i] = processXmlRpcArgument(a[i]);
@@ -554,7 +556,9 @@ public final class RhinoCore implements ScopeProvider {
             return Context.getCurrentContext().newArray(global, a);
         }
         if (arg instanceof Hashtable) {
-            Hashtable<String, Object> t = (Hashtable<String, Object>) arg;
+        	// TODO: ?
+            @SuppressWarnings("unchecked")
+			Hashtable<String, Object> t = (Hashtable<String, Object>) arg;
             for (Enumeration<String> e = t.keys(); e.hasMoreElements(); ) {
                 String key = e.nextElement();
                 t.put(key, processXmlRpcArgument(t.get(key)));
@@ -607,7 +611,9 @@ public final class RhinoCore implements ScopeProvider {
             }
             return retval;
         } else if (arg instanceof Map) {
-            Map<String, Object> map = (Map<String, Object>) arg;
+        	// TODO: ?
+            @SuppressWarnings("unchecked")
+			Map<String, Object> map = (Map<String, Object>) arg;
             Hashtable<Object, Object> ht = new Hashtable<Object, Object>(map.size()*2);
             for (Iterator<Entry<String, Object>> it=map.entrySet().iterator(); it.hasNext();) {
                 Map.Entry<String, Object> entry = it.next();
@@ -1124,7 +1130,9 @@ public final class RhinoCore implements ScopeProvider {
      */
     class WrapMaker extends WrapFactory {
 
-        public Object wrap(Context cx, Scriptable scope, Object obj, Class<?> staticType) {
+    	// TODO: ?
+        @SuppressWarnings("unchecked")
+		public Object wrap(Context cx, Scriptable scope, Object obj, Class<?> staticType) {
             // taking a shortcut here on things normally defined by setJavaPrimitivesWrap()
             if (obj == null || obj == Undefined.instance
                     || obj instanceof Scriptable || obj instanceof String

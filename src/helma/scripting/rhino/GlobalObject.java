@@ -418,7 +418,9 @@ public class GlobalObject extends ImporterTopLevel implements PropertyRecorder {
      * @return a wrapper that makes the map look like a JS object
      * 
      */
-    public Object wrapJavaMap(Object obj) {
+    // TODO: ?
+    @SuppressWarnings("unchecked")
+	public Object wrapJavaMap(Object obj) {
     	if (obj instanceof Wrapper) {
     		return ((Wrapper) obj).unwrap();
     	}

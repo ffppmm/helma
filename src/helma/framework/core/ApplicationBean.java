@@ -481,7 +481,7 @@ public class ApplicationBean implements Serializable {
      *
      * @return a readonly wrapper around the application's app properties
      */
-    public Map<Object, Object> getProperties() {
+    public Map<String, Object> getProperties() {
         if (properties == null) {
             properties = new WrappedMap(app.getProperties(), true);
         }
@@ -493,7 +493,7 @@ public class ApplicationBean implements Serializable {
      *
      * @return a readonly wrapper around the application's db properties
      */
-    public Map<Object, Object> getDbProperties() {
+    public Map<String, Object> getDbProperties() {
         return new WrappedMap(app.getDbProperties(), true);
     }
 
@@ -509,7 +509,7 @@ public class ApplicationBean implements Serializable {
      *
      * @return a readonly wrapper around the application's apps.properties
      */
-    public Map<Object, Object> getAppsProperties() {
+    public Map<String, Object> getAppsProperties() {
         Server server = Server.getServer();
         if (server == null)
             return new WrappedMap();

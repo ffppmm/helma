@@ -37,7 +37,7 @@ public class CopyOnWriteMap extends WrappedMap {
     /**
      * Constructor
      */
-    public CopyOnWriteMap(Map map) {
+    public CopyOnWriteMap(Map<String, Object> map) {
         super(map);
     }
 
@@ -67,25 +67,25 @@ public class CopyOnWriteMap extends WrappedMap {
 
     // Modification Operations - check for readonly
 
-    public synchronized Object put(Object key, Object value) {
+    public synchronized Object put(String key, Object value) {
         if (!modified) {
-            wrapped = new HashMap<Object, Object>(wrapped);
+            wrapped = new HashMap<String, Object>(wrapped);
             modified = true;
         }
         return wrapped.put(key, value);
     }
 
-    public synchronized Object remove(Object key) {
+    public synchronized Object remove(String key) {
         if (!modified) {
-            wrapped = new HashMap<Object, Object>(wrapped);
+            wrapped = new HashMap<String, Object>(wrapped);
             modified = true;
         }
         return wrapped.remove(key);
     }
 
-    public synchronized void putAll(Map t) {
+    public synchronized void putAll(Map<? extends String,? extends Object> t) {
         if (!modified) {
-            wrapped = new HashMap<Object, Object>(wrapped);
+            wrapped = new HashMap<String, Object>(wrapped);
             modified = true;
         }
         wrapped.putAll(t);
@@ -93,7 +93,7 @@ public class CopyOnWriteMap extends WrappedMap {
 
     public synchronized void clear() {
         if (!modified) {
-            wrapped = new HashMap<Object, Object>(wrapped);
+            wrapped = new HashMap<String, Object>(wrapped);
             modified = true;
         }
         wrapped.clear();
@@ -101,7 +101,7 @@ public class CopyOnWriteMap extends WrappedMap {
 
     // Views
 
-    public synchronized Set<Object> keySet() {
+    public synchronized Set<String> keySet() {
         return wrapped.keySet();
     }
 
@@ -109,7 +109,7 @@ public class CopyOnWriteMap extends WrappedMap {
         return wrapped.values();
     }
 
-    public synchronized Set entrySet() {
+    public synchronized Set<Entry<String, Object>> entrySet() {
         return wrapped.entrySet();
     }
 

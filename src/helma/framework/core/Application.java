@@ -207,7 +207,7 @@ public final class Application implements Runnable {
     private String xmlrpcHandlerName;
 
     // the list of currently active cron jobs
-    Hashtable<String,CronRunner> activeCronJobs = null;
+    Hashtable<String, CronRunner> activeCronJobs = null;
     
     // the list of custom cron jobs
     Map<String, CronJob> customCronJobs = null;
