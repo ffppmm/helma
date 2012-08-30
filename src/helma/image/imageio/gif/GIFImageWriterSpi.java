@@ -26,6 +26,7 @@ import java.util.Locale;
 import javax.imageio.ImageTypeSpecifier;
 import javax.imageio.ImageWriter;
 import javax.imageio.spi.ImageWriterSpi;
+import javax.imageio.stream.ImageOutputStream;
 
 public class GIFImageWriterSpi extends ImageWriterSpi {
 	
@@ -37,7 +38,7 @@ public class GIFImageWriterSpi extends ImageWriterSpi {
             new String[] {"gif", "GIF"},
             new String[] {"image/gif", "image/x-gif"},
             "helma.image.imageio.gif.GIFImageWriter",
-            STANDARD_OUTPUT_TYPE,
+            new Class[] { ImageOutputStream.class },
             null,
             false, null, null, null, null,
             false, null, null, null, null
