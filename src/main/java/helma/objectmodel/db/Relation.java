@@ -1009,13 +1009,14 @@ public final class Relation {
                     q.append(") WHERE ROWNUM <= ").append(maxSize);
                 }
             } else {
-                q.append(" LIMIT ").append(maxSize);
+            	if (!otherType.isDerby()) {
+            		q.append(" LIMIT ").append(maxSize);
+            	}
                 if (offset > 0) {
                     q.append(" OFFSET ").append(offset);
                 }
             }
         }
-
     }
 
     protected void appendAdditionalTables(StringBuffer q) {

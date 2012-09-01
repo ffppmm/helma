@@ -5,6 +5,7 @@ import helma.main.Server;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class ServerRunningTest {
@@ -12,10 +13,11 @@ public class ServerRunningTest {
 	private Server srv = null;
 	
 	@Before
-	public void createServer() {
+	public void startServer() {
 		helma.util.JUnitHelper.startHelmaServer(null);
 	}
 	
+	@Ignore("not ready yet")
 	@Test
 	public void test() {
 		srv = Server.getServer();
@@ -24,7 +26,7 @@ public class ServerRunningTest {
 		try {
 			manageApp = srv.getApplication("manage");
 		} catch (Exception e) {
-			fail("coud not get get manage app " + e);			
+			fail("coud not get manage app " + e);			
 		}
 		assertNotNull("manage app not found", manageApp);
 	}

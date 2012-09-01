@@ -1271,6 +1271,21 @@ public final class DbMapping {
     }
 
     /**
+     * Is the database behind this an Derby db?
+     *
+     * @return true if the dbsource is using an derby JDBC driver
+     */
+    public boolean isDerby() {
+        if (dbSource != null) {
+            return dbSource.isDerby();
+        }
+        if (parentMapping != null) {
+            return parentMapping.isDerby();
+        }
+        return false;
+    }
+
+    /**
      * Return a string representation for this DbMapping
      *
      * @return a string representation

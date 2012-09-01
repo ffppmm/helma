@@ -37,7 +37,7 @@ public class DbSource {
     protected String url;
     private String driver;
     // FIXME should be solved differently, hibernate?
-    private boolean isOracle, isMySQL, isPostgreSQL, isH2;
+    private boolean isOracle, isMySQL, isPostgreSQL, isH2, isDerby;
     private long lastRead = 0L;
     private Hashtable<String, DbMapping> dbmappings = new Hashtable<String, DbMapping>();
     // compute hashcode statically because it's expensive and we need it often
@@ -166,6 +166,7 @@ public class DbSource {
                   driver.startsWith("org.gjt.mm.mysql");
         isPostgreSQL = driver.equals("org.postgresql.Driver");
         isH2 = driver.equals("org.h2.Driver");
+        isDerby = driver.startsWith("org.apache.derby");
         // test if driver class is available
         Class.forName(driver);
 
@@ -292,4 +293,9 @@ public class DbSource {
     public boolean equals(Object obj) {
         return obj instanceof DbSource && subProps.equals(((DbSource) obj).subProps);
     }
+
+	public boolean isDerby() {
+		return isDerby;
+	}
+
 }
