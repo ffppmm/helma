@@ -277,7 +277,7 @@ public class RequestTrans implements Serializable {
             values[array.length] = value;
             postParams.put(name, values);
         } else if (previous == null) {
-            postParams.put(name, new Object[] {value});
+            postParams.put(name, value);
         }
     }
 
@@ -696,7 +696,6 @@ public class RequestTrans implements Serializable {
                 } else if (name.endsWith("_cookie") && value == null) {
                     value = super.get(name.substring(0, name.length() - 7));
                     return value instanceof Cookie ? value : null;
-                // fix this should be Collection
                 } else if (value instanceof Collection) {
                 	Object[] values = ((Collection<?>) value).toArray();
                     return values.length > 0 ? values[0] : null;
