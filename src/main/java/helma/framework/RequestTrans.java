@@ -252,7 +252,7 @@ public class RequestTrans implements Serializable {
     /**
      * set the request parameters
      */
-    public void setParameters(Map<String, Collection<String>> parameters, boolean isPost) {
+    public void setParameters(Map<String, Collection<Object>> parameters, boolean isPost) {
         if (isPost) {
             postParams = new ParameterMap(parameters);
         } else {
@@ -264,6 +264,7 @@ public class RequestTrans implements Serializable {
      * Add a post parameter to the request
      * @param name the parameter name
      * @param value the parameter value
+     * 
      */
     public void addPostParam(String name, Object value) {
         if (postParams == null) {
@@ -277,7 +278,7 @@ public class RequestTrans implements Serializable {
             values[array.length] = value;
             postParams.put(name, values);
         } else if (previous == null) {
-            postParams.put(name, new Object[] {value});
+            postParams.put(name, value);
         }
     }
 
@@ -303,7 +304,7 @@ public class RequestTrans implements Serializable {
     /**
      *  Get the data map for this request transmitter.
      */
-    public Map<String, Object> getRequestData() {
+    public Map<String, ? extends Object> getRequestData() {
         return values;
     }
 
@@ -644,10 +645,10 @@ public class RequestTrans implements Serializable {
             super();
         }
 
-        public ParameterMap(Map<String, Collection<String>> map) {
+        public ParameterMap(Map<String, Collection<Object>> map) {
             super((int) (map.size() / 0.75f) + 1);
-            for (Iterator<java.util.Map.Entry<String, Collection<String>>> i = map.entrySet().iterator(); i.hasNext(); ) {
-                java.util.Map.Entry<String, Collection<String>> e = i.next();
+            for (Iterator<java.util.Map.Entry<String, Collection<Object>>> i = map.entrySet().iterator(); i.hasNext(); ) {
+                java.util.Map.Entry<String, Collection<Object>> e = i.next();
                 put(e.getKey(), e.getValue());
             }
         }
