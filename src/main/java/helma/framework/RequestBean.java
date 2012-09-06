@@ -25,9 +25,8 @@ import javax.servlet.http.HttpServletRequest;
  * 
  */
 public class RequestBean implements Serializable {
-    /**
-	 * 
-	 */
+
+	
 	private static final long serialVersionUID = -6826881712426326687L;
 	RequestTrans req;
 
@@ -142,8 +141,7 @@ public class RequestBean implements Serializable {
      * 
      * FIXME: Don't know what to do with functions that don't have Types
      */
-    @SuppressWarnings("rawtypes")
-	public Map getData() {
+	public Map<String, ? extends Object> getData() {
         return req.getRequestData();
     }
 
