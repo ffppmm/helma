@@ -17,7 +17,7 @@ rem set HOP_HOME=c:\program files\helma
 rem set JAVA_HOME=c:\program files\java
 
 :: Uncomment to pass options to the Java virtual machine
-rem set JAVA_OPTIONS=-server -Xmx128m
+rem set JAVA_OPTIONS=-server -Xmx128m -Xms128m
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :::::: No user configuration needed below this line :::::::
@@ -27,7 +27,7 @@ rem set JAVA_OPTIONS=-server -Xmx128m
 set INSTALL_DIR=%~d0%~p0
 
 :: Using JAVA_HOME variable if defined. Otherwise,
-:: Java executable must be contained in PATH variable
+:: Java executable must be contained in PATH variable 
 if "%JAVA_HOME%"=="" goto default
    set JAVACMD=%JAVA_HOME%\bin\java
    goto end
@@ -40,6 +40,5 @@ if "%HOP_HOME%"=="" (
    set HOP_HOME=%INSTALL_DIR%
 )
 cd %HOP_HOME%
-
 :: Invoking the Java virtual machine
-%JAVACMD% %JAVA_OPTIONS% helma.main.Server %OPTIONS% %*
+%JAVACMD% %JAVA_OPTIONS% -cp .\dependency\*;.\* helma.main.Server
