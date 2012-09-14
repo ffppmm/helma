@@ -17,9 +17,25 @@
 				<artifactId>maven-assembly-plugin</artifactId>
 				<configuration>
 					<descriptors>
-						<descriptor>build/helper/maven/assembly.xml</descriptor>
+						<descriptor>helper/maven/assembly.xml</descriptor>
 					</descriptors>
 				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-shade-plugin</artifactId>
+				<version>2.0</version>
+				<configuration>
+					<!-- put your configurations here -->
+				</configuration>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>shade</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
@@ -29,18 +45,9 @@
 					<licenseName>helma</licenseName>
 					<licenseResolver>file://${basedir}/src/license</licenseResolver>
 				</configuration>
-<!-- 
-				<executions>
-					<execution>
-						<id>license-update</id>
-						<goals>
-							<goal>update-file-header</goal>
-						</goals>
-						<phase>process-sources</phase>
-					</execution>
-				</executions>
- -->
- 			</plugin>
+				<!-- <executions> <execution> <id>license-update</id> <goals> <goal>update-file-header</goal> 
+					</goals> <phase>process-sources</phase> </execution> </executions> -->
+			</plugin>
 			<plugin>
 				<artifactId>maven-resources-plugin</artifactId>
 				<version>2.5</version>
@@ -72,25 +79,14 @@
 					<target />
 				</configuration>
 			</plugin>
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<version>1.2.1</version>
-				<artifactId>exec-maven-plugin</artifactId>
-				<configuration>
-					<executable>java</executable>
-					<arguments>
-						<argument>-Xms128m</argument>
-						<argument>-Xmx128m</argument>
-						<argument>-Dhelma.home=${basedir}/target</argument>
-						<argument>-Dhelma.httpport=8080</argument>
-						<!-- <argument>-Dhelma.httpport=${env.HELMA_HTTP_PORT}</argument> <argument>-Dhelma.xmlrpcport=${env.HELMA_XMLRPC_PORT}</argument> 
-							<argument>-Dhelma.ajp13port=${env.HELMA_AJP13_PORT}</argument> <argument>-Dhelma.rmiport=${env.HELMA_RMI_PORT}</argument> -->
-						<argument>-classpath</argument>
-						<classpath />
-						<argument>helma.main.Server</argument>
-					</arguments>
-				</configuration>
-			</plugin>
+			<!-- <plugin> <groupId>org.codehaus.mojo</groupId> <version>1.2.1</version> 
+				<artifactId>exec-maven-plugin</artifactId> <configuration> <executable>java</executable> 
+				<arguments> <argument>-Xms128m</argument> <argument>-Xmx128m</argument> <argument>-Dhelma.home=${basedir}/target</argument> 
+				<argument>-Dhelma.httpport=8080</argument> <argument>-Dhelma.httpport=${env.HELMA_HTTP_PORT}</argument> 
+				<argument>-Dhelma.xmlrpcport=${env.HELMA_XMLRPC_PORT}</argument> <argument>-Dhelma.ajp13port=${env.HELMA_AJP13_PORT}</argument> 
+				<argument>-Dhelma.rmiport=${env.HELMA_RMI_PORT}</argument> <argument>-classpath</argument> 
+				<classpath /> <argument>helma.main.Server</argument> </arguments> </configuration> 
+				</plugin> -->
 		</plugins>
 	</build>
 	<dependencies>
@@ -118,6 +114,12 @@
 			<groupId>org.apache.ws.xmlrpc</groupId>
 			<artifactId>xmlrpc</artifactId>
 			<version>2.0.1</version>
+			<exclusions>
+				<exclusion>
+					<artifactId>servlet-api</artifactId>
+					<groupId>javax.servlet</groupId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>com.sun.mail</groupId>
