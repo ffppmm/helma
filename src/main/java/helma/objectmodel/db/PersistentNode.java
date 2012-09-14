@@ -22,6 +22,7 @@ import helma.framework.core.RequestEvaluator;
 import helma.objectmodel.ConcurrencyException;
 import helma.objectmodel.INode;
 import helma.objectmodel.IProperty;
+import helma.objectmodel.NullProperty;
 import helma.objectmodel.TransientNode;
 
 import java.util.Date;
@@ -1586,7 +1587,7 @@ public final class PersistentNode extends AbstractNode {
             n.setDbMapping(rel.getVirtualMapping());
             n.setParent(this);
             setNode(propname, n);
-            return (Property) properties.get(correctPropertyName(propname));
+            return properties.get(correctPropertyName(propname));
         }
 
         // 2) check if this is a create-on-demand node property
@@ -1607,7 +1608,7 @@ public final class PersistentNode extends AbstractNode {
         }
 
         // 4) nothing to be found - return null
-        return null;
+        return new NullProperty();
     }
 
     /**
