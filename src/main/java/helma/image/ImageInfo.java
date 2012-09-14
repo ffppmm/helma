@@ -1,3 +1,6 @@
+package helma.image;
+
+//%%Ignore-License
 /*
  * ImageInfo.java
  *
@@ -12,23 +15,6 @@
  * Contributed to the Public Domain.
  *
  * Last modification 2004-02-29
- */
-
-package helma.image;
-
-/*
- * #%L
- * HelmaObjectPublisher
- * %%
- * Copyright (C) 1998 - 2012 Helma Software
- * %%
- * Helma License Notice
- * 
- * The contents of this file are subject to the Helma License
- * Version 2.0 (the "License"). You may not use this file except in
- * compliance with the License. A copy of the License is available at
- * http://adele.helma.org/download/helma/license.txt
- * #L%
  */
 
 import java.io.DataInput;

@@ -1,27 +1,6 @@
 package helma.image;
 
-/*
- * #%L
- * HelmaObjectPublisher
- * %%
- * Copyright (C) 1998 - 2012 Helma Software
- * %%
- * Helma License Notice
- * 
- * The contents of this file are subject to the Helma License
- * Version 2.0 (the "License"). You may not use this file except in
- * compliance with the License. A copy of the License is available at
- * http://adele.helma.org/download/helma/license.txt
- * #L%
- */
-
-import java.awt.AlphaComposite;
-import java.awt.Graphics2D;
-import java.awt.image.BufferedImage;
-import java.awt.image.DataBufferByte;
-import java.awt.image.DataBufferInt;
-import java.awt.image.IndexColorModel;
-
+// %%Ignore-License
 /*
  * Modifications by Juerg Lehni:
  * 
@@ -220,6 +199,13 @@ import java.awt.image.IndexColorModel;
  %
  %
  */
+
+import java.awt.AlphaComposite;
+import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
+import java.awt.image.DataBufferByte;
+import java.awt.image.DataBufferInt;
+import java.awt.image.IndexColorModel;
 
 public class ColorQuantizer {
 	public static final int MAX_NODES = 266817;

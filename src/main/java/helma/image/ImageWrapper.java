@@ -1,3 +1,20 @@
+package helma.image;
+
+/*
+ * #%L
+ * HelmaObjectPublisher
+ * %%
+ * Copyright (C) 1998 - 2012 Helma Software
+ * %%
+ * Helma License Notice
+ * 
+ * The contents of this file are subject to the Helma License
+ * Version 2.0 (the "License"). You may not use this file except in
+ * compliance with the License. A copy of the License is available at
+ * http://adele.helma.org/download/helma/license.txt
+ * #L%
+ */
+
 /*
  * A few explanations:
  * 
@@ -15,23 +32,6 @@
  *   all different implementations of Imaging functionallity are implemented
  *   as a ImageGenerator extending class.
  * 
- */
-
-package helma.image;
-
-/*
- * #%L
- * HelmaObjectPublisher
- * %%
- * Copyright (C) 1998 - 2012 Helma Software
- * %%
- * Helma License Notice
- * 
- * The contents of this file are subject to the Helma License
- * Version 2.0 (the "License"). You may not use this file except in
- * compliance with the License. A copy of the License is available at
- * http://adele.helma.org/download/helma/license.txt
- * #L%
  */
 
 import java.awt.AlphaComposite;

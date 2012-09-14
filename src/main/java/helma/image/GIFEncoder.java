@@ -1,3 +1,6 @@
+package helma.image;
+
+// %%Ignore-License
 /*
  * The GIF encoding routines are based on the Acme libary
  *
@@ -48,23 +51,6 @@
  * Rowley <mgardi@watdscu.waterloo.edu>.  Lempel-Zim compression
  * based on "compress".
  *
- */
-
-package helma.image;
-
-/*
- * #%L
- * HelmaObjectPublisher
- * %%
- * Copyright (C) 1998 - 2012 Helma Software
- * %%
- * Helma License Notice
- * 
- * The contents of this file are subject to the Helma License
- * Version 2.0 (the "License"). You may not use this file except in
- * compliance with the License. A copy of the License is available at
- * http://adele.helma.org/download/helma/license.txt
- * #L%
  */
 
 import java.awt.image.BufferedImage;

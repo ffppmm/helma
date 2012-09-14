@@ -1,26 +1,12 @@
-/**
+package helma.image;
+
+//%%Ignore-License
+/*
  * This class does pretty much the opposite of java.awt.image.BufferedImageFilter:
  * It wraps an ImageFilter in a BufferedImageOp
  * Optimizations have been added, like the ignoring of color models 
  * and the assumption of INT_RGB type for destination buffers in 
  * order to speed things up by almost a factor of 4.
- */
-
-package helma.image;
-
-/*
- * #%L
- * HelmaObjectPublisher
- * %%
- * Copyright (C) 1998 - 2012 Helma Software
- * %%
- * Helma License Notice
- * 
- * The contents of this file are subject to the Helma License
- * Version 2.0 (the "License"). You may not use this file except in
- * compliance with the License. A copy of the License is available at
- * http://adele.helma.org/download/helma/license.txt
- * #L%
  */
 
 import java.awt.AlphaComposite;
