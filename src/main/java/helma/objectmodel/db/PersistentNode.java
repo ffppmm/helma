@@ -1608,7 +1608,7 @@ public final class PersistentNode extends AbstractNode {
         }
 
         // 4) nothing to be found - return null
-        return new NullProperty();
+        return NullProperty.getInstance();
     }
 
     /**

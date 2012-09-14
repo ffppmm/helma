@@ -3,8 +3,17 @@ package helma.objectmodel;
 import java.sql.Timestamp;
 import java.util.Date;
 
-public class NullProperty implements IProperty {
 
+final public class NullProperty implements IProperty {
+	private static NullProperty instance = new NullProperty();
+
+	private NullProperty() {
+		
+	}
+	
+	public static NullProperty getInstance() {
+		return instance;
+	}
 	public String getName() {
 		return null;
 	}
