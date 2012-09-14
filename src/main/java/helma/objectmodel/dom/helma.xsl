@@ -1,4 +1,19 @@
 <?xml version="1.0" encoding="iso-8859-15"?>
+<!--
+  #%L
+  HelmaObjectPublisher
+  %%
+  Copyright (C) 1998 - 2012 Helma Software
+  %%
+  Helma License Notice
+  
+  The contents of this file are subject to the Helma License
+  Version 2.0 (the "License"). You may not use this file except in
+  compliance with the License. A copy of the License is available at
+  http://adele.helma.org/download/helma/license.txt
+  #L%
+  -->
+
 
 <xsl:stylesheet
    version="1.0"

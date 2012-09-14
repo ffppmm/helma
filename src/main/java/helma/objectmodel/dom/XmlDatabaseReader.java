@@ -1,27 +1,26 @@
+package helma.objectmodel.dom;
+
 /*
+ * #%L
+ * HelmaObjectPublisher
+ * %%
+ * Copyright (C) 1998 - 2012 Helma Software
+ * %%
  * Helma License Notice
- *
+ * 
  * The contents of this file are subject to the Helma License
  * Version 2.0 (the "License"). You may not use this file except in
  * compliance with the License. A copy of the License is available at
  * http://adele.helma.org/download/helma/license.txt
- *
- * Copyright 1998-2003 Helma Software. All Rights Reserved.
- *
- * $RCSfile$
- * $Author$
- * $Revision$
- * $Date$
+ * #L%
  */
-
-package helma.objectmodel.dom;
 
 import helma.objectmodel.IProperty;
 import helma.objectmodel.db.DbKey;
 import helma.objectmodel.db.DbMapping;
-import helma.objectmodel.db.PersistentNode;
 import helma.objectmodel.db.NodeHandle;
 import helma.objectmodel.db.NodeManager;
+import helma.objectmodel.db.PersistentNode;
 import helma.objectmodel.db.Property;
 import helma.objectmodel.db.SubnodeList;
 
@@ -43,226 +42,244 @@ import org.xml.sax.helpers.DefaultHandler;
 /**
  * 
  */
-public final class XmlDatabaseReader extends DefaultHandler implements XmlConstants {
-    static SAXParserFactory factory = SAXParserFactory.newInstance();
-    private NodeManager nmgr = null;
-    private PersistentNode currentNode;
-    private String elementType = null;
-    private String elementName = null;
-    private StringBuffer charBuffer = null;
-    Hashtable<String, IProperty> propMap = null;
-    SubnodeList subnodes = null;
+public final class XmlDatabaseReader extends DefaultHandler implements
+		XmlConstants {
+	static SAXParserFactory factory = SAXParserFactory.newInstance();
+	private NodeManager nmgr = null;
+	private PersistentNode currentNode;
+	private String elementType = null;
+	private String elementName = null;
+	private StringBuffer charBuffer = null;
+	Hashtable<String, IProperty> propMap = null;
+	SubnodeList subnodes = null;
 
-    /**
-     * Creates a new XmlDatabaseReader object.
-     *
-     * @param nmgr ...
-     */
-    public XmlDatabaseReader(NodeManager nmgr) {
-        this.nmgr = nmgr;
-    }
+	/**
+	 * Creates a new XmlDatabaseReader object.
+	 * 
+	 * @param nmgr
+	 *            ...
+	 */
+	public XmlDatabaseReader(NodeManager nmgr) {
+		this.nmgr = nmgr;
+	}
 
-    /**
-     * read an InputSource with xml-content.
-     */
-    public PersistentNode read(File file)
-              throws ParserConfigurationException, SAXException, IOException {
-        if (nmgr == null) {
-            throw new RuntimeException("can't create a new Node without a NodeManager");
-        }
+	/**
+	 * read an InputSource with xml-content.
+	 */
+	public PersistentNode read(File file) throws ParserConfigurationException,
+			SAXException, IOException {
+		if (nmgr == null) {
+			throw new RuntimeException(
+					"can't create a new Node without a NodeManager");
+		}
 
-        SAXParser parser = factory.newSAXParser();
+		SAXParser parser = factory.newSAXParser();
 
-        currentNode = null;
+		currentNode = null;
 
-        parser.parse(file, this);
+		parser.parse(file, this);
 
-        return currentNode;
-    }
+		return currentNode;
+	}
 
-    /**
-     *
-     *
-     * @param namespaceURI ...
-     * @param localName ...
-     * @param qName ...
-     * @param atts ...
-     */
-    public void startElement(String namespaceURI, String localName, String qName,
-                             Attributes atts) {
-        // System.err.println ("XML-READ: startElement "+namespaceURI+", "+localName+", "+qName+", "+atts.getValue("id"));
-        // discard the first element called xmlroot
-        if ("xmlroot".equals(qName) && (currentNode == null)) {
-            return;
-        }
+	/**
+	 * 
+	 * 
+	 * @param namespaceURI
+	 *            ...
+	 * @param localName
+	 *            ...
+	 * @param qName
+	 *            ...
+	 * @param atts
+	 *            ...
+	 */
+	public void startElement(String namespaceURI, String localName,
+			String qName, Attributes atts) {
+		// System.err.println
+		// ("XML-READ: startElement "+namespaceURI+", "+localName+", "+qName+", "+atts.getValue("id"));
+		// discard the first element called xmlroot
+		if ("xmlroot".equals(qName) && (currentNode == null)) {
+			return;
+		}
 
-        // if currentNode is null, this must be the hopobject node
-        if ("hopobject".equals(qName) && (currentNode == null)) {
-            String id = atts.getValue("id");
-            String name = atts.getValue("name");
-            String prototype = atts.getValue("prototype");
+		// if currentNode is null, this must be the hopobject node
+		if ("hopobject".equals(qName) && (currentNode == null)) {
+			String id = atts.getValue("id");
+			String name = atts.getValue("name");
+			String prototype = atts.getValue("prototype");
 
-            if ("".equals(prototype)) {
-                prototype = "hopobject";
-            }
+			if ("".equals(prototype)) {
+				prototype = "hopobject";
+			}
 
-            try {
-                long created = Long.parseLong(atts.getValue("created"));
-                long lastmodified = Long.parseLong(atts.getValue("lastModified"));
+			try {
+				long created = Long.parseLong(atts.getValue("created"));
+				long lastmodified = Long.parseLong(atts
+						.getValue("lastModified"));
 
-                currentNode = new PersistentNode(name, id, prototype, nmgr.safe, created,
-                                       lastmodified);
-            } catch (NumberFormatException e) {
-                currentNode = new PersistentNode(name, id, prototype, nmgr.safe);
-            }
+				currentNode = new PersistentNode(name, id, prototype,
+						nmgr.safe, created, lastmodified);
+			} catch (NumberFormatException e) {
+				currentNode = new PersistentNode(name, id, prototype, nmgr.safe);
+			}
 
-            return;
-        }
+			return;
+		}
 
-        // find out what kind of element this is by looking at
-        // the number and names of attributes.
-        String idref = atts.getValue("idref");
+		// find out what kind of element this is by looking at
+		// the number and names of attributes.
+		String idref = atts.getValue("idref");
 
-        if (idref != null) {
-            // a hopobject reference.
-            NodeHandle handle = makeNodeHandle(atts);
+		if (idref != null) {
+			// a hopobject reference.
+			NodeHandle handle = makeNodeHandle(atts);
 
-            if ("hop:child".equals(qName)) {
-                if (subnodes == null) {
-                    subnodes = currentNode.createSubnodeList();
-                }
+			if ("hop:child".equals(qName)) {
+				if (subnodes == null) {
+					subnodes = currentNode.createSubnodeList();
+				}
 
-                subnodes.add(handle);
-            } else if ("hop:parent".equals(qName)) {
-                currentNode.setParentHandle(handle);
-            } else {
-                // property name may be encoded as "propertyname" attribute,
-                // otherwise it is the element name
-                String propName = atts.getValue("propertyname");
+				subnodes.add(handle);
+			} else if ("hop:parent".equals(qName)) {
+				currentNode.setParentHandle(handle);
+			} else {
+				// property name may be encoded as "propertyname" attribute,
+				// otherwise it is the element name
+				String propName = atts.getValue("propertyname");
 
-                if (propName == null) {
-                    propName = qName;
-                }
+				if (propName == null) {
+					propName = qName;
+				}
 
-                Property prop = new Property(propName, currentNode);
+				Property prop = new Property(propName, currentNode);
 
-                prop.setNodeHandle(handle);
+				prop.setNodeHandle(handle);
 
-                if (propMap == null) {
-                    propMap = new Hashtable<String, IProperty>();
-                    currentNode.setPropMap(propMap);
-                }
+				if (propMap == null) {
+					propMap = new Hashtable<String, IProperty>();
+					currentNode.setPropMap(propMap);
+				}
 
-                propMap.put(correctPropertyName(propName), prop);
-            }
-        } else {
-            // a primitive property
-            elementType = atts.getValue("type");
+				propMap.put(correctPropertyName(propName), prop);
+			}
+		} else {
+			// a primitive property
+			elementType = atts.getValue("type");
 
-            if (elementType == null) {
-                elementType = "string";
-            }
+			if (elementType == null) {
+				elementType = "string";
+			}
 
-            // property name may be encoded as "propertyname" attribute,
-            // otherwise it is the element name
-            elementName = atts.getValue("propertyname");
+			// property name may be encoded as "propertyname" attribute,
+			// otherwise it is the element name
+			elementName = atts.getValue("propertyname");
 
-            if (elementName == null) {
-                elementName = qName;
-            }
+			if (elementName == null) {
+				elementName = qName;
+			}
 
-            if (charBuffer == null) {
-                charBuffer = new StringBuffer();
-            } else {
-                charBuffer.setLength(0);
-            }
-        }
-    }
+			if (charBuffer == null) {
+				charBuffer = new StringBuffer();
+			} else {
+				charBuffer.setLength(0);
+			}
+		}
+	}
 
-    private String correctPropertyName(String propName) {
-        return this.currentNode.getDbMapping().getApplication().correctPropertyName(propName);
-    }
+	private String correctPropertyName(String propName) {
+		return this.currentNode.getDbMapping().getApplication()
+				.correctPropertyName(propName);
+	}
 
-    /**
-     *
-     *
-     * @param ch ...
-     * @param start ...
-     * @param length ...
-     *
-     * @throws SAXException ...
-     */
-    public void characters(char[] ch, int start, int length)
-                    throws SAXException {
-        // append chars to char buffer
-        if (elementType != null) {
-            charBuffer.append(ch, start, length);
-        }
-    }
+	/**
+	 * 
+	 * 
+	 * @param ch
+	 *            ...
+	 * @param start
+	 *            ...
+	 * @param length
+	 *            ...
+	 * 
+	 * @throws SAXException
+	 *             ...
+	 */
+	public void characters(char[] ch, int start, int length)
+			throws SAXException {
+		// append chars to char buffer
+		if (elementType != null) {
+			charBuffer.append(ch, start, length);
+		}
+	}
 
-    /**
-     *
-     *
-     * @param namespaceURI ...
-     * @param localName ...
-     * @param qName ...
-     *
-     * @throws SAXException ...
-     */
-    public void endElement(String namespaceURI, String localName, String qName)
-                    throws SAXException {
-        if (elementType != null) {
-            Property prop = new Property(elementName, currentNode);
-            String charValue = charBuffer.toString();
+	/**
+	 * 
+	 * 
+	 * @param namespaceURI
+	 *            ...
+	 * @param localName
+	 *            ...
+	 * @param qName
+	 *            ...
+	 * 
+	 * @throws SAXException
+	 *             ...
+	 */
+	public void endElement(String namespaceURI, String localName, String qName)
+			throws SAXException {
+		if (elementType != null) {
+			Property prop = new Property(elementName, currentNode);
+			String charValue = charBuffer.toString();
 
-            charBuffer.setLength(0);
+			charBuffer.setLength(0);
 
-            if ("boolean".equals(elementType)) {
-                if ("true".equals(charValue)) {
-                    prop.setBooleanValue(true);
-                } else {
-                    prop.setBooleanValue(false);
-                }
-            } else if ("date".equals(elementType)) {
-                SimpleDateFormat format = new SimpleDateFormat(DATEFORMAT);
+			if ("boolean".equals(elementType)) {
+				if ("true".equals(charValue)) {
+					prop.setBooleanValue(true);
+				} else {
+					prop.setBooleanValue(false);
+				}
+			} else if ("date".equals(elementType)) {
+				SimpleDateFormat format = new SimpleDateFormat(DATEFORMAT);
 
-                try {
-                    Date date = format.parse(charValue);
+				try {
+					Date date = format.parse(charValue);
 
-                    prop.setDateValue(date);
-                } catch (ParseException e) {
-                    prop.setStringValue(charValue);
-                }
-            } else if ("float".equals(elementType)) {
-                prop.setFloatValue((new Double(charValue)).doubleValue());
-            } else if ("integer".equals(elementType)) {
-                prop.setIntegerValue((new Long(charValue)).longValue());
-            } else {
-                prop.setStringValue(charValue);
-            }
+					prop.setDateValue(date);
+				} catch (ParseException e) {
+					prop.setStringValue(charValue);
+				}
+			} else if ("float".equals(elementType)) {
+				prop.setFloatValue((new Double(charValue)).doubleValue());
+			} else if ("integer".equals(elementType)) {
+				prop.setIntegerValue((new Long(charValue)).longValue());
+			} else {
+				prop.setStringValue(charValue);
+			}
 
-            if (propMap == null) {
-                propMap = new Hashtable<String, IProperty>();
-                currentNode.setPropMap(propMap);
-            }
+			if (propMap == null) {
+				propMap = new Hashtable<String, IProperty>();
+				currentNode.setPropMap(propMap);
+			}
 
-            propMap.put(correctPropertyName(elementName), prop);
-            elementName = null;
-            elementType = null;
-            charValue = null;
-        }
-    }
+			propMap.put(correctPropertyName(elementName), prop);
+			elementName = null;
+			elementType = null;
+			charValue = null;
+		}
+	}
 
-    // create a node handle from a node reference DOM element
-    private NodeHandle makeNodeHandle(Attributes atts) {
-        String idref = atts.getValue("idref");
-        String protoref = atts.getValue("prototyperef");
-        DbMapping dbmap = null;
+	// create a node handle from a node reference DOM element
+	private NodeHandle makeNodeHandle(Attributes atts) {
+		String idref = atts.getValue("idref");
+		String protoref = atts.getValue("prototyperef");
+		DbMapping dbmap = null;
 
-        if (protoref != null) {
-            dbmap = nmgr.getDbMapping(protoref);
-        }
+		if (protoref != null) {
+			dbmap = nmgr.getDbMapping(protoref);
+		}
 
-        return new NodeHandle(new DbKey(dbmap, idref));
-    }
+		return new NodeHandle(new DbKey(dbmap, idref));
+	}
 }

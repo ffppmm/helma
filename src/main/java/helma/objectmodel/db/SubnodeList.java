@@ -1,20 +1,19 @@
+package helma.objectmodel.db;
+
 /*
+ * #%L
+ * HelmaObjectPublisher
+ * %%
+ * Copyright (C) 1998 - 2012 Helma Software
+ * %%
  * Helma License Notice
- *
+ * 
  * The contents of this file are subject to the Helma License
  * Version 2.0 (the "License"). You may not use this file except in
  * compliance with the License. A copy of the License is available at
  * http://adele.helma.org/download/helma/license.txt
- *
- * Copyright 1998-2003 Helma Software. All Rights Reserved.
- *
- * $RCSfile$
- * $Author$
- * $Revision$
- * $Date$
+ * #L%
  */
-
-package helma.objectmodel.db;
 
 import helma.objectmodel.INode;
 
@@ -27,172 +26,187 @@ import java.util.List;
  */
 public class SubnodeList implements Serializable {
 
-    /**
+	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 711208015232333566L;
 	protected INode node;
-    protected List<NodeHandle> list;
+	protected List<NodeHandle> list;
 
-    transient protected long lastSubnodeFetch = 0;
-    transient protected long lastSubnodeChange = 0;
-    
+	transient protected long lastSubnodeFetch = 0;
+	transient protected long lastSubnodeChange = 0;
 
-    /**
-     * Hide/disable zero argument constructor for subclasses
-     *
-     * FIXME: Should be called somewhere?
-     */
-    @SuppressWarnings("unused")
-	private SubnodeList()  {}
+	/**
+	 * Hide/disable zero argument constructor for subclasses
+	 * 
+	 * FIXME: Should be called somewhere?
+	 */
+	@SuppressWarnings("unused")
+	private SubnodeList() {
+	}
 
-    /**
-     * Creates a new subnode list
-     * @param node the node we belong to
-     */
-    public SubnodeList(INode node) {
-        this.node = node;
-        this.list = new ArrayList<NodeHandle>();
-    }
+	/**
+	 * Creates a new subnode list
+	 * 
+	 * @param node
+	 *            the node we belong to
+	 */
+	public SubnodeList(INode node) {
+		this.node = node;
+		this.list = new ArrayList<NodeHandle>();
+	}
 
-    /**
-     * Adds the specified object to this list performing
-     * custom ordering
-     *
-     * @param handle element to be inserted.
-     */
-    public boolean add(NodeHandle handle) {
-        return list.add(handle);
-    }
-    /**
-     * Adds the specified object to the list at the given position
-     * @param idx the index to insert the element at
-     * @param handle the object to add
-     */
-    public void add(int idx, NodeHandle handle) {
-        list.add(idx, handle);
-    }
+	/**
+	 * Adds the specified object to this list performing custom ordering
+	 * 
+	 * @param handle
+	 *            element to be inserted.
+	 */
+	public boolean add(NodeHandle handle) {
+		return list.add(handle);
+	}
 
-    public NodeHandle get(int index) {
-        if (index < 0 || index >= list.size()) {
-            return null;
-        }
-        return (NodeHandle) list.get(index);
-    }
+	/**
+	 * Adds the specified object to the list at the given position
+	 * 
+	 * @param idx
+	 *            the index to insert the element at
+	 * @param handle
+	 *            the object to add
+	 */
+	public void add(int idx, NodeHandle handle) {
+		list.add(idx, handle);
+	}
 
-    public INode getNode(int index) {
-        INode retval = null;
-        NodeHandle handle = get(index);
+	public NodeHandle get(int index) {
+		if (index < 0 || index >= list.size()) {
+			return null;
+		}
+		return (NodeHandle) list.get(index);
+	}
 
-        if (handle != null) {
-            retval = handle.getNode(node.getNodeManager());
-            // Legacy alarm!
-            if ((retval != null) && (retval.getParent() == null) &&
-                    !node.getNodeManager().isRootNode(retval)) {
-                retval.setParent(node);
-                retval.setAnonymous(true);
-            }
-        }
+	public INode getNode(int index) {
+		INode retval = null;
+		NodeHandle handle = get(index);
 
-        return retval;
-    }
+		if (handle != null) {
+			retval = handle.getNode(node.getNodeManager());
+			// Legacy alarm!
+			if ((retval != null) && (retval.getParent() == null)
+					&& !node.getNodeManager().isRootNode(retval)) {
+				retval.setParent(node);
+				retval.setAnonymous(true);
+			}
+		}
 
-    public boolean contains(Object object) {
-        return list.contains(object);
-    }
+		return retval;
+	}
 
-    public int indexOf(Object object) {
-        return list.indexOf(object);
-    }
+	public boolean contains(Object object) {
+		return list.contains(object);
+	}
 
-    /**
-     * remove the object specified by the given index-position
-     * @param idx the index-position of the NodeHandle to remove
-     */
-    public Object remove (int idx) {
-        return list.remove(idx);
-    }
+	public int indexOf(Object object) {
+		return list.indexOf(object);
+	}
 
-    /**
-     * remove the given Object from this List
-     * @param obj the NodeHandle to remove
-     */
-    public boolean remove (Object obj) {
-        return list.remove(obj);
-    }
+	/**
+	 * remove the object specified by the given index-position
+	 * 
+	 * @param idx
+	 *            the index-position of the NodeHandle to remove
+	 */
+	public Object remove(int idx) {
+		return list.remove(idx);
+	}
 
-    public Object[] toArray() {
-        return list.toArray();
-    }
+	/**
+	 * remove the given Object from this List
+	 * 
+	 * @param obj
+	 *            the NodeHandle to remove
+	 */
+	public boolean remove(Object obj) {
+		return list.remove(obj);
+	}
 
-    /**
-     * Return the size of the list.
-     * @return the list size
-     */
-    public int size() {
-        return list.size();
-    }
+	public Object[] toArray() {
+		return list.toArray();
+	}
 
-    protected void update() {
-        // also reload if the type mapping has changed.
-        long lastChange = getLastSubnodeChange();
-        if (lastChange != lastSubnodeFetch) {
-            Relation rel = getSubnodeRelation();
-            if (rel != null && rel.aggressiveLoading && rel.groupby == null) {
-                list = node.getNodeManager().getNodes(node, rel);
-            } else {
-                list = node.getNodeManager().getNodeIDs(node, rel);
-            }
-            lastSubnodeFetch = lastChange;
-        }
-    }
+	/**
+	 * Return the size of the list.
+	 * 
+	 * @return the list size
+	 */
+	public int size() {
+		return list.size();
+	}
 
-    protected void prefetch(int start, int length) {
-        if (start < 0 || start >= size()) {
-            return;
-        }
-        length =  (length < 0) ?
-                size() - start : Math.min(length, size() - start);
-        if (length < 0) {
-            return;
-        }
+	protected void update() {
+		// also reload if the type mapping has changed.
+		long lastChange = getLastSubnodeChange();
+		if (lastChange != lastSubnodeFetch) {
+			Relation rel = getSubnodeRelation();
+			if (rel != null && rel.aggressiveLoading && rel.groupby == null) {
+				list = node.getNodeManager().getNodes(node, rel);
+			} else {
+				list = node.getNodeManager().getNodeIDs(node, rel);
+			}
+			lastSubnodeFetch = lastChange;
+		}
+	}
 
-        DbMapping dbmap = getSubnodeMapping();
+	protected void prefetch(int start, int length) {
+		if (start < 0 || start >= size()) {
+			return;
+		}
+		length = (length < 0) ? size() - start : Math.min(length, size()
+				- start);
+		if (length < 0) {
+			return;
+		}
 
-        if (dbmap.isRelational()) {
-            Relation rel = getSubnodeRelation();
-            node.getNodeManager().prefetchNodes(node, rel, this, start, length);
-        }
-    }
+		DbMapping dbmap = getSubnodeMapping();
 
-    /**
-     * Compute a serial number indicating the last change in subnode collection
-     * @return a serial number that increases with each subnode change
-     */
-    protected long getLastSubnodeChange() {
-        // include dbmap.getLastTypeChange to also reload if the type mapping has changed.
-        long checkSum = lastSubnodeChange + node.getDbMapping().getLastTypeChange();
-        Relation rel = getSubnodeRelation();
-        return rel == null || rel.aggressiveCaching ?
-                checkSum : checkSum + rel.otherType.getLastDataChange();
-    }
+		if (dbmap.isRelational()) {
+			Relation rel = getSubnodeRelation();
+			node.getNodeManager().prefetchNodes(node, rel, this, start, length);
+		}
+	}
 
-    protected synchronized void markAsChanged() {
-        lastSubnodeChange += 1;
-    }
+	/**
+	 * Compute a serial number indicating the last change in subnode collection
+	 * 
+	 * @return a serial number that increases with each subnode change
+	 */
+	protected long getLastSubnodeChange() {
+		// include dbmap.getLastTypeChange to also reload if the type mapping
+		// has changed.
+		long checkSum = lastSubnodeChange
+				+ node.getDbMapping().getLastTypeChange();
+		Relation rel = getSubnodeRelation();
+		return rel == null || rel.aggressiveCaching ? checkSum : checkSum
+				+ rel.otherType.getLastDataChange();
+	}
 
-    protected boolean hasRelationalNodes() {
-        DbMapping dbmap = getSubnodeMapping();
-        return (dbmap != null && dbmap.isRelational()
-                && ((node.getState() != INode.TRANSIENT &&  node.getState() != INode.NEW)
-                    || node.getSubnodeRelation() != null));
-    }
+	protected synchronized void markAsChanged() {
+		lastSubnodeChange += 1;
+	}
 
-    protected DbMapping getSubnodeMapping() {
-        return node.getDbMapping() == null ? null : node.getDbMapping().getSubnodeMapping();
-    }
+	protected boolean hasRelationalNodes() {
+		DbMapping dbmap = getSubnodeMapping();
+		return (dbmap != null && dbmap.isRelational() && ((node.getState() != INode.TRANSIENT && node
+				.getState() != INode.NEW) || node.getSubnodeRelation() != null));
+	}
 
-    protected Relation getSubnodeRelation() {
-        return node.getDbMapping() == null ? null : node.getDbMapping().getSubnodeRelation();
-    }
+	protected DbMapping getSubnodeMapping() {
+		return node.getDbMapping() == null ? null : node.getDbMapping()
+				.getSubnodeMapping();
+	}
+
+	protected Relation getSubnodeRelation() {
+		return node.getDbMapping() == null ? null : node.getDbMapping()
+				.getSubnodeRelation();
+	}
 }

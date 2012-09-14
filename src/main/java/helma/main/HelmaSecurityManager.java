@@ -1,20 +1,19 @@
+package helma.main;
+
 /*
+ * #%L
+ * HelmaObjectPublisher
+ * %%
+ * Copyright (C) 1998 - 2012 Helma Software
+ * %%
  * Helma License Notice
- *
+ * 
  * The contents of this file are subject to the Helma License
  * Version 2.0 (the "License"). You may not use this file except in
  * compliance with the License. A copy of the License is available at
  * http://adele.helma.org/download/helma/license.txt
- *
- * Copyright 1998-2003 Helma Software. All Rights Reserved.
- *
- * $RCSfile$
- * $Author$
- * $Revision$
- * $Date$
+ * #L%
  */
-
-package helma.main;
 
 import helma.framework.core.AppClassLoader;
 
@@ -24,308 +23,344 @@ import java.security.Permission;
 import java.util.HashSet;
 
 /**
- *  Liberal security manager for Helma system that makes sure application code
- *  is not allowed to exit the VM and set a security manager.
- *
- *  This class can be subclassed to implement actual security policies. It contains
- *  a utility method <code>getApplication</code> that can be used to determine
- *  the name of the application trying to execute the action in question, if any.
+ * Liberal security manager for Helma system that makes sure application code is
+ * not allowed to exit the VM and set a security manager.
+ * 
+ * This class can be subclassed to implement actual security policies. It
+ * contains a utility method <code>getApplication</code> that can be used to
+ * determine the name of the application trying to execute the action in
+ * question, if any.
  */
 public class HelmaSecurityManager extends SecurityManager {
-    // The set of actions forbidden to application code.
-    // We are pretty permissive, forbidding only System.exit() 
-    // and setting the security manager.
-    private final static HashSet<String> forbidden = new HashSet<String>();
+	// The set of actions forbidden to application code.
+	// We are pretty permissive, forbidding only System.exit()
+	// and setting the security manager.
+	private final static HashSet<String> forbidden = new HashSet<String>();
 
-    static {
-        forbidden.add("exitVM");
-        forbidden.add("setSecurityManager");
-    }
+	static {
+		forbidden.add("exitVM");
+		forbidden.add("setSecurityManager");
+	}
 
-    /**
-     *
-     *
-     * @param p ...
-     */
-    @SuppressWarnings("rawtypes")
+	/**
+	 * 
+	 * 
+	 * @param p
+	 *            ...
+	 */
+	@SuppressWarnings("rawtypes")
 	public void checkPermission(Permission p) {
-        if (p instanceof RuntimePermission) {
-            if (forbidden.contains(p.getName())) {
-                Class[] classes = getClassContext();
+		if (p instanceof RuntimePermission) {
+			if (forbidden.contains(p.getName())) {
+				Class[] classes = getClassContext();
 
-                for (int i = 0; i < classes.length; i++) {
-                    if (classes[i].getClassLoader() instanceof AppClassLoader) {
-                        throw new SecurityException(p.getName() +
-                                                    " not allowed for application code");
-                    }
-                }
-            }
-        }
-    }
+				for (int i = 0; i < classes.length; i++) {
+					if (classes[i].getClassLoader() instanceof AppClassLoader) {
+						throw new SecurityException(p.getName()
+								+ " not allowed for application code");
+					}
+				}
+			}
+		}
+	}
 
-    /**
+	/**
+	 * 
+	 * 
+	 * @param p
+	 *            ...
+	 * @param context
+	 *            ...
+	 */
+	public void checkPermission(Permission p, Object context) {
+	}
+
+	/**
      *
-     *
-     * @param p ...
-     * @param context ...
      */
-    public void checkPermission(Permission p, Object context) {
-    }
+	public void checkCreateClassLoader() {
+	}
 
-    /**
-     *
-     */
-    public void checkCreateClassLoader() {
-    }
+	/**
+	 * 
+	 * 
+	 * @param thread
+	 *            ...
+	 */
+	public void checkAccess(Thread thread) {
+	}
 
-    /**
-     *
-     *
-     * @param thread ...
-     */
-    public void checkAccess(Thread thread) {
-    }
+	/**
+	 * 
+	 * 
+	 * @param group
+	 *            ...
+	 */
+	public void checkAccess(ThreadGroup group) {
+	}
 
-    /**
-     *
-     *
-     * @param group ...
-     */
-    public void checkAccess(ThreadGroup group) {
-    }
-
-    /**
-     *
-     *
-     * @param status ...
-     */
-    @SuppressWarnings("rawtypes")
+	/**
+	 * 
+	 * 
+	 * @param status
+	 *            ...
+	 */
+	@SuppressWarnings("rawtypes")
 	public void checkExit(int status) {
-        Class[] classes = getClassContext();
+		Class[] classes = getClassContext();
 
-        for (int i = 0; i < classes.length; i++) {
-            if (classes[i].getClassLoader() instanceof AppClassLoader) {
-                throw new SecurityException("operation not allowed for application code");
-            }
-        }
-    }
+		for (int i = 0; i < classes.length; i++) {
+			if (classes[i].getClassLoader() instanceof AppClassLoader) {
+				throw new SecurityException(
+						"operation not allowed for application code");
+			}
+		}
+	}
 
-    /**
-     *
-     *
-     * @param cmd ...
-     */
-    public void checkExec(String cmd) {
-    }
+	/**
+	 * 
+	 * 
+	 * @param cmd
+	 *            ...
+	 */
+	public void checkExec(String cmd) {
+	}
 
-    /**
-     *
-     *
-     * @param lib ...
-     */
-    public void checkLink(String lib) {
-    }
+	/**
+	 * 
+	 * 
+	 * @param lib
+	 *            ...
+	 */
+	public void checkLink(String lib) {
+	}
 
-    /**
-     *
-     *
-     * @param fdesc ...
-     */
-    public void checkRead(FileDescriptor fdesc) {
-    }
+	/**
+	 * 
+	 * 
+	 * @param fdesc
+	 *            ...
+	 */
+	public void checkRead(FileDescriptor fdesc) {
+	}
 
-    /**
-     *
-     *
-     * @param file ...
-     */
-    public void checkRead(String file) {
-    }
+	/**
+	 * 
+	 * 
+	 * @param file
+	 *            ...
+	 */
+	public void checkRead(String file) {
+	}
 
-    /**
-     *
-     *
-     * @param file ...
-     * @param context ...
-     */
-    public void checkRead(String file, Object context) {
-    }
+	/**
+	 * 
+	 * 
+	 * @param file
+	 *            ...
+	 * @param context
+	 *            ...
+	 */
+	public void checkRead(String file, Object context) {
+	}
 
-    /**
-     *
-     *
-     * @param fdesc ...
-     */
-    public void checkWrite(FileDescriptor fdesc) {
-    }
+	/**
+	 * 
+	 * 
+	 * @param fdesc
+	 *            ...
+	 */
+	public void checkWrite(FileDescriptor fdesc) {
+	}
 
-    /**
-     *
-     *
-     * @param file ...
-     */
-    public void checkWrite(String file) {
-    }
+	/**
+	 * 
+	 * 
+	 * @param file
+	 *            ...
+	 */
+	public void checkWrite(String file) {
+	}
 
-    /**
-     *
-     *
-     * @param file ...
-     */
-    public void checkDelete(String file) {
-    }
+	/**
+	 * 
+	 * 
+	 * @param file
+	 *            ...
+	 */
+	public void checkDelete(String file) {
+	}
 
-    /**
-     *
-     *
-     * @param host ...
-     * @param port ...
-     */
-    public void checkConnect(String host, int port) {
-    }
+	/**
+	 * 
+	 * 
+	 * @param host
+	 *            ...
+	 * @param port
+	 *            ...
+	 */
+	public void checkConnect(String host, int port) {
+	}
 
-    /**
-     *
-     *
-     * @param host ...
-     * @param port ...
-     * @param context ...
-     */
-    public void checkConnect(String host, int port, Object context) {
-    }
+	/**
+	 * 
+	 * 
+	 * @param host
+	 *            ...
+	 * @param port
+	 *            ...
+	 * @param context
+	 *            ...
+	 */
+	public void checkConnect(String host, int port, Object context) {
+	}
 
-    /**
-     *
-     *
-     * @param port ...
-     */
-    public void checkListen(int port) {
-    }
+	/**
+	 * 
+	 * 
+	 * @param port
+	 *            ...
+	 */
+	public void checkListen(int port) {
+	}
 
-    /**
-     *
-     *
-     * @param host ...
-     * @param port ...
-     */
-    public void checkAccept(String host, int port) {
-    }
+	/**
+	 * 
+	 * 
+	 * @param host
+	 *            ...
+	 * @param port
+	 *            ...
+	 */
+	public void checkAccept(String host, int port) {
+	}
 
-    /**
-     *
-     *
-     * @param addr ...
-     */
-    public void checkMulticast(InetAddress addr) {
-    }
+	/**
+	 * 
+	 * 
+	 * @param addr
+	 *            ...
+	 */
+	public void checkMulticast(InetAddress addr) {
+	}
 
-    /**
-     *
-     *
-     * @param addr ...
-     * @param ttl ...
-     */
-    public void checkMulticast(InetAddress addr, byte ttl) {
-    }
+	/**
+	 * 
+	 * 
+	 * @param addr
+	 *            ...
+	 * @param ttl
+	 *            ...
+	 */
+	public void checkMulticast(InetAddress addr, byte ttl) {
+	}
 
-    /**
-     *
-     */
-    public void checkPropertiesAccess() {
-    }
-
-    /**
-     *
-     *
-     * @param key ...
-     */
-    public void checkPropertyAccess(String key) {
-    }
-
-    /**
-     *
-     *
-     * @param window ...
-     *
-     * @return ...
-     */
-    public boolean checkTopLevelWindow(Object window) {
-        return true;
-    }
-
-    /**
+	/**
      *
      */
-    public void checkPrintJobAccess() {
-    }
+	public void checkPropertiesAccess() {
+	}
 
-    /**
+	/**
+	 * 
+	 * 
+	 * @param key
+	 *            ...
+	 */
+	public void checkPropertyAccess(String key) {
+	}
+
+	/**
+	 * 
+	 * 
+	 * @param window
+	 *            ...
+	 * 
+	 * @return ...
+	 */
+	public boolean checkTopLevelWindow(Object window) {
+		return true;
+	}
+
+	/**
      *
      */
-    public void checkSystemClipboardAccess() {
-    }
+	public void checkPrintJobAccess() {
+	}
 
-    /**
+	/**
      *
      */
-    public void checkAwtEventQueueAccess() {
-    }
+	public void checkSystemClipboardAccess() {
+	}
 
-    /**
-     *
-     *
-     * @param pkg ...
-     */
-    public void checkPackageAccess(String pkg) {
-    }
-
-    /**
-     *
-     *
-     * @param pkg ...
-     */
-    public void checkPackageDefinition(String pkg) {
-    }
-
-    /**
+	/**
      *
      */
-    public void checkSetFactory() {
-    }
+	public void checkAwtEventQueueAccess() {
+	}
 
-    /**
-     *
-     *
-     * @param clazz ...
-     * @param which ...
-     */
-    public void checkMemberAccess(Class<?> clazz, int which) {
-    }
+	/**
+	 * 
+	 * 
+	 * @param pkg
+	 *            ...
+	 */
+	public void checkPackageAccess(String pkg) {
+	}
 
-    /**
-     *
-     *
-     * @param target ...
-     */
-    public void checkSecurityAccess(String target) {
-    }
+	/**
+	 * 
+	 * 
+	 * @param pkg
+	 *            ...
+	 */
+	public void checkPackageDefinition(String pkg) {
+	}
 
-    /**
-     *  Utility method that returns the name of the application trying
-     *  to execute the code in question. Returns null if the current code
-     *  does not belong to any application.
+	/**
+     *
      */
-    @SuppressWarnings("rawtypes")
+	public void checkSetFactory() {
+	}
+
+	/**
+	 * 
+	 * 
+	 * @param clazz
+	 *            ...
+	 * @param which
+	 *            ...
+	 */
+	public void checkMemberAccess(Class<?> clazz, int which) {
+	}
+
+	/**
+	 * 
+	 * 
+	 * @param target
+	 *            ...
+	 */
+	public void checkSecurityAccess(String target) {
+	}
+
+	/**
+	 * Utility method that returns the name of the application trying to execute
+	 * the code in question. Returns null if the current code does not belong to
+	 * any application.
+	 */
+	@SuppressWarnings("rawtypes")
 	protected String getApplication() {
-        Class[] classes = getClassContext();
+		Class[] classes = getClassContext();
 
-        for (int i = 0; i < classes.length; i++) {
-            if (classes[i].getClassLoader() instanceof AppClassLoader) {
-                return ((AppClassLoader) classes[i].getClassLoader()).getAppName();
-            }
-        }
+		for (int i = 0; i < classes.length; i++) {
+			if (classes[i].getClassLoader() instanceof AppClassLoader) {
+				return ((AppClassLoader) classes[i].getClassLoader())
+						.getAppName();
+			}
+		}
 
-        // no application class loader found in stack - return null
-        return null;
-    }
+		// no application class loader found in stack - return null
+		return null;
+	}
 }

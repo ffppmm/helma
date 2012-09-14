@@ -1,20 +1,19 @@
+package helma.main;
+
 /*
+ * #%L
+ * HelmaObjectPublisher
+ * %%
+ * Copyright (C) 1998 - 2012 Helma Software
+ * %%
  * Helma License Notice
- *
+ * 
  * The contents of this file are subject to the Helma License
  * Version 2.0 (the "License"). You may not use this file except in
  * compliance with the License. A copy of the License is available at
  * http://adele.helma.org/download/helma/license.txt
- *
- * Copyright 1998-2003 Helma Software. All Rights Reserved.
- *
- * $RCSfile$
- * $Author$
- * $Revision$
- * $Date$
+ * #L%
  */
-
-package helma.main;
 
 import helma.framework.repository.FileResource;
 import helma.util.ResourceProperties;
@@ -89,6 +88,7 @@ public class ServerConfig {
 		}
 		return uniqueInstance;
 	}
+
 	public static String getHttpPortKey() {
 		return "helma.httpPort";
 	}
@@ -96,7 +96,7 @@ public class ServerConfig {
 	public static String getXmlrpcPortKey() {
 		return "helma.xmlrpcPort";
 	}
-	
+
 	public static String getAjp13PortKey() {
 		return "helma.ajp13Port";
 	}

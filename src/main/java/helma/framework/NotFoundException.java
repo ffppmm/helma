@@ -1,48 +1,49 @@
+package helma.framework;
+
 /*
+ * #%L
+ * HelmaObjectPublisher
+ * %%
+ * Copyright (C) 1998 - 2012 Helma Software
+ * %%
  * Helma License Notice
- *
+ * 
  * The contents of this file are subject to the Helma License
  * Version 2.0 (the "License"). You may not use this file except in
  * compliance with the License. A copy of the License is available at
  * http://adele.helma.org/download/helma/license.txt
- *
- * Copyright 1998-2003 Helma Software. All Rights Reserved.
- *
- * $RCSfile$
- * $Author$
- * $Revision$
- * $Date$
+ * #L%
  */
-
-package helma.framework;
-
 
 /**
- * The basic exception class used to tell when certain things go
- * wrong in evaluation of requests.
+ * The basic exception class used to tell when certain things go wrong in
+ * evaluation of requests.
  */
 public class NotFoundException extends RuntimeException {
-    /**
+	/**
 	 * 
 	 */
 	private static final long serialVersionUID = -715022974097617658L;
 
 	/**
-     * Creates a new NotFoundException object.
-     *
-     * @param message ...
-     */
-    public NotFoundException(String message) {
-        super(message);
-    }
+	 * Creates a new NotFoundException object.
+	 * 
+	 * @param message
+	 *            ...
+	 */
+	public NotFoundException(String message) {
+		super(message);
+	}
 
-    /**
-     * Creates a new NotFoundException object with a cause.
-     *
-     * @param message the message
-     * @param cause the cause
-     */
-    public NotFoundException(String message, Throwable cause) {
-        super(message, cause);
-    }
+	/**
+	 * Creates a new NotFoundException object with a cause.
+	 * 
+	 * @param message
+	 *            the message
+	 * @param cause
+	 *            the cause
+	 */
+	public NotFoundException(String message, Throwable cause) {
+		super(message, cause);
+	}
 }
