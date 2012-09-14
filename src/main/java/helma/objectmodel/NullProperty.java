@@ -35,7 +35,7 @@ final public class NullProperty implements IProperty {
 
 	public int getType() {
 		// TODO this works?
-		return (Integer) null;
+		return IProperty.NULL;
 	}
 
 	public Object getValue() {
@@ -52,17 +52,17 @@ final public class NullProperty implements IProperty {
 
 	public boolean getBooleanValue() {
 		// TODO this works?
-		return (Boolean) null;
+		return false;
 	}
 
 	public long getIntegerValue() {
 		// TODO this works?
-		return (Long) null;
+		return 0L;
 	}
 
 	public double getFloatValue() {
 		// TODO this works?
-		return (Double) null;
+		return 0.0;
 	}
 
 	public Date getDateValue() {

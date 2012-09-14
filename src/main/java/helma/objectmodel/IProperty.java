@@ -29,6 +29,7 @@ public interface IProperty {
 	public static final int FLOAT = 5;
 	public static final int NODE = 6;
 	public static final int JAVAOBJECT = 7;
+	public static final int NULL = 0;
 
 	/**
 	 * 
