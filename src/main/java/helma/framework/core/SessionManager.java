@@ -67,7 +67,7 @@ public class SessionManager {
         if (sessionId == null) {
             return null;
         }
-        return (Session) sessions.get(sessionId);
+        return sessions.get(sessionId);
     }
 
     public void registerSession(Session session) {
@@ -118,7 +118,7 @@ public class SessionManager {
 
         Enumeration<Session> e = sessions.elements();
         while (e.hasMoreElements()) {
-            Session s = (Session) e.nextElement();
+            Session s = e.nextElement();
 
             if (s != null && username.equals(s.getUID())) {
                 // append to list if session is logged in and fits the given username
@@ -137,7 +137,7 @@ public class SessionManager {
         ArrayList<INode> list = new ArrayList<INode>();
 
         for (Enumeration<Session> e = sessions.elements(); e.hasMoreElements();) {
-            Session s = (Session) e.nextElement();
+            Session s = e.nextElement();
 
             if (s != null && s.isLoggedIn()) {
                 // returns a session if it is logged in and has not been
