@@ -1,7 +1,7 @@
+package helma.servlet;
+
 /* Portierung von helma.asp.AspClient auf Servlets */
 /* Author: Raphael Spannocchi Datum: 27.11.1998 */
-
-package helma.servlet;
 
 /*
  * #%L
@@ -152,7 +152,7 @@ public abstract class AbstractServletClient extends HttpServlet {
 			sessionCookieName = "HopSession";
 		}
 
-		// disable binding session cookie to ip address?
+		// disable binding session cookie to ip address? default to true
 		protectedSessionCookie = !("false".equalsIgnoreCase(init
 				.getInitParameter("protectedSessionCookie")));
 
@@ -602,6 +602,7 @@ public abstract class AbstractServletClient extends HttpServlet {
 			// If protected session cookies are enabled we also force a new
 			// session
 			// if the existing session id doesn't match the client's ip address
+			// FIXME: Problem with IP v6 v4 mixing!
 			StringBuffer buffer = new StringBuffer();
 			addIPAddress(buffer, request.getRemoteAddr());
 			addIPAddress(buffer, request.getHeader("X-Forwarded-For"));
