@@ -1,20 +1,17 @@
-This is the README file for version 1.8.0 of the Helma Javascript
-Web Application Framework.
+Helma Javascript Web Application Framework
+==========================================
 
-==============
 STARTING HELMA
-==============
-
+--------------
 With the default package installed, all you need to do to get 
 started is:
- -> make sure that you have Java 1.5 or higher installed
- -> call startHelma, resp. startHelma.bat depending on your platform
- -> direct your web browser to http://localhost:8080/
+ * make sure that you have Java 1.5 or higher installed
+ * call startHelma, resp. startHelma.bat depending on your platform
+ * direct your web browser to http://localhost:8080/
 See below for more detailed information.
 
-===========
 ABOUT HELMA
-===========
+-----------
 
 Helma is an open source web application framework for fast 
 and efficient scripting and serving of your websites and 
@@ -36,9 +33,8 @@ Austrian Broadcasting Corporation, popular weblog hosting sites such
 as antville.org, twoday.net, and blogger.de, among many others, have 
 successfully been deploying Helma for several years now.
 
-===================
 SYSTEM REQUIREMENTS
-===================
+-------------------
 
 You need a Java virtual machine 1.5 or higher to run Helma.
 
@@ -49,9 +45,8 @@ you already have a Java runtime that will work well with Helma.
 For other operating systems, please consult the documentation about the 
 availabilty of a Java 1.5 (or higher) runtime.
 
-============================
 INSTALLING AND RUNNING HELMA
-============================
+----------------------------
 
 Simply unzip or untar the contents of the archive file into any place 
 on your hard disk. Start Helma by invoking start.bat or start.sh from  
@@ -86,9 +81,8 @@ classes that communicate with Helma either directly or via Java RMI.
 since most of the recent development efforts have been geared towards the
 mod_jk/AJPv13 setup.)
 
-=====================================
 DOCUMENTATION AND FURTHER INFORMATION
-=====================================
+-------------------------------------
 
 After installing and running Helma, you will be able to access  
 introductions to the features of Helma and the various included 
@@ -100,9 +94,9 @@ http://helma.org/docs/reference/
 http://helma.org/docs/tutorial/
 http://helma.org/docs/docbook/
 
-========================
+
 MAILING LIST AND SUPPORT
-========================
+------------------------
 
 Please join us on the Helma mailing lists where we will be happy to 
 answer any further questions you may have!
