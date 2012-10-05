@@ -6,7 +6,7 @@ STARTING HELMA
 With the default package installed, all you need to do to get 
 started is:
  * make sure that you have Java 1.5 or higher installed
- * call startHelma, resp. startHelma.bat depending on your platform
+ * call helmaStart, resp. helmaStart.bat depending on your platform
  * direct your web browser to http://localhost:8080/
 See below for more detailed information.
 
