@@ -89,10 +89,10 @@ introductions to the features of Helma and the various included
 development tools. Further information you will find on the helma.org 
 website:
 
-http://helma.org/docs/guide/
-http://helma.org/docs/reference/
-http://helma.org/docs/tutorial/
-http://helma.org/docs/docbook/
+ * http://helma.org/docs/guide/
+ * http://helma.org/docs/reference/
+ * http://helma.org/docs/tutorial/
+ * http://helma.org/docs/docbook/
 
 
 MAILING LIST AND SUPPORT
