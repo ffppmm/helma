@@ -1,13 +1,32 @@
 Helma Javascript Web Application Framework
 ==========================================
 
+BUILDING HELMA
+--------------
+### PREREQUISITES ###
+
+For building Helma you need:
+ * Apache Maven. For more information about Maven and the 
+ Download, see <http://maven.apache.org/>.
+ * For checking out the source files got to <https://github.com/ffppmm/helma.git>. 
+ Current branch is helma-1.8 
+
+### STARTING BUILD ###
+
+The syntax to build an create a target dir with all needed files:
+
+    mvn clean package
+
+Maven will do all other things, like copying required libraries. Thats it.
+
 STARTING HELMA
 --------------
 With the default package installed, all you need to do to get 
 started is:
  * make sure that you have Java 1.5 or higher installed
  * call helmaStart, resp. helmaStart.bat depending on your platform
- * direct your web browser to http://localhost:8080/
+ * direct your web browser to <http://localhost:8080/>
+
 See below for more detailed information.
 
 ABOUT HELMA
@@ -39,7 +58,7 @@ SYSTEM REQUIREMENTS
 You need a Java virtual machine 1.5 or higher to run Helma.
 
 For Windows, Linux and Solaris you can get a Java runtime or development 
-kit from http://java.sun.com/j2se/downloads.html. If you are on Mac OS X, 
+kit from <http://java.sun.com/j2se/downloads.html>. If you are on Mac OS X, 
 you already have a Java runtime that will work well with Helma.
 
 For other operating systems, please consult the documentation about the 
@@ -63,16 +82,16 @@ stopped by editing the apps.properties file through the web interface
 using the Management application that is part of Helma.
 
 If you manage to get it running you should be able to connect your
-browser to http://localhost:8080/ or http://127.0.0.1:8080/ 
+browser to <http://localhost:8080/> or <http://127.0.0.1:8080/> 
 (port 8080 on the local machine, that is).
 
 Helma comes with a version of Jetty, a lightweight yet industrial strenth
-web server developed by Mortbay Consulting. See http://jetty.mortbay.com/
+web server developed by Mortbay Consulting. See <http://www.eclipse.org/jetty/>
 for more information. While Jetty works well for deploying real web sites,
 you may want to run Helma behind an existing web server. This is most
 easily done by running Helma with the AJPv13 listener which allows you to
 plug Helma into any web server using the Apache mod_jk module. See
-http://tomcat.apache.org/connectors-doc/index.html for more 
+<http://tomcat.apache.org/connectors-doc/index.html> for more 
 information on mod_jk and AJPv13.
 
 Finally, Helma can be plugged into Servlet containers using Servlet
@@ -89,10 +108,10 @@ introductions to the features of Helma and the various included
 development tools. Further information you will find on the helma.org 
 website:
 
- * http://helma.org/docs/guide/
- * http://helma.org/docs/reference/
- * http://helma.org/docs/tutorial/
- * http://helma.org/docs/docbook/
+ * <http://helma.org/docs/guide/>
+ * <http://helma.org/docs/reference/>
+ * <http://helma.org/docs/tutorial/>
+ * <http://helma.org/docs/docbook/>
 
 
 MAILING LIST AND SUPPORT
@@ -101,7 +120,4 @@ MAILING LIST AND SUPPORT
 Please join us on the Helma mailing lists where we will be happy to 
 answer any further questions you may have!
 
-http://helma.org/development/mailinglists/
-
-
-
+<http://helma.org/development/mailinglists/>
