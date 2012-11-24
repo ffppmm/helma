@@ -1665,7 +1665,7 @@ public final class PersistentNode extends AbstractNode {
 				.getExactPropertyRelation(propname);
 
 		// 1) check if the property is contained in the propMap
-		Property prop = properties == null ? null : (Property) properties
+		IProperty prop = properties == null ? null : properties
 				.get(correctPropertyName(propname));
 
 		if (prop != null) {
@@ -1734,14 +1734,7 @@ public final class PersistentNode extends AbstractNode {
 	 * @return ...
 	 */
 	public String getString(String propname) {
-		IProperty prop = getProperty(propname);
-		// FIXME: still need the try catch because oj NullProperty?
-		try {
-			return prop.getStringValue();
-		} catch (Exception ignore) {
-		}
-
-		return null;
+		return getProperty(propname).getStringValue();
 	}
 
 	/**
@@ -1753,15 +1746,7 @@ public final class PersistentNode extends AbstractNode {
 	 * @return ...
 	 */
 	public long getInteger(String propname) {
-		IProperty prop = getProperty(propname);
-
-		// FIXME: still need the try catch because oj NullProperty?
-		try {
-			return prop.getIntegerValue();
-		} catch (Exception ignore) {
-		}
-
-		return 0;
+		return getProperty(propname).getIntegerValue();
 	}
 
 	/**
@@ -1773,15 +1758,7 @@ public final class PersistentNode extends AbstractNode {
 	 * @return ...
 	 */
 	public double getFloat(String propname) {
-		IProperty prop = getProperty(propname);
-
-		// FIXME: still need the try catch because oj NullProperty?
-		try {
-			return prop.getFloatValue();
-		} catch (Exception ignore) {
-		}
-
-		return 0.0;
+		return getProperty(propname).getFloatValue();
 	}
 
 	/**
@@ -1793,15 +1770,7 @@ public final class PersistentNode extends AbstractNode {
 	 * @return ...
 	 */
 	public Date getDate(String propname) {
-		IProperty prop = getProperty(propname);
-
-		// FIXME: still need the try catch because oj NullProperty?
-		try {
-			return prop.getDateValue();
-		} catch (Exception ignore) {
-		}
-
-		return null;
+		return getProperty(propname).getDateValue();
 	}
 
 	/**
@@ -1813,15 +1782,7 @@ public final class PersistentNode extends AbstractNode {
 	 * @return ...
 	 */
 	public boolean getBoolean(String propname) {
-		IProperty prop = getProperty(propname);
-
-		// FIXME: still need the try catch because oj NullProperty?
-		try {
-			return prop.getBooleanValue();
-		} catch (Exception ignore) {
-		}
-
-		return false;
+		return getProperty(propname).getBooleanValue();
 	}
 
 	/**
@@ -1833,15 +1794,7 @@ public final class PersistentNode extends AbstractNode {
 	 * @return ...
 	 */
 	public INode getNode(String propname) {
-		IProperty prop = getProperty(propname);
-
-		// FIXME: still need the try catch because oj NullProperty?
-		try {
-			return prop.getNodeValue();
-		} catch (Exception ignore) {
-		}
-
-		return null;
+		return getProperty(propname).getNodeValue();
 	}
 
 	/**
@@ -1853,15 +1806,7 @@ public final class PersistentNode extends AbstractNode {
 	 * @return ...
 	 */
 	public Object getJavaObject(String propname) {
-		IProperty prop = getProperty(propname);
-
-		// FIXME: still need the try catch because oj NullProperty?
-		try {
-			return prop.getJavaObjectValue();
-		} catch (Exception ignore) {
-		}
-
-		return null;
+		return getProperty(propname).getJavaObjectValue();
 	}
 
 	public void setProperty(String name, IProperty property) {

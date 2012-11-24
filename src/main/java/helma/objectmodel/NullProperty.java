@@ -15,6 +15,8 @@ package helma.objectmodel;
  * #L%
  */
 
+import helma.objectmodel.db.Relation;
+
 import java.sql.Timestamp;
 import java.util.Date;
 
@@ -103,6 +105,10 @@ final public class NullProperty implements IProperty {
 
 	public Timestamp getTimestampValue() {
 		return null;
+	}
+
+	public void convertToNodeReference(Relation rel) {
+		// do nothing
 	}
 
 }

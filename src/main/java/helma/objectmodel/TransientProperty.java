@@ -15,6 +15,8 @@ package helma.objectmodel;
  * #L%
  */
 
+import helma.objectmodel.db.Relation;
+
 import java.io.Serializable;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
@@ -361,5 +363,10 @@ public final class TransientProperty implements IProperty, Serializable {
 
 	public Timestamp getTimestampValue() {
 		return new Timestamp(getDateValue().getTime());
+	}
+
+	public void convertToNodeReference(Relation rel) {
+		// TODO do nothing?
+		
 	}
 }
