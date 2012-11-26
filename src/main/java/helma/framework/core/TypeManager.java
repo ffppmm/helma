@@ -17,7 +17,7 @@ package helma.framework.core;
 
 import helma.framework.repository.Repository;
 import helma.framework.repository.Resource;
-import helma.objectmodel.db.DbMapping;
+import helma.orm.db.DbMapping;
 import helma.util.StringUtils;
 
 import java.io.IOException;

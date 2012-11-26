@@ -16,7 +16,7 @@ package helma.framework.core;
  */
 
 import helma.framework.UploadStatus;
-import helma.objectmodel.INode;
+import helma.orm.INode;
 
 import java.io.Serializable;
 import java.util.Date;

@@ -15,11 +15,11 @@ package helma.scripting.rhino;
  * #L%
  */
 
-import helma.objectmodel.INode;
-import helma.objectmodel.db.DbKey;
-import helma.objectmodel.db.DbMapping;
-import helma.objectmodel.db.PersistentNode;
-import helma.objectmodel.db.WrappedNodeManager;
+import helma.orm.INode;
+import helma.orm.db.DbKey;
+import helma.orm.db.DbMapping;
+import helma.orm.db.PersistentNode;
+import helma.orm.db.WrappedNodeManager;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;

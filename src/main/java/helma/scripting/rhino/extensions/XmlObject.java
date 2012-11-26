@@ -15,11 +15,11 @@ package helma.scripting.rhino.extensions;
  * #L%
  */
 
-import helma.objectmodel.INode;
-import helma.objectmodel.db.PersistentNode;
-import helma.objectmodel.dom.XmlConverter;
-import helma.objectmodel.dom.XmlReader;
-import helma.objectmodel.dom.XmlWriter;
+import helma.orm.INode;
+import helma.orm.db.PersistentNode;
+import helma.orm.dom.XmlConverter;
+import helma.orm.dom.XmlReader;
+import helma.orm.dom.XmlWriter;
 import helma.scripting.rhino.RhinoCore;
 
 import java.io.ByteArrayOutputStream;

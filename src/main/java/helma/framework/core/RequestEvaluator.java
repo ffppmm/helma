@@ -25,9 +25,9 @@ import helma.framework.RequestTrans;
 import helma.framework.ResponseBean;
 import helma.framework.ResponseTrans;
 import helma.framework.TimeoutException;
-import helma.objectmodel.ConcurrencyException;
-import helma.objectmodel.db.NodeHandle;
-import helma.objectmodel.db.Transactor;
+import helma.orm.ConcurrencyException;
+import helma.orm.db.NodeHandle;
+import helma.orm.db.Transactor;
 import helma.scripting.ScriptingEngine;
 import helma.scripting.ScriptingException;
 

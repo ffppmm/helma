@@ -19,7 +19,7 @@ import helma.framework.core.Application;
 import helma.framework.core.ApplicationBean;
 import helma.framework.core.Prototype;
 import helma.framework.core.Skin;
-import helma.objectmodel.db.DbSource;
+import helma.orm.db.DbSource;
 import helma.scripting.rhino.extensions.DatabaseObject;
 import helma.scripting.rhino.extensions.XmlObject;
 import helma.util.HtmlEncoder;

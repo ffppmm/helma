@@ -19,7 +19,7 @@ import helma.framework.repository.FileResource;
 import helma.framework.repository.Repository;
 import helma.framework.repository.Resource;
 import helma.framework.repository.ResourceTracker;
-import helma.objectmodel.db.DbMapping;
+import helma.orm.db.DbMapping;
 import helma.scripting.ScriptingEngine;
 import helma.util.ResourceProperties;
 import helma.util.WrappedMap;

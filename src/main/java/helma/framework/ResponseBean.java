@@ -15,7 +15,7 @@ package helma.framework;
  * #L%
  */
 
-import helma.objectmodel.db.Transactor;
+import helma.orm.db.Transactor;
 import helma.scripting.ScriptingException;
 
 import java.io.PrintWriter;

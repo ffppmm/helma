@@ -15,9 +15,9 @@ package helma.framework.core;
  * #L%
  */
 
-import helma.objectmodel.INode;
-import helma.objectmodel.db.NodeHandle;
-import helma.objectmodel.db.Transactor;
+import helma.orm.INode;
+import helma.orm.db.NodeHandle;
+import helma.orm.db.Transactor;
 import helma.scripting.ScriptingEngine;
 
 import java.io.BufferedInputStream;

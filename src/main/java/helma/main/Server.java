@@ -18,7 +18,7 @@ package helma.main;
 import helma.extensions.HelmaExtension;
 import helma.framework.core.Application;
 import helma.framework.repository.FileResource;
-import helma.objectmodel.db.DbSource;
+import helma.orm.db.DbSource;
 import helma.util.Logging;
 import helma.util.ResourceProperties;
 

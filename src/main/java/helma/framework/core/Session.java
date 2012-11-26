@@ -17,10 +17,10 @@ package helma.framework.core;
 
 import helma.framework.ResponseTrans;
 import helma.framework.UploadStatus;
-import helma.objectmodel.INode;
-import helma.objectmodel.TransientNode;
-import helma.objectmodel.db.NodeHandle;
-import helma.objectmodel.db.PersistentNode;
+import helma.orm.INode;
+import helma.orm.TransientNode;
+import helma.orm.db.NodeHandle;
+import helma.orm.db.PersistentNode;
 
 import java.io.Serializable;
 import java.util.HashMap;

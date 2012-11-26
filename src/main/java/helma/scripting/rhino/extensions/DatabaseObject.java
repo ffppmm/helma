@@ -34,7 +34,7 @@ package helma.scripting.rhino.extensions;
  * #L%
  */
 
-import helma.objectmodel.db.DbSource;
+import helma.orm.db.DbSource;
 
 import java.io.IOException;
 import java.io.Reader;

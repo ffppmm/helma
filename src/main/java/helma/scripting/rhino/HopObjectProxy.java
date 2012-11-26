@@ -15,9 +15,9 @@ package helma.scripting.rhino;
  * #L%
  */
 
-import helma.objectmodel.INode;
-import helma.objectmodel.db.NodeHandle;
-import helma.objectmodel.db.PersistentNode;
+import helma.orm.INode;
+import helma.orm.db.NodeHandle;
+import helma.orm.db.PersistentNode;
 
 import org.mozilla.javascript.Context;
 

@@ -19,7 +19,7 @@ import helma.framework.RedirectException;
 import helma.framework.ResponseTrans;
 import helma.framework.TimeoutException;
 import helma.framework.repository.Resource;
-import helma.objectmodel.ConcurrencyException;
+import helma.orm.ConcurrencyException;
 import helma.scripting.ScriptingEngine;
 import helma.util.CopyOnWriteMap;
 import helma.util.HtmlEncoder;

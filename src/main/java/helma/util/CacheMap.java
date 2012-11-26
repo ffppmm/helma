@@ -45,7 +45,7 @@ package helma.util;
  */
 
 import helma.framework.core.Application;
-import helma.objectmodel.IObjectCache;
+import helma.orm.IObjectCache;
 
 import java.util.HashMap;
 import java.util.Map;

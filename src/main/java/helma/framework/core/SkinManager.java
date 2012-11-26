@@ -16,7 +16,7 @@ package helma.framework.core;
  */
 
 import helma.framework.repository.FileResource;
-import helma.objectmodel.INode;
+import helma.orm.INode;
 
 import java.io.File;
 import java.io.FilenameFilter;
