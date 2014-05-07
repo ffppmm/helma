@@ -6,10 +6,8 @@ BUILDING HELMA
 ### PREREQUISITES ###
 
 For building Helma you need:
- * Apache Maven. For more information about Maven and the 
- Download, see <http://maven.apache.org/>.
- * For checking out the source files got to <https://github.com/ffppmm/helma.git>. 
- Current branch is helma-1.8
+ * Apache Maven. For more information about Maven and the Download, see <http://maven.apache.org/>.
+ * For checking out the source files got to <https://github.com/ffppmm/helma.git>. Current branch is helma-1.8.
 
     git clone https://github.com/ffppmm/helma.git -b helma-1.8
 
